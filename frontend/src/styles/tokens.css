@@ -1,0 +1,34 @@
+:root {
+  /* Color */
+  --bg:          #000000;   /* app background — pure black */
+  --surface:     #0D0D0D;   /* cards */
+  --surface-2:   #141414;   /* trays, tooltips, raised */
+  --hairline:    #2A2A2A;   /* all 1px borders & dividers */
+  --text-1:      #FFFFFF;
+  --text-2:      #8A8A8A;   /* secondary — AA-safe on black */
+  --text-3:      #4E4E4E;   /* disabled / meta */
+  --red:         #D71921;   /* Nothing red — fills & markers ONLY */
+  --red-text:    #FF4B45;   /* AA-safe red for small text on black */
+
+  /* Geometry */
+  --r-card: 12px;  --r-input: 8px;  --r-pill: 999px;  --stroke: 1px;
+
+  /* Type */
+  --font-ui:   'Space Grotesk', 'Inter', sans-serif;
+  --font-data: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+
+  /* Motion */
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --t-fast: 120ms;  --t-base: 180ms;  --t-slow: 240ms;
+}
+
+/* Inverted light theme (optional class toggle on root element) */
+.theme-light {
+  --bg: #FFFFFF;
+  --surface: #F5F5F5;
+  --surface-2: #ECECEC;
+  --hairline: #E6E6E6;
+  --text-1: #000000;
+  --text-2: #4A4A4A;
+  --text-3: #9A9A9A;
+}

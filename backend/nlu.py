@@ -1,0 +1,411 @@
+"""Rule-based NLU — full fallback when no LLM API key is present.
+
+Identical conversation flows in both modes. Parses one-shot preferences,
+refinements, browsing, tray ops, and small talk.
+"""
+from __future__ import annotations
+
+import re
+from copy import deepcopy
+from typing import Any, Optional
+
+from backend.models import Allergen, UserPreferences
+
+# Hinglish -> English aliases, applied (word-boundary, multiword-first) before
+# every parse step. Lets students type like they speak on campus.
+HINGLISH: list[tuple[str, str]] = [
+    ("bahut bhukh", "very hungry"), ("bahut bhook", "very hungry"),
+    ("zyada bhukh", "very hungry"), ("ghar ka", "homely"),
+    ("phir se", "again"), ("bina pyaaz", "no onion"), ("bina lehsun", "no garlic"),
+    ("kam teekha", "less spicy"), ("zyada teekha", "extra spicy"),
+    ("bhukh", "hungry"), ("bhook", "hungry"), ("bhukha", "hungry"),
+    ("jaldi", "hurry"), ("teekha", "spicy"), ("tikha", "spicy"),
+    ("meetha", "sweet"), ("mitha", "sweet"), ("sasta", "cheap"), ("saste", "cheap"),
+    ("thanda", "cold"), ("garam", "warm"), ("halka", "light"),
+    ("shakahari", "veg"), ("anda", "egg"), ("pyaaz", "onion"), ("lehsun", "garlic"),
+    ("bina", "no"), ("kam", "less"), ("zyada", "extra"),
+    ("subah", "morning"), ("dopahar", "afternoon"), ("raat", "night"), ("shaam", "evening"),
+    ("dikhao", "show"), ("batao", "suggest"), ("bata", "suggest"), ("chahiye", "want"),
+    ("kuch", ""), ("mujhe", "i"), ("hai", "is"), ("kya", "what"), ("aur", "and"),
+]
+
+_HINGLISH_RES = [(re.compile(r"\b" + re.escape(a) + r"\b"), b) for a, b in HINGLISH]
+
+
+def normalize_hinglish(text: str) -> str:
+    t = f" {text.lower()} "
+    for rx, rep in _HINGLISH_RES:
+        t = rx.sub(f" {rep} " if rep else " ", t)
+    return " ".join(t.split())
+
+
+RUPEE = r"(?:₹|rs\.?|inr|rupees?|rupaye|rupya|rupaiye)"
+
+# ---------- low-level parsers ----------
+
+def parse_budget(text: str) -> Optional[float]:
+    t = text.lower()
+    m = re.search(r"between\s+(\d+)\s+and\s+(\d+)", t)
+    if m:
+        return float(max(int(m.group(1)), int(m.group(2))))
+    m = re.search(rf"under\s+{RUPEE}?\s*(\d+)", t)
+    if m:
+        return float(m.group(1))
+    m = re.search(rf"{RUPEE}\s*(\d+)\s*(?:max|max budget|budget|only|limit)?", t)
+    if m:
+        # avoid matching stray numbers like "20 mins" — require rupee marker or budget word nearby
+        return float(m.group(1))
+    m = re.search(rf"(\d+)\s*{RUPEE}", t)
+    if m:
+        return float(m.group(1))
+    m = re.search(r"budget(?: of)?\s*(?:is\s*)?(\d+)", t)
+    if m:
+        return float(m.group(1))
+    m = re.search(r"(\d+)\s*(?:bucks|rupees?)\s*(?:max|only|budget)?", t)
+    if m:
+        return float(m.group(1))
+    return None
+
+
+def parse_time(text: str) -> Optional[int]:
+    text = normalize_hinglish(text)
+    t = text.lower()
+    if any(k in t for k in ["in a hurry", "hurry", "asap", "quick", "fast", "rush", "hurry up"]):
+        return 5
+    m = re.search(r"(\d+)\s*(?:mins?|minutes?)", t)
+    if m and any(k in t for k in ["got", "have", "only", "within", "under", "max", "in ", "want", "andar"]):
+        return int(m.group(1))
+    m = re.search(r"got\s+(\d+)", t)
+    if m:
+        return int(m.group(1))
+    return None
+
+
+MOOD_WORDS = {
+    "happy": "happy", "stressed": "stressed", "stress": "stressed", "tired": "tired",
+    "homesick": "homesick", "home sick": "homesick", "nostalgic": "homesick",
+    "celebrat": "celebrating", "party": "celebrating", "birthday": "celebrating",
+    "exam": "exam-mode", "study": "exam-mode", "focus": "exam-mode",
+    "very hungry": "very hungry", "starving": "very hungry", "hungry": "hungry",
+}
+
+def parse_mood(text: str) -> Optional[str]:
+    t = normalize_hinglish(text).lower()
+    for k, v in MOOD_WORDS.items():
+        if k in t:
+            return v
+    return None
+
+
+def parse_dietary_allergy(text: str) -> tuple[list[str], list[str], bool]:
+    t = normalize_hinglish(text).lower()
+    diet: list[str] = []
+    if re.search(r"non[\s\-_]?veg|nonveg", t):
+        # Explicit "non veg" — but a vegan/jain/veg claim alongside wins
+        # (keeps the vegan+craving-chicken conflict path intact).
+        if not re.search(r"\bvegan\b|\bjain\b|\bvegetarian\b|pure veg", t):
+            diet.append("non_veg")
+    if not diet and re.search(r"\bvegan\b", t):
+        diet.append("vegan")
+    elif re.search(r"\bjain\b", t):
+        diet.append("jain")
+    elif re.search(r"vegetarian|\bveg\b|veggie|pure veg", t):
+        # "non-veg"/"non veg" must not trigger veg
+        if "non" not in t.split("veg")[0][-6:]:
+            diet.append("veg")
+    if re.search(r"egg[\s-]?free|eggless|no egg", t):
+        diet.append("egg_free")
+    if re.search(r"\bhalal\b", t):
+        diet.append("halal")
+    if re.search(r"gluten[\s-]?free", t):
+        diet.append("gluten_free")
+    if re.search(r"dairy[\s-]?free|lactose[\s-]?free", t):
+        diet.append("dairy_free")
+
+    allergies: list[str] = []
+    mapping = {"peanut": "peanuts", "groundnut": "peanuts", "tree nut": "tree_nuts",
+               "almond": "tree_nuts", "cashew": "tree_nuts", "walnut": "tree_nuts",
+               "dairy": "dairy", "milk": "dairy", "lactose": "dairy",
+               "gluten": "gluten", "wheat": "gluten",
+               "soy": "soy", "soya": "soy", "egg": "egg",
+               "seafood": "seafood", "fish": "seafood", "prawn": "seafood", "shrimp": "seafood",
+               "sesame": "sesame", "til": "sesame"}
+    for k, v in mapping.items():
+        if k in t and v not in allergies:
+            # "egg-free diet" is a restriction, not an allergy — but treat egg mention
+            # with allergy words as allergy.
+            if v == "egg" and ("free" in t or "eggless" in t) and "allerg" not in t:
+                continue
+            if v in ("dairy", "gluten") and "free" in t and "allerg" not in t:
+                # "dairy-free" already captured as diet; skip allergy unless explicit
+                if f"{k}" in t and "allerg" not in t and "intoler" not in t:
+                    continue
+            allergies.append(v)
+    if re.search(r"allerg", t):
+        # bare "allergy" with food word already handled; keep list as-is
+        pass
+    no_og = bool(re.search(r"no\s+onion|no\s+garlic|without onion|without garlic|no onion", t))
+    return diet, allergies, no_og
+
+
+CRAVING_WORDS = ["spicy", "sweet", "cheesy", "cheese", "tangy", "savory", "savoury",
+                 "refreshing", "comfort", "comforting", "warm", "soup", "light",
+                 "chocolate", "dosa", "biryani", "maggi", "momos", "noodles",
+                 "coffee", "chai", "paneer", "chicken", "mutton", "egg", "fries", "brownie",
+                 "lassi", "juice", "ice cream", "jalebi", "samosa", "masala"]
+
+def parse_cravings(text: str) -> list[str]:
+    t = normalize_hinglish(text).lower()
+    found = []
+    for w in CRAVING_WORDS:
+        if w in t and w not in found:
+            found.append(w)
+    return found
+
+
+def parse_hunger(text: str) -> Optional[str]:
+    t = normalize_hinglish(text).lower()
+    if any(k in t for k in ["very hungry", "starving", "really hungry", "super hungry"]):
+        return "very_hungry"
+    if re.search(r"\bhungry\b", t):
+        return "hungry"
+    if any(k in t for k in ["light bite", "light snack", "small bite", "just a bite"]):
+        return "light_bite"
+    if re.search(r"\blight\b", t) and "light" not in t.replace("light bite", ""):
+        return "light_bite"
+    return None
+
+
+def parse_meal(text: str) -> Optional[str]:
+    t = normalize_hinglish(text).lower()
+    if "breakfast" in t or "morning" in t:
+        return "breakfast"
+    if "lunch" in t or "afternoon" in t:
+        return "lunch"
+    if "dinner" in t or "night" in t or "evening" in t:
+        return "dinner"
+    return None
+
+
+def parse_cuisine(text: str) -> Optional[str]:
+    t = text.lower().replace("-", "_").replace(" ", "_")
+    for c in ["south_indian", "north_indian", "chinese", "continental", "street_food"]:
+        if c in t or c.replace("_", " ") in text.lower():
+            return c
+    if "south" in t:
+        return "south_indian"
+    if "north" in t:
+        return "north_indian"
+    if "chinese" in t:
+        return "chinese"
+    if "continental" in t:
+        return "continental"
+    if "street" in t:
+        return "street_food"
+    return None
+
+
+def parse_spice_cap(text: str) -> Optional[int]:
+    t = normalize_hinglish(text).lower()
+    if any(k in t for k in ["less spicy", "not spicy", "no spicy", "mild", "no spice"]):
+        return 1
+    if "medium spice" in t:
+        return 2
+    if "extra spicy" in t or "very spicy" in t:
+        return 3
+    return None
+
+
+def detect_intent(text: str) -> str:
+    text = normalize_hinglish(text)
+    t = text.strip().lower()
+    if not t or len(t) < 2:
+        return "nonsense"
+    if re.match(r"^(hi|hey|hello|yo|good (morning|afternoon|evening))\b", t):
+        return "greeting"
+    if re.search(r"\b(thanks|thank you|shukriya|dhanyavad)\b", t):
+        return "thanks"
+    if "order" not in t and "token" not in t and \
+            any(k in t for k in ["bye", "exit", "quit", "done", "that's all", "tata"]):
+        return "exit"
+    if re.search(r"\b(repeat|reorder|again)\b", t) or "last order" in t or "same order" in t:
+        return "reorder"
+    if re.search(r"cb-\d+", t) or "my order" in t or "where" in t and "order" in t \
+            or "track" in t or ("status" in t and "order" in t) or "ready" in t:
+        return "status"
+    if "complete my meal" in t or "fill my tray" in t or "with remaining" in t:
+        return "suggest"
+    if any(k in t for k in ["order", "checkout", "confirm", "place order", "token"]):
+        return "order"
+    if any(k in t for k in ["add to tray", "add ", "tray", "my tray"]):
+        return "tray"
+    if re.search("[\U0001F44D\U0001F44E]|feedback|rating|thumbs|review|liked|disliked", t):
+        return "feedback"
+    if any(k in t for k in ["what do you have", "show all", "show me", "menu", "list", "under ₹", "under rs", "options under"]):
+        # browsing vs recommending: browsing asks for a list, not personalised pick
+        if any(k in t for k in ["what do you have", "show all", "list", "menu"]):
+            return "browse"
+    if any(k in t for k in ["cheaper", "less spicy", "more filling", "quicker", "faster",
+                            "different", "something else", "another", "combos only",
+                            "no onion", "no garlic", "change budget", "my budget is now"]):
+        return "refine"
+    if any(k in t for k in ["who are you", "weather", "cricket", "movie", "joke", "python",
+                            "capital of", "meaning of life", "tell me about"]):
+        return "smalltalk"
+    if re.search(r"(₹|rs|budget|hungry|veg|vegan|jain|spicy|sweet|mins?|hurry|mood|combo|snack|breakfast|lunch|dinner|allergy|cheesy|light|refreshing|comfort|chai|coffee|dosa|biryani|maggi|momos|protein|gym|diet|calorie|healthy|cheap|sasta|teekha|bhukh|bhook|khana|thirsty|mutton|paneer|fries|soup|juice|lassi|eat|food|meal|thali|plate)", t):
+        return "recommend"
+    # Anything with a parseable budget/time is a food request even without keywords.
+    if parse_budget(t) is not None or parse_time(t) is not None:
+        return "recommend"
+    if len(t.split()) <= 3:
+        # Short + unrecognized (e.g. "xyz123", "ok", "hmm") -> graceful redirect.
+        return "nonsense"
+    return "smalltalk"
+
+
+def apply_refinement(text: str, prefs: UserPreferences, menu_names: Optional[list[str]] = None) -> tuple[UserPreferences, str]:
+    """Mutate prefs per refinement command. Returns (new_prefs, note)."""
+    t = text.lower()
+    p = prefs.model_copy(deep=True)
+    notes = []
+    budget = parse_budget(text)
+    if budget is not None and ("change" in t or "now" in t or "budget" in t or "cheaper" in t):
+        p.budget = budget
+        notes.append(f"Budget updated to Rs {budget:.0f}.")
+    elif "cheaper" in t or "lower budget" in t or "reduce" in t:
+        if p.budget is not None:
+            p.budget = max(10.0, round(p.budget * 0.7, 0))
+            notes.append(f"Lowered budget to Rs {p.budget:.0f}.")
+        else:
+            p.budget = 60.0
+            notes.append("Set budget to Rs 60.")
+    if "less spicy" in t or "mild" in t:
+        p.max_spice = 1
+        notes.append("Capped spice at mild (level 1).")
+    if "more filling" in t or "heavier" in t or "very hungry" in t:
+        p.hunger = "very_hungry"
+        notes.append("Prioritising filling portions.")
+    if "lighter" in t or "light " in t:
+        p.hunger = "light_bite"
+        notes.append("Prioritising light bites.")
+    if "quicker" in t or "faster" in t or "hurry" in t:
+        p.max_prep_time = 5 if p.max_prep_time is None else min(p.max_prep_time, 5)
+        notes.append("Limited to 5-min items.")
+    m = re.search(r"(\d+)\s*mins?", t)
+    if m and ("got" in t or "have" in t or "only" in t or "within" in t):
+        p.max_prep_time = int(m.group(1))
+        notes.append(f"Time limit set to {m.group(1)} min.")
+    if "no onion" in t or "no garlic" in t or "no onions" in t:
+        p.no_onion_garlic = True
+        notes.append("Excluding onion/garlic.")
+    if "combos only" in t or t.strip() == "combos" or "show combos" in t:
+        p.combos_only = True
+        notes.append("Showing combos only.")
+    if "singles" in t or "single items" in t:
+        p.combos_only = False
+    cuis = parse_cuisine(text)
+    if cuis and "different" in t:
+        p.cuisine = None
+        notes.append("Cleared cuisine filter — trying others.")
+    elif cuis:
+        p.cuisine = cuis
+        notes.append(f"Switched to {cuis.replace('_', ' ')}.")
+    elif "different cuisine" in t:
+        # rotate: clear cuisine so engine explores
+        p.cuisine = None
+        notes.append("Trying a different cuisine.")
+    if not notes:
+        notes.append("Shuffling to different picks with the same constraints.")
+    return p, " ".join(notes)
+
+
+def parse_goal(text: str) -> Optional[str]:
+    """Nutrition goal: high_protein (gym/protein) or low_calorie (diet/light eating)."""
+    t = normalize_hinglish(text).lower()
+    if any(k in t for k in ["high protein", "high-protein", "protein rich", "gym", "muscle",
+                            "bodybuild", "workout meal"]):
+        return "high_protein"
+    if re.search(r"\bprotein\b", t):
+        return "high_protein"
+    if any(k in t for k in ["low cal", "low-cal", "low calorie", "weight loss", "lose weight",
+                            "diet food", "on a diet", "healthy", "light diet"]):
+        return "low_calorie"
+    if re.search(r"\bon diet\b|\bdieting\b", t):
+        return "low_calorie"
+    return None
+
+
+def parse_one_shot(text: str, base: Optional[UserPreferences] = None) -> UserPreferences:
+    text = normalize_hinglish(text)
+    p = (base.model_copy(deep=True) if base else UserPreferences())
+    budget = parse_budget(text)
+    if budget is not None:
+        p.budget = budget
+    elif re.search(r"\b(cheap|sasta|budget)\b", text.lower()) and p.budget is None:
+        p.budget = 60.0  # "something cheap" with no number -> sensible student default
+    tm = parse_time(text)
+    if tm is not None:
+        p.max_prep_time = tm
+    mood = parse_mood(text)
+    if mood:
+        p.mood = mood
+    diet, allergies, no_og = parse_dietary_allergy(text)
+    for d in diet:
+        if d not in p.dietary_restrictions:
+            p.dietary_restrictions.append(d)
+    for a in allergies:
+        try:
+            enum_val = Allergen(a)
+        except ValueError:
+            continue
+        if enum_val not in p.allergies:
+            p.allergies.append(enum_val)
+    if no_og:
+        p.no_onion_garlic = True
+    cravings = parse_cravings(text)
+    for c in cravings:
+        if c not in p.cravings:
+            p.cravings.append(c)
+    hunger = parse_hunger(text)
+    if hunger:
+        p.hunger = hunger
+    meal = parse_meal(text)
+    if meal:
+        p.meal = meal
+    cuis = parse_cuisine(text)
+    # only set cuisine if explicitly a cuisine request, not via "different"
+    if cuis and "cuisine" in text.lower() or cuis and any(k in text.lower() for k in ["south", "north", "chinese", "continental", "street"]):
+        p.cuisine = cuis
+    spice = parse_spice_cap(text)
+    if spice is not None:
+        p.max_spice = spice
+    goal = parse_goal(text)
+    if goal:
+        p.goal = goal
+    if "combo" in text.lower():
+        short = len(text.split()) <= 3
+        p.combos_only = "only" in text.lower() or "combos only" in text.lower() or short
+    return p
+
+
+def clarifying_questions(prefs: UserPreferences) -> list[str]:
+    """Max 1-2 questions, then recommend — never interrogate."""
+    qs = []
+    if prefs.budget is None:
+        qs.append("What's your budget? (e.g. under Rs 80)")
+    # Only ask ONE more: time or diet if both missing and no cravings at all
+    if prefs.max_prep_time is None and not prefs.cravings and len(qs) < 2:
+        qs.append("How much time do you have? (e.g. 10 mins, or 'in a hurry')")
+    return qs[:2]
+
+
+def smalltalk_reply() -> str:
+    return ("I'm your CampusBite food buddy — I only know the live canteen menu, "
+            "but I can find you something tasty within budget. Tell me your budget "
+            "and craving (e.g. 'Rs 70, spicy veg, 10 mins'), or try 'Show combos under Rs 100'.")
+
+
+def nonsense_reply() -> str:
+    return ("Hmm, I didn't catch that. I can help with food: share a budget like "
+            "'under Rs 80', a craving like 'spicy' or 'sweet', and time like '10 mins'. "
+            "Or tap a quick chip to start.")

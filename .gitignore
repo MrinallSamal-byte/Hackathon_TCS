@@ -1,0 +1,11 @@
+__pycache__/
+.venv/
+node_modules/
+dist/
+*.pyc
+.env
+*.log
+.pytest_cache/
+data/memory.json
+data/feedback_log.json
+data/order_history.json

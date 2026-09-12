@@ -1,0 +1,2360 @@
+[
+  {
+    "id": "masala_dosa",
+    "name": "Masala Dosa",
+    "description": "Crispy rice crepe, potato masala, sambar + coconut chutney.",
+    "price": 60.0,
+    "category": "breakfast",
+    "cuisine": "south_indian",
+    "ingredients": [
+      "rice",
+      "urad dal",
+      "potato",
+      "onion",
+      "mustard seeds",
+      "curry leaves"
+    ],
+    "allergens": [],
+    "dietary_tags": [
+      "veg",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": "11:30",
+    "prep_time_minutes": 10,
+    "calories": 320,
+    "protein_g": 8,
+    "portion_size": "medium",
+    "spice_level": 1,
+    "taste_profile": [
+      "savory",
+      "comforting"
+    ],
+    "mood_tags": [
+      "comfort",
+      "homesick",
+      "energizing"
+    ],
+    "serving_times": [
+      "breakfast"
+    ],
+    "popularity_score": 92,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "idli_sambar",
+    "name": "Idli Sambar (4 pc)",
+    "description": "Steamed rice cakes with hot sambar and chutney.",
+    "price": 40.0,
+    "category": "breakfast",
+    "cuisine": "south_indian",
+    "ingredients": [
+      "rice",
+      "urad dal",
+      "toor dal",
+      "vegetables",
+      "tamarind"
+    ],
+    "allergens": [],
+    "dietary_tags": [
+      "veg",
+      "vegan",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": "11:30",
+    "prep_time_minutes": 8,
+    "calories": 260,
+    "protein_g": 6,
+    "portion_size": "medium",
+    "spice_level": 1,
+    "taste_profile": [
+      "savory",
+      "comforting"
+    ],
+    "mood_tags": [
+      "light",
+      "comfort",
+      "study_fuel"
+    ],
+    "serving_times": [
+      "breakfast"
+    ],
+    "popularity_score": 85,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "poha",
+    "name": "Kanda Poha",
+    "description": "Flattened rice tossed with onion, peanuts, lemon.",
+    "price": 35.0,
+    "category": "breakfast",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "flattened rice",
+      "onion",
+      "peanuts",
+      "turmeric",
+      "lemon",
+      "curry leaves"
+    ],
+    "allergens": [
+      "peanuts"
+    ],
+    "dietary_tags": [
+      "veg",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": "11:30",
+    "prep_time_minutes": 7,
+    "calories": 240,
+    "protein_g": 5,
+    "portion_size": "light",
+    "spice_level": 1,
+    "taste_profile": [
+      "tangy",
+      "savory"
+    ],
+    "mood_tags": [
+      "light",
+      "energizing"
+    ],
+    "serving_times": [
+      "breakfast"
+    ],
+    "popularity_score": 78,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "aloo_paratha",
+    "name": "Aloo Paratha + Curd",
+    "description": "2 whole-wheat parathas stuffed with spiced potato, curd cup.",
+    "price": 55.0,
+    "category": "breakfast",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "wheat flour",
+      "potato",
+      "curd",
+      "onion",
+      "green chilli",
+      "ghee"
+    ],
+    "allergens": [
+      "dairy",
+      "gluten"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": "11:30",
+    "prep_time_minutes": 12,
+    "calories": 450,
+    "protein_g": 9,
+    "portion_size": "heavy",
+    "spice_level": 2,
+    "taste_profile": [
+      "savory",
+      "comforting"
+    ],
+    "mood_tags": [
+      "comfort",
+      "homesick"
+    ],
+    "serving_times": [
+      "breakfast"
+    ],
+    "popularity_score": 88,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "jain_poha",
+    "name": "Jain Poha (No Onion/Garlic)",
+    "description": "Jain-friendly flattened rice, no onion/garlic.",
+    "price": 40.0,
+    "category": "breakfast",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "flattened rice",
+      "potato",
+      "turmeric",
+      "lemon",
+      "curry leaves",
+      "peanuts"
+    ],
+    "allergens": [
+      "peanuts"
+    ],
+    "dietary_tags": [
+      "veg",
+      "jain",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": "11:30",
+    "prep_time_minutes": 7,
+    "calories": 230,
+    "protein_g": 5,
+    "portion_size": "light",
+    "spice_level": 0,
+    "taste_profile": [
+      "tangy",
+      "savory"
+    ],
+    "mood_tags": [
+      "light",
+      "comfort"
+    ],
+    "serving_times": [
+      "breakfast"
+    ],
+    "popularity_score": 64,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "egg_bhurji_pav",
+    "name": "Egg Bhurji Pav",
+    "description": "Spiced scrambled eggs with buttered pav (2 pc).",
+    "price": 50.0,
+    "category": "breakfast",
+    "cuisine": "street_food",
+    "ingredients": [
+      "egg",
+      "onion",
+      "tomato",
+      "pav",
+      "butter",
+      "green chilli"
+    ],
+    "allergens": [
+      "egg",
+      "dairy",
+      "gluten"
+    ],
+    "dietary_tags": [
+      "egg"
+    ],
+    "availability": true,
+    "available_until": "11:30",
+    "prep_time_minutes": 10,
+    "calories": 380,
+    "protein_g": 14,
+    "portion_size": "medium",
+    "spice_level": 2,
+    "taste_profile": [
+      "spicy",
+      "savory"
+    ],
+    "mood_tags": [
+      "energizing",
+      "study_fuel"
+    ],
+    "serving_times": [
+      "breakfast"
+    ],
+    "popularity_score": 80,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "oats_upma",
+    "name": "Oats Upma",
+    "description": "Savoury oats with veggies, light and high-fibre.",
+    "price": 45.0,
+    "category": "breakfast",
+    "cuisine": "south_indian",
+    "ingredients": [
+      "oats",
+      "carrot",
+      "beans",
+      "mustard seeds",
+      "curry leaves",
+      "lemon"
+    ],
+    "allergens": [
+      "gluten"
+    ],
+    "dietary_tags": [
+      "veg",
+      "vegan",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": "11:30",
+    "prep_time_minutes": 10,
+    "calories": 220,
+    "protein_g": 8,
+    "portion_size": "light",
+    "spice_level": 1,
+    "taste_profile": [
+      "savory"
+    ],
+    "mood_tags": [
+      "light",
+      "study_fuel",
+      "energizing"
+    ],
+    "serving_times": [
+      "breakfast"
+    ],
+    "popularity_score": 62,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "bread_omelette",
+    "name": "Bread Omelette",
+    "description": "Double-egg omelette with toasted bread.",
+    "price": 45.0,
+    "category": "breakfast",
+    "cuisine": "street_food",
+    "ingredients": [
+      "egg",
+      "bread",
+      "onion",
+      "green chilli",
+      "butter"
+    ],
+    "allergens": [
+      "egg",
+      "gluten",
+      "dairy"
+    ],
+    "dietary_tags": [
+      "egg"
+    ],
+    "availability": false,
+    "available_until": "11:30",
+    "prep_time_minutes": 8,
+    "calories": 360,
+    "protein_g": 13,
+    "portion_size": "medium",
+    "spice_level": 1,
+    "taste_profile": [
+      "savory",
+      "comforting"
+    ],
+    "mood_tags": [
+      "comfort",
+      "study_fuel"
+    ],
+    "serving_times": [
+      "breakfast"
+    ],
+    "popularity_score": 70,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "chole_bhature",
+    "name": "Chole Bhature",
+    "description": "Amritsari chickpea curry with 2 fluffy bhature.",
+    "price": 90.0,
+    "category": "main_course",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "chickpeas",
+      "wheat flour",
+      "onion",
+      "tomato",
+      "garlic",
+      "spices"
+    ],
+    "allergens": [
+      "gluten"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": "21:00",
+    "prep_time_minutes": 15,
+    "calories": 650,
+    "protein_g": 14,
+    "portion_size": "filling",
+    "spice_level": 2,
+    "taste_profile": [
+      "spicy",
+      "savory",
+      "comforting"
+    ],
+    "mood_tags": [
+      "comfort",
+      "homesick",
+      "indulgent"
+    ],
+    "serving_times": [
+      "lunch",
+      "dinner"
+    ],
+    "popularity_score": 95,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "rajma_chawal",
+    "name": "Rajma Chawal",
+    "description": "Kidney-bean curry over steamed rice.",
+    "price": 85.0,
+    "category": "main_course",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "kidney beans",
+      "rice",
+      "onion",
+      "tomato",
+      "garlic",
+      "spices"
+    ],
+    "allergens": [],
+    "dietary_tags": [
+      "veg",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": "21:00",
+    "prep_time_minutes": 15,
+    "calories": 580,
+    "protein_g": 15,
+    "portion_size": "filling",
+    "spice_level": 2,
+    "taste_profile": [
+      "savory",
+      "comforting"
+    ],
+    "mood_tags": [
+      "comfort",
+      "homesick"
+    ],
+    "serving_times": [
+      "lunch",
+      "dinner"
+    ],
+    "popularity_score": 89,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "veg_biryani",
+    "name": "Veg Biryani",
+    "description": "Fragrant basmati, mixed veg, mirchi ka salan + raita.",
+    "price": 110.0,
+    "category": "main_course",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "basmati rice",
+      "mixed vegetables",
+      "curd",
+      "onion",
+      "saffron",
+      "spices"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg",
+      "halal"
+    ],
+    "availability": true,
+    "available_until": "21:00",
+    "prep_time_minutes": 20,
+    "calories": 620,
+    "protein_g": 9,
+    "portion_size": "filling",
+    "spice_level": 2,
+    "taste_profile": [
+      "spicy",
+      "savory"
+    ],
+    "mood_tags": [
+      "celebratory",
+      "indulgent",
+      "comfort"
+    ],
+    "serving_times": [
+      "lunch",
+      "dinner"
+    ],
+    "popularity_score": 90,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "chicken_biryani",
+    "name": "Chicken Biryani",
+    "description": "Hyderabadi dum biryani, raita + salan.",
+    "price": 150.0,
+    "category": "main_course",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "basmati rice",
+      "chicken",
+      "curd",
+      "onion",
+      "saffron",
+      "spices"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietary_tags": [
+      "non_veg",
+      "halal"
+    ],
+    "availability": true,
+    "available_until": "21:00",
+    "prep_time_minutes": 22,
+    "calories": 750,
+    "protein_g": 28,
+    "portion_size": "filling",
+    "spice_level": 3,
+    "taste_profile": [
+      "spicy",
+      "savory"
+    ],
+    "mood_tags": [
+      "celebratory",
+      "indulgent"
+    ],
+    "serving_times": [
+      "lunch",
+      "dinner"
+    ],
+    "popularity_score": 97,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "paneer_naan",
+    "name": "Paneer Butter Masala + Naan",
+    "description": "Creamy paneer curry with 2 butter naan.",
+    "price": 130.0,
+    "category": "main_course",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "paneer",
+      "tomato",
+      "cream",
+      "butter",
+      "wheat flour",
+      "garlic"
+    ],
+    "allergens": [
+      "dairy",
+      "gluten"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": "21:00",
+    "prep_time_minutes": 18,
+    "calories": 700,
+    "protein_g": 22,
+    "portion_size": "heavy",
+    "spice_level": 2,
+    "taste_profile": [
+      "savory",
+      "comforting"
+    ],
+    "mood_tags": [
+      "indulgent",
+      "celebratory",
+      "comfort"
+    ],
+    "serving_times": [
+      "lunch",
+      "dinner"
+    ],
+    "popularity_score": 91,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "dal_rice",
+    "name": "Dal Tadka + Rice",
+    "description": "Yellow dal tempered in ghee with steamed rice.",
+    "price": 80.0,
+    "category": "main_course",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "toor dal",
+      "rice",
+      "ghee",
+      "garlic",
+      "red chilli",
+      "cumin"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg",
+      "gluten_free"
+    ],
+    "availability": true,
+    "available_until": "21:00",
+    "prep_time_minutes": 15,
+    "calories": 520,
+    "protein_g": 14,
+    "portion_size": "heavy",
+    "spice_level": 1,
+    "taste_profile": [
+      "savory",
+      "comforting"
+    ],
+    "mood_tags": [
+      "comfort",
+      "homesick",
+      "light"
+    ],
+    "serving_times": [
+      "lunch",
+      "dinner"
+    ],
+    "popularity_score": 84,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "hakka_noodles_veg",
+    "name": "Veg Hakka Noodles",
+    "description": "Wok-tossed noodles, crunchy veggies, manchurian sauce.",
+    "price": 90.0,
+    "category": "main_course",
+    "cuisine": "chinese",
+    "ingredients": [
+      "noodles",
+      "cabbage",
+      "carrot",
+      "capsicum",
+      "soy sauce",
+      "garlic"
+    ],
+    "allergens": [
+      "gluten",
+      "soy"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": "21:00",
+    "prep_time_minutes": 12,
+    "calories": 480,
+    "protein_g": 8,
+    "portion_size": "heavy",
+    "spice_level": 2,
+    "taste_profile": [
+      "savory",
+      "spicy"
+    ],
+    "mood_tags": [
+      "study_fuel",
+      "comfort",
+      "celebratory"
+    ],
+    "serving_times": [
+      "lunch",
+      "dinner"
+    ],
+    "popularity_score": 86,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "chicken_noodles",
+    "name": "Chicken Hakka Noodles",
+    "description": "Hakka noodles with shredded chicken.",
+    "price": 130.0,
+    "category": "main_course",
+    "cuisine": "chinese",
+    "ingredients": [
+      "noodles",
+      "chicken",
+      "cabbage",
+      "soy sauce",
+      "garlic",
+      "spring onion"
+    ],
+    "allergens": [
+      "gluten",
+      "soy"
+    ],
+    "dietary_tags": [
+      "non_veg",
+      "halal"
+    ],
+    "availability": true,
+    "available_until": "21:00",
+    "prep_time_minutes": 14,
+    "calories": 560,
+    "protein_g": 20,
+    "portion_size": "heavy",
+    "spice_level": 2,
+    "taste_profile": [
+      "savory",
+      "spicy"
+    ],
+    "mood_tags": [
+      "study_fuel",
+      "indulgent"
+    ],
+    "serving_times": [
+      "lunch",
+      "dinner"
+    ],
+    "popularity_score": 88,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "veg_fried_rice",
+    "name": "Veg Fried Rice",
+    "description": "Smoky wok rice with veggies + spring onion.",
+    "price": 85.0,
+    "category": "main_course",
+    "cuisine": "chinese",
+    "ingredients": [
+      "rice",
+      "carrot",
+      "beans",
+      "spring onion",
+      "soy sauce",
+      "garlic"
+    ],
+    "allergens": [
+      "soy"
+    ],
+    "dietary_tags": [
+      "veg",
+      "vegan",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": "21:00",
+    "prep_time_minutes": 12,
+    "calories": 460,
+    "protein_g": 7,
+    "portion_size": "heavy",
+    "spice_level": 1,
+    "taste_profile": [
+      "savory"
+    ],
+    "mood_tags": [
+      "study_fuel",
+      "light"
+    ],
+    "serving_times": [
+      "lunch",
+      "dinner"
+    ],
+    "popularity_score": 79,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "jain_khichdi",
+    "name": "Jain Dal Khichdi",
+    "description": "Rice-moong khichdi, no onion/garlic, with ghee.",
+    "price": 75.0,
+    "category": "main_course",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "rice",
+      "moong dal",
+      "potato",
+      "carrot",
+      "ghee",
+      "cumin"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg",
+      "jain",
+      "gluten_free"
+    ],
+    "availability": true,
+    "available_until": "21:00",
+    "prep_time_minutes": 18,
+    "calories": 480,
+    "protein_g": 12,
+    "portion_size": "heavy",
+    "spice_level": 0,
+    "taste_profile": [
+      "comforting",
+      "savory"
+    ],
+    "mood_tags": [
+      "comfort",
+      "light",
+      "homesick"
+    ],
+    "serving_times": [
+      "lunch",
+      "dinner"
+    ],
+    "popularity_score": 72,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "palak_roti",
+    "name": "Palak Paneer + Roti",
+    "description": "Spinach-paneer curry with 3 tawa rotis.",
+    "price": 120.0,
+    "category": "main_course",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "spinach",
+      "paneer",
+      "cream",
+      "wheat flour",
+      "garlic",
+      "spices"
+    ],
+    "allergens": [
+      "dairy",
+      "gluten"
+    ],
+    "dietary_tags": [
+      "veg",
+      "gluten_free"
+    ],
+    "availability": true,
+    "available_until": "21:00",
+    "prep_time_minutes": 18,
+    "calories": 600,
+    "protein_g": 18,
+    "portion_size": "heavy",
+    "spice_level": 1,
+    "taste_profile": [
+      "savory",
+      "comforting"
+    ],
+    "mood_tags": [
+      "comfort",
+      "light"
+    ],
+    "serving_times": [
+      "lunch",
+      "dinner"
+    ],
+    "popularity_score": 77,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "egg_curry_rice",
+    "name": "Egg Curry + Rice",
+    "description": "Homestyle egg curry with steamed rice.",
+    "price": 100.0,
+    "category": "main_course",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "egg",
+      "rice",
+      "onion",
+      "tomato",
+      "garlic",
+      "spices"
+    ],
+    "allergens": [
+      "egg"
+    ],
+    "dietary_tags": [
+      "egg"
+    ],
+    "availability": false,
+    "available_until": "21:00",
+    "prep_time_minutes": 16,
+    "calories": 590,
+    "protein_g": 16,
+    "portion_size": "filling",
+    "spice_level": 2,
+    "taste_profile": [
+      "spicy",
+      "savory"
+    ],
+    "mood_tags": [
+      "comfort",
+      "homesick"
+    ],
+    "serving_times": [
+      "lunch",
+      "dinner"
+    ],
+    "popularity_score": 81,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "samosa",
+    "name": "Samosa (2 pc)",
+    "description": "Punjabi aloo samosa with imli chutney.",
+    "price": 25.0,
+    "category": "snack",
+    "cuisine": "street_food",
+    "ingredients": [
+      "wheat flour",
+      "potato",
+      "peas",
+      "tamarind",
+      "spices"
+    ],
+    "allergens": [
+      "gluten"
+    ],
+    "dietary_tags": [
+      "veg",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 5,
+    "calories": 300,
+    "protein_g": 5,
+    "portion_size": "light",
+    "spice_level": 2,
+    "taste_profile": [
+      "spicy",
+      "savory",
+      "tangy"
+    ],
+    "mood_tags": [
+      "study_fuel",
+      "indulgent"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 100,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "vada_pav",
+    "name": "Vada Pav",
+    "description": "Mumbai vada pav with garlic chutney + fried mirchi.",
+    "price": 30.0,
+    "category": "snack",
+    "cuisine": "street_food",
+    "ingredients": [
+      "potato",
+      "pav",
+      "garlic",
+      "chickpea flour",
+      "green chilli"
+    ],
+    "allergens": [
+      "gluten"
+    ],
+    "dietary_tags": [
+      "veg",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 6,
+    "calories": 350,
+    "protein_g": 6,
+    "portion_size": "medium",
+    "spice_level": 3,
+    "taste_profile": [
+      "spicy",
+      "savory"
+    ],
+    "mood_tags": [
+      "study_fuel",
+      "indulgent",
+      "comfort"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 90,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "maggi",
+    "name": "Masala Maggi",
+    "description": "Hostel classic masala maggi.",
+    "price": 40.0,
+    "category": "snack",
+    "cuisine": "street_food",
+    "ingredients": [
+      "instant noodles",
+      "onion",
+      "tomato",
+      "peas",
+      "masala"
+    ],
+    "allergens": [
+      "gluten",
+      "soy"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 8,
+    "calories": 380,
+    "protein_g": 7,
+    "portion_size": "medium",
+    "spice_level": 2,
+    "taste_profile": [
+      "spicy",
+      "savory",
+      "comforting"
+    ],
+    "mood_tags": [
+      "study_fuel",
+      "comfort",
+      "homesick"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 96,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "cheese_maggi",
+    "name": "Cheese Maggi",
+    "description": "Masala maggi loaded with cheese.",
+    "price": 60.0,
+    "category": "snack",
+    "cuisine": "continental",
+    "ingredients": [
+      "instant noodles",
+      "cheese",
+      "milk",
+      "onion",
+      "masala"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy",
+      "soy"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 9,
+    "calories": 480,
+    "protein_g": 11,
+    "portion_size": "medium",
+    "spice_level": 1,
+    "taste_profile": [
+      "cheesy",
+      "savory",
+      "comforting"
+    ],
+    "mood_tags": [
+      "indulgent",
+      "comfort",
+      "study_fuel"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 89,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "veg_momos",
+    "name": "Veg Momos (8 pc)",
+    "description": "Steamed veg momos with spicy chutney.",
+    "price": 70.0,
+    "category": "snack",
+    "cuisine": "chinese",
+    "ingredients": [
+      "wheat flour",
+      "cabbage",
+      "carrot",
+      "garlic",
+      "soy sauce",
+      "chilli"
+    ],
+    "allergens": [
+      "gluten",
+      "soy"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 12,
+    "calories": 320,
+    "protein_g": 6,
+    "portion_size": "medium",
+    "spice_level": 2,
+    "taste_profile": [
+      "spicy",
+      "savory"
+    ],
+    "mood_tags": [
+      "study_fuel",
+      "celebratory"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 87,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "chicken_momos",
+    "name": "Chicken Momos (8 pc)",
+    "description": "Juicy chicken momos with chutney + mayo.",
+    "price": 90.0,
+    "category": "snack",
+    "cuisine": "chinese",
+    "ingredients": [
+      "wheat flour",
+      "chicken",
+      "onion",
+      "garlic",
+      "soy sauce",
+      "mayonnaise"
+    ],
+    "allergens": [
+      "gluten",
+      "soy",
+      "egg"
+    ],
+    "dietary_tags": [
+      "non_veg",
+      "halal"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 13,
+    "calories": 420,
+    "protein_g": 14,
+    "portion_size": "medium",
+    "spice_level": 2,
+    "taste_profile": [
+      "spicy",
+      "savory"
+    ],
+    "mood_tags": [
+      "indulgent",
+      "celebratory",
+      "study_fuel"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 91,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "fries",
+    "name": "French Fries",
+    "description": "Crispy salted fries.",
+    "price": 70.0,
+    "category": "snack",
+    "cuisine": "continental",
+    "ingredients": [
+      "potato",
+      "salt",
+      "oil"
+    ],
+    "allergens": [],
+    "dietary_tags": [
+      "veg",
+      "vegan",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 10,
+    "calories": 380,
+    "protein_g": 4,
+    "portion_size": "medium",
+    "spice_level": 0,
+    "taste_profile": [
+      "savory"
+    ],
+    "mood_tags": [
+      "study_fuel",
+      "indulgent"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 83,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "peri_fries",
+    "name": "Peri Peri Fries",
+    "description": "Fries dusted with peri peri masala.",
+    "price": 85.0,
+    "category": "snack",
+    "cuisine": "continental",
+    "ingredients": [
+      "potato",
+      "peri peri masala",
+      "oil",
+      "salt"
+    ],
+    "allergens": [],
+    "dietary_tags": [
+      "veg",
+      "vegan",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 11,
+    "calories": 400,
+    "protein_g": 4,
+    "portion_size": "medium",
+    "spice_level": 3,
+    "taste_profile": [
+      "spicy",
+      "savory"
+    ],
+    "mood_tags": [
+      "study_fuel",
+      "indulgent",
+      "energizing"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 82,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "peanut_masala",
+    "name": "Peanut Masala",
+    "description": "Roasted peanuts, onion, lemon, chaat masala.",
+    "price": 30.0,
+    "category": "snack",
+    "cuisine": "street_food",
+    "ingredients": [
+      "peanuts",
+      "onion",
+      "lemon",
+      "chaat masala",
+      "green chilli"
+    ],
+    "allergens": [
+      "peanuts"
+    ],
+    "dietary_tags": [
+      "veg",
+      "vegan",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 3,
+    "calories": 280,
+    "protein_g": 13,
+    "portion_size": "light",
+    "spice_level": 2,
+    "taste_profile": [
+      "spicy",
+      "tangy",
+      "savory"
+    ],
+    "mood_tags": [
+      "study_fuel",
+      "light"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 68,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "jain_samosa",
+    "name": "Jain Samosa (2 pc)",
+    "description": "No onion/garlic samosa with sweet chutney.",
+    "price": 30.0,
+    "category": "snack",
+    "cuisine": "street_food",
+    "ingredients": [
+      "wheat flour",
+      "potato",
+      "peas",
+      "tamarind",
+      "spices"
+    ],
+    "allergens": [
+      "gluten"
+    ],
+    "dietary_tags": [
+      "veg",
+      "jain",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 5,
+    "calories": 290,
+    "protein_g": 5,
+    "portion_size": "light",
+    "spice_level": 1,
+    "taste_profile": [
+      "savory",
+      "tangy"
+    ],
+    "mood_tags": [
+      "light",
+      "comfort"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 66,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "filter_coffee",
+    "name": "Filter Coffee",
+    "description": "South Indian degree coffee, served hot.",
+    "price": 15.0,
+    "category": "beverage",
+    "cuisine": "south_indian",
+    "ingredients": [
+      "milk",
+      "coffee",
+      "sugar"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 3,
+    "calories": 80,
+    "protein_g": 4,
+    "portion_size": "light",
+    "spice_level": 0,
+    "taste_profile": [
+      "comforting"
+    ],
+    "mood_tags": [
+      "energizing",
+      "study_fuel",
+      "comfort"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 94,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "masala_chai",
+    "name": "Masala Chai",
+    "description": "Kadak chai brewed with ginger + spices.",
+    "price": 15.0,
+    "category": "beverage",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "milk",
+      "tea",
+      "ginger",
+      "cardamom",
+      "sugar"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 4,
+    "calories": 90,
+    "protein_g": 4,
+    "portion_size": "light",
+    "spice_level": 0,
+    "taste_profile": [
+      "comforting",
+      "sweet"
+    ],
+    "mood_tags": [
+      "comfort",
+      "homesick",
+      "study_fuel"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 93,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "cold_coffee",
+    "name": "Cold Coffee",
+    "description": "Blended iced coffee with ice cream.",
+    "price": 50.0,
+    "category": "beverage",
+    "cuisine": "continental",
+    "ingredients": [
+      "milk",
+      "coffee",
+      "ice cream",
+      "sugar"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 6,
+    "calories": 280,
+    "protein_g": 8,
+    "portion_size": "medium",
+    "spice_level": 0,
+    "taste_profile": [
+      "sweet"
+    ],
+    "mood_tags": [
+      "indulgent",
+      "celebratory",
+      "energizing"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 84,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "mango_lassi",
+    "name": "Mango Lassi",
+    "description": "Thick mango + curd cooler.",
+    "price": 45.0,
+    "category": "beverage",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "mango",
+      "curd",
+      "sugar",
+      "cardamom"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg",
+      "gluten_free"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 5,
+    "calories": 260,
+    "protein_g": 7,
+    "portion_size": "medium",
+    "spice_level": 0,
+    "taste_profile": [
+      "sweet",
+      "refreshing"
+    ],
+    "mood_tags": [
+      "comfort",
+      "celebratory",
+      "homesick"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 86,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "lime_juice",
+    "name": "Sweet Lime Juice",
+    "description": "Fresh mosambi juice, no added colour.",
+    "price": 35.0,
+    "category": "beverage",
+    "cuisine": "street_food",
+    "ingredients": [
+      "sweet lime",
+      "sugar",
+      "salt",
+      "water"
+    ],
+    "allergens": [],
+    "dietary_tags": [
+      "veg",
+      "vegan",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 4,
+    "calories": 120,
+    "protein_g": 1,
+    "portion_size": "light",
+    "spice_level": 0,
+    "taste_profile": [
+      "refreshing",
+      "sweet",
+      "tangy"
+    ],
+    "mood_tags": [
+      "light",
+      "energizing"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 75,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "oreo_shake",
+    "name": "Oreo Shake",
+    "description": "Cookies-and-cream thickshake.",
+    "price": 70.0,
+    "category": "beverage",
+    "cuisine": "continental",
+    "ingredients": [
+      "milk",
+      "oreo biscuit",
+      "ice cream",
+      "sugar"
+    ],
+    "allergens": [
+      "dairy",
+      "gluten",
+      "soy"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": false,
+    "available_until": null,
+    "prep_time_minutes": 7,
+    "calories": 450,
+    "protein_g": 8,
+    "portion_size": "medium",
+    "spice_level": 0,
+    "taste_profile": [
+      "sweet"
+    ],
+    "mood_tags": [
+      "indulgent",
+      "celebratory"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 87,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "chaas",
+    "name": "Masala Chaas",
+    "description": "Spiced buttermilk, jeera + curry leaf.",
+    "price": 20.0,
+    "category": "beverage",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "curd",
+      "water",
+      "cumin",
+      "curry leaves",
+      "salt"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg",
+      "gluten_free"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 2,
+    "calories": 60,
+    "protein_g": 3,
+    "portion_size": "light",
+    "spice_level": 0,
+    "taste_profile": [
+      "tangy",
+      "refreshing"
+    ],
+    "mood_tags": [
+      "light",
+      "comfort"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 73,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "green_tea",
+    "name": "Green Tea",
+    "description": "Light brewed green tea with lemon.",
+    "price": 15.0,
+    "category": "beverage",
+    "cuisine": "continental",
+    "ingredients": [
+      "green tea",
+      "lemon",
+      "water"
+    ],
+    "allergens": [],
+    "dietary_tags": [
+      "veg",
+      "vegan",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 3,
+    "calories": 5,
+    "protein_g": 0,
+    "portion_size": "light",
+    "spice_level": 0,
+    "taste_profile": [
+      "refreshing"
+    ],
+    "mood_tags": [
+      "light",
+      "study_fuel",
+      "energizing"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 58,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "tomato_soup",
+    "name": "Hot Tomato Soup",
+    "description": "Warm creamy tomato soup with croutons.",
+    "price": 50.0,
+    "category": "beverage",
+    "cuisine": "continental",
+    "ingredients": [
+      "tomato",
+      "cream",
+      "basil",
+      "bread croutons",
+      "garlic"
+    ],
+    "allergens": [
+      "dairy",
+      "gluten"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 10,
+    "calories": 180,
+    "protein_g": 4,
+    "portion_size": "light",
+    "spice_level": 1,
+    "taste_profile": [
+      "tangy",
+      "comforting"
+    ],
+    "mood_tags": [
+      "comfort",
+      "homesick",
+      "light"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 71,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "pb_smoothie",
+    "name": "Peanut Butter Smoothie",
+    "description": "Banana + peanut butter + milk blend.",
+    "price": 65.0,
+    "category": "beverage",
+    "cuisine": "continental",
+    "ingredients": [
+      "peanuts",
+      "banana",
+      "milk",
+      "honey"
+    ],
+    "allergens": [
+      "peanuts",
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg",
+      "gluten_free"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 6,
+    "calories": 340,
+    "protein_g": 14,
+    "portion_size": "medium",
+    "spice_level": 0,
+    "taste_profile": [
+      "sweet",
+      "comforting"
+    ],
+    "mood_tags": [
+      "energizing",
+      "study_fuel",
+      "indulgent"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 69,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "gulab_jamun",
+    "name": "Gulab Jamun (2 pc)",
+    "description": "Warm khoya dumplings in rose syrup.",
+    "price": 35.0,
+    "category": "dessert",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "khoya",
+      "sugar",
+      "rose water",
+      "cardamom"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg",
+      "gluten_free"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 4,
+    "calories": 300,
+    "protein_g": 4,
+    "portion_size": "light",
+    "spice_level": 0,
+    "taste_profile": [
+      "sweet",
+      "comforting"
+    ],
+    "mood_tags": [
+      "celebratory",
+      "comfort",
+      "homesick"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 88,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "brownie",
+    "name": "Chocolate Brownie",
+    "description": "Warm fudgy brownie square.",
+    "price": 60.0,
+    "category": "dessert",
+    "cuisine": "continental",
+    "ingredients": [
+      "wheat flour",
+      "cocoa",
+      "butter",
+      "egg",
+      "sugar"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy",
+      "egg"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 5,
+    "calories": 380,
+    "protein_g": 5,
+    "portion_size": "light",
+    "spice_level": 0,
+    "taste_profile": [
+      "sweet"
+    ],
+    "mood_tags": [
+      "indulgent",
+      "celebratory",
+      "study_fuel"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 85,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "fruit_custard",
+    "name": "Fruit Custard",
+    "description": "Chilled custard with seasonal fruit.",
+    "price": 45.0,
+    "category": "dessert",
+    "cuisine": "continental",
+    "ingredients": [
+      "milk",
+      "custard powder",
+      "apple",
+      "banana",
+      "grapes"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg",
+      "gluten_free"
+    ],
+    "availability": false,
+    "available_until": null,
+    "prep_time_minutes": 5,
+    "calories": 220,
+    "protein_g": 4,
+    "portion_size": "light",
+    "spice_level": 0,
+    "taste_profile": [
+      "sweet",
+      "refreshing"
+    ],
+    "mood_tags": [
+      "light",
+      "celebratory"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 67,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "jalebi",
+    "name": "Jalebi (250g)",
+    "description": "Crispy saffron jalebi, served hot.",
+    "price": 40.0,
+    "category": "dessert",
+    "cuisine": "street_food",
+    "ingredients": [
+      "wheat flour",
+      "sugar",
+      "saffron",
+      "ghee"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 8,
+    "calories": 420,
+    "protein_g": 3,
+    "portion_size": "medium",
+    "spice_level": 0,
+    "taste_profile": [
+      "sweet"
+    ],
+    "mood_tags": [
+      "celebratory",
+      "indulgent",
+      "homesick"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 82,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "choco_mousse",
+    "name": "Dark Chocolate Mousse",
+    "description": "Vegan dark-chocolate mousse cup.",
+    "price": 75.0,
+    "category": "dessert",
+    "cuisine": "continental",
+    "ingredients": [
+      "dark chocolate",
+      "coconut milk",
+      "sugar",
+      "vanilla"
+    ],
+    "allergens": [],
+    "dietary_tags": [
+      "veg",
+      "vegan",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 5,
+    "calories": 260,
+    "protein_g": 4,
+    "portion_size": "light",
+    "spice_level": 0,
+    "taste_profile": [
+      "sweet"
+    ],
+    "mood_tags": [
+      "indulgent",
+      "celebratory"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 74,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "jain_fruit_bowl",
+    "name": "Jain Fruit Bowl",
+    "description": "Cut seasonal fruit, chaat masala on side.",
+    "price": 50.0,
+    "category": "dessert",
+    "cuisine": "street_food",
+    "ingredients": [
+      "apple",
+      "banana",
+      "papaya",
+      "pomegranate",
+      "lemon"
+    ],
+    "allergens": [],
+    "dietary_tags": [
+      "veg",
+      "vegan",
+      "jain",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 5,
+    "calories": 150,
+    "protein_g": 1,
+    "portion_size": "light",
+    "spice_level": 0,
+    "taste_profile": [
+      "sweet",
+      "refreshing"
+    ],
+    "mood_tags": [
+      "light",
+      "energizing"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 63,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "vanilla_scoop",
+    "name": "Vanilla Scoop",
+    "description": "Single-scoop vanilla ice cream.",
+    "price": 40.0,
+    "category": "dessert",
+    "cuisine": "continental",
+    "ingredients": [
+      "milk",
+      "cream",
+      "sugar",
+      "vanilla"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg",
+      "gluten_free"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 2,
+    "calories": 180,
+    "protein_g": 3,
+    "portion_size": "light",
+    "spice_level": 0,
+    "taste_profile": [
+      "sweet"
+    ],
+    "mood_tags": [
+      "indulgent",
+      "celebratory",
+      "comfort"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 78,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "combo_dosa_coffee",
+    "name": "Dosa + Filter Coffee",
+    "description": "Masala dosa with a tumbler of filter coffee.",
+    "price": 70.0,
+    "category": "combo",
+    "cuisine": "south_indian",
+    "ingredients": [
+      "rice",
+      "urad dal",
+      "potato",
+      "milk",
+      "coffee",
+      "spices"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": "11:30",
+    "prep_time_minutes": 10,
+    "calories": 400,
+    "protein_g": 12,
+    "portion_size": "heavy",
+    "spice_level": 1,
+    "taste_profile": [
+      "savory",
+      "comforting"
+    ],
+    "mood_tags": [
+      "comfort",
+      "homesick",
+      "study_fuel"
+    ],
+    "serving_times": [
+      "breakfast"
+    ],
+    "popularity_score": 90,
+    "is_combo": true,
+    "combo_items": [
+      "masala_dosa",
+      "filter_coffee"
+    ]
+  },
+  {
+    "id": "combo_chole_chaas",
+    "name": "Chole Bhature + Chaas",
+    "description": "Chole bhature with masala chaas.",
+    "price": 100.0,
+    "category": "combo",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "chickpeas",
+      "wheat flour",
+      "curd",
+      "onion",
+      "spices"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": false,
+    "available_until": "21:00",
+    "prep_time_minutes": 15,
+    "calories": 710,
+    "protein_g": 17,
+    "portion_size": "filling",
+    "spice_level": 2,
+    "taste_profile": [
+      "spicy",
+      "savory",
+      "tangy"
+    ],
+    "mood_tags": [
+      "comfort",
+      "indulgent",
+      "homesick"
+    ],
+    "serving_times": [
+      "lunch",
+      "dinner"
+    ],
+    "popularity_score": 86,
+    "is_combo": true,
+    "combo_items": [
+      "chole_bhature",
+      "chaas"
+    ]
+  },
+  {
+    "id": "combo_maggi_chai",
+    "name": "Maggi + Chai Study Pack",
+    "description": "Masala maggi with kadak masala chai.",
+    "price": 50.0,
+    "category": "combo",
+    "cuisine": "street_food",
+    "ingredients": [
+      "instant noodles",
+      "milk",
+      "tea",
+      "onion",
+      "spices"
+    ],
+    "allergens": [
+      "gluten",
+      "soy",
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 8,
+    "calories": 470,
+    "protein_g": 11,
+    "portion_size": "heavy",
+    "spice_level": 2,
+    "taste_profile": [
+      "spicy",
+      "comforting"
+    ],
+    "mood_tags": [
+      "study_fuel",
+      "comfort",
+      "homesick"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 94,
+    "is_combo": true,
+    "combo_items": [
+      "maggi",
+      "masala_chai"
+    ]
+  },
+  {
+    "id": "combo_biryani_jamun",
+    "name": "Chicken Biryani + Gulab Jamun",
+    "description": "Chicken biryani + 2pc gulab jamun.",
+    "price": 175.0,
+    "category": "combo",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "basmati rice",
+      "chicken",
+      "khoya",
+      "curd",
+      "spices",
+      "sugar"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietary_tags": [
+      "non_veg",
+      "halal"
+    ],
+    "availability": true,
+    "available_until": "21:00",
+    "prep_time_minutes": 22,
+    "calories": 1050,
+    "protein_g": 32,
+    "portion_size": "filling",
+    "spice_level": 3,
+    "taste_profile": [
+      "spicy",
+      "sweet",
+      "savory"
+    ],
+    "mood_tags": [
+      "celebratory",
+      "indulgent"
+    ],
+    "serving_times": [
+      "lunch",
+      "dinner"
+    ],
+    "popularity_score": 92,
+    "is_combo": true,
+    "combo_items": [
+      "chicken_biryani",
+      "gulab_jamun"
+    ]
+  },
+  {
+    "id": "combo_momos_juice",
+    "name": "Veg Momos + Lime Juice",
+    "description": "8pc veg momos with fresh lime juice.",
+    "price": 95.0,
+    "category": "combo",
+    "cuisine": "chinese",
+    "ingredients": [
+      "wheat flour",
+      "cabbage",
+      "sweet lime",
+      "soy sauce",
+      "spices"
+    ],
+    "allergens": [
+      "gluten",
+      "soy"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 12,
+    "calories": 440,
+    "protein_g": 7,
+    "portion_size": "heavy",
+    "spice_level": 2,
+    "taste_profile": [
+      "spicy",
+      "refreshing",
+      "tangy"
+    ],
+    "mood_tags": [
+      "study_fuel",
+      "light",
+      "celebratory"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 83,
+    "is_combo": true,
+    "combo_items": [
+      "veg_momos",
+      "lime_juice"
+    ]
+  },
+  {
+    "id": "combo_khichdi_chaas",
+    "name": "Jain Khichdi + Chaas",
+    "description": "Jain dal khichdi with masala chaas.",
+    "price": 85.0,
+    "category": "combo",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "rice",
+      "moong dal",
+      "curd",
+      "cumin",
+      "potato",
+      "carrot"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg",
+      "jain",
+      "gluten_free"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 18,
+    "calories": 540,
+    "protein_g": 15,
+    "portion_size": "filling",
+    "spice_level": 0,
+    "taste_profile": [
+      "comforting",
+      "tangy"
+    ],
+    "mood_tags": [
+      "comfort",
+      "light",
+      "homesick"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 70,
+    "is_combo": true,
+    "combo_items": [
+      "jain_khichdi",
+      "chaas"
+    ]
+  }
+]
