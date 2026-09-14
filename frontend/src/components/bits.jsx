@@ -7,6 +7,7 @@ export function Badge({ children }) {
 export function Toggle({ checked, onChange, label }) {
   return (
     <button
+      type="button"
       className="toggle"
       role="switch"
       aria-checked={checked ? 'true' : 'false'}
@@ -53,18 +54,33 @@ export function DietMarker({ tags }) {
   const t = new Set(tags || []);
   const isNonVeg = t.has('non_veg');
   const isEgg = t.has('egg') && !t.has('veg') && !t.has('vegan');
+  const isJain = t.has('jain');
+  const isVegan = t.has('vegan');
+
   if (isNonVeg || isEgg) {
     return (
-      <span className="diet-marker">
+      <span className="diet-marker" style={{ color: '#E95340' }}>
         <span className="nonveg-box" aria-hidden="true" />
         <span className="diet-label">{isNonVeg ? 'NON-VEG' : 'EGG'}</span>
       </span>
     );
   }
+  // Never default to veg: items with no diet info must not wear a green badge.
+  if (t.size === 0) {
+    return (
+      <span className="diet-marker" style={{ color: 'var(--text-3)' }}>
+        <span aria-hidden="true" style={{
+          width: 16, height: 16, border: '1.5px solid var(--text-3)',
+          borderRadius: 4, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        }} />
+        <span className="diet-label">UNMARKED</span>
+      </span>
+    );
+  }
   return (
-    <span className="diet-marker">
+    <span className="diet-marker" style={{ color: '#10B981' }}>
       <span className="veg-box" aria-hidden="true" />
-      <span className="diet-label">VEG</span>
+      <span className="diet-label">{isVegan ? 'VEGAN' : isJain ? 'JAIN VEG' : 'PURE VEG'}</span>
     </span>
   );
 }
