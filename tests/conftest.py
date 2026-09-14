@@ -12,3 +12,12 @@ def _no_queues(monkeypatch):
     import backend.queue as q
     monkeypatch.setattr(q, "current_queues",
                         lambda: {n: 0 for n in q.COUNTERS})
+
+
+@pytest.fixture(autouse=True)
+def _clear_phrase_cache():
+    """Phrase cache must never leak between tests (stale paraphrases)."""
+    import backend.llm as llm
+    llm.clear_phrase_cache()
+    yield
+    llm.clear_phrase_cache()

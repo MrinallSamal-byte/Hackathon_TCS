@@ -225,7 +225,9 @@ def test_on_diet_goal_and_headline():
     c = TestClient(app_module.app)
     r = c.post("/chat", json={"message": "I am on diet, under 150"}).json()
     assert r["prefs"]["goal"] == "low_calorie"
-    assert "under Rs 150" in r["reply"] and "picks for" in r["reply"]
+    # recommend_headline rotates daily across 3 variants — accept any of them.
+    assert "under Rs 150" in r["reply"] and any(
+        s in r["reply"] for s in ("picks for", "great options for", "Top "))
 
 
 def test_combos_only_hides_singles():
@@ -242,3 +244,56 @@ def test_dynamic_combo_cards_complete():
     assert dyn["protein_g"] >= 0 and dyn["spice_level"] >= 0
     assert dyn["portion_size"] in ("light", "medium", "heavy", "filling")
     assert dyn["dietary_tags"]  # never empty/mislabeled
+
+
+def test_greeting_recommends_food():
+    from fastapi.testclient import TestClient
+    c = TestClient(app_module.app)
+    # 1. Fresh user greeting
+    r = c.post("/chat", json={"message": "hello"}).json()
+    assert r["intent"] == "greeting"
+    assert len(r["singles"]) >= 1
+    assert "give it a try" in r["reply"].lower() or "picks" in r["reply"].lower()
+    for item in r["singles"]:
+        assert "explanation" in item and len(item["explanation"]) > 0
+
+    # 2. Returning user with past orders
+    sid = "sess_greeting_test"
+    mem = app_module.memory_store.get(sid)
+    mem["orders"] = {"it_samosa": 2}
+    app_module.memory_store.save(sid, mem)
+    r2 = c.post("/chat", json={"message": "hey there", "session_id": sid}).json()
+    assert r2["intent"] == "greeting"
+    assert len(r2["singles"]) >= 1
+    assert "give it a try" in r2["reply"].lower() or "based on your previous orders" in r2["reply"].lower()
+
+
+def test_budget_pattern_100_budget():
+    from backend.nlu import parse_budget
+    from fastapi.testclient import TestClient
+    assert parse_budget("i have 100 budget what best food") == 100.0
+    c = TestClient(app_module.app)
+    r = c.post("/chat", json={"message": "i have 100 budget what best food"}).json()
+    assert r["intent"] == "recommend"
+    assert r["prefs"]["budget"] == 100.0
+    assert "under Rs 100" in r["reply"]
+    for it in r["singles"]:
+        assert it["price"] <= 100.0
+
+
+def test_diabetic_intent_and_recommendation():
+    from backend.nlu import parse_goal, detect_intent
+    from fastapi.testclient import TestClient
+    assert parse_goal("i have diabatics") == "diabetic"
+    assert detect_intent("i have diabatics") == "recommend"
+    c = TestClient(app_module.app)
+    r = c.post("/chat", json={"message": "i have diabatics"}).json()
+    assert r["intent"] == "recommend"
+    assert r["prefs"]["goal"] == "diabetic"
+    assert "diabetic-friendly" in r["reply"]
+    assert len(r["singles"]) >= 1
+    # Check that high sugar desserts are not top ranked
+    for it in r["singles"][:3]:
+        assert it.get("category") != "dessert"
+        assert "sweet" not in it.get("taste_profile", [])
+
