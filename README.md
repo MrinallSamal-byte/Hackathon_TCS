@@ -49,6 +49,7 @@ leftover tray budget gets filled with the best sides.
 22. [Database: what lives where](#22-database-what-lives-where)
 23. [AI verification (prove it works)](#23-ai-verification-prove-it-works)
 24. [Responsive design matrix](#24-responsive-design-matrix)
+25. [Deploying to Vercel](#25-deploying-to-vercel)
 
 ---
 
@@ -650,13 +651,14 @@ bottom sheet; ≥1024px: 640px chat + 320px rail. Light theme via
 ## 15. Testing
 
 ```bash
-.venv/bin/python -m pytest tests/ -q     # 140 tests, ~3 s, fully offline
+.venv/bin/python -m pytest tests/ -q     # 158 tests, ~3 s, fully offline
 ```
 
 | File | Covers |
 |------|--------|
 | `test_recommender.py` (11) | schema/counts, hard filters, allergen never-relaxed, Jain onion/garlic, vegan, scoring weights, combo math+ETA, availability toggle, Rs-5 path, vegan×chicken conflict, substitutes |
 | `test_nlu.py` (7) | budget/time formats, one-shot, refinements, intents, ≤2 questions |
+| `test_nlu_robust.py` (9) | nospace/`below`/`80/-`/word-number budgets, bare-number times, greeting variants, food typos, eggetarian end to end, always-on gap-fill, rival-diet merge guard |
 | `test_api.py` (6) | health/menu (+category/cuisine filters), budget respect, tray warn + order token, mid-order budget change, admin round-trip, feedback logging |
 | `test_conversations.py` (10) | the 10 scripted spec conversations end-to-end |
 | `test_llm.py` (10) | patch validation, merge precedence, chain fallback, offline mode, batch-phrase accept/reject |
@@ -666,7 +668,8 @@ bottom sheet; ≥1024px: 640px chat + 320px rail. Light theme via
 | `test_top20.py` (21) | orders/cancel/favorites/profile/coupons/reviews/counter/split/trending/spending/admin-orders/status/analytics/inbox/bulk/edit/export/alerts/restock + 7 chat intents |
 | `test_bugfix.py` (20) | dyn-combo ordering, unique tokens, null-money rows, prep range, profile `max_spice=0`, session echo, bad-taste rejection, specials determinism, allergen exclusion, weekly budget, surprise/special intents, diabetic honesty (tiers, disclaimer, redirect, autonomy, conflict flag), nutrition filters, admin nutrition edit, export columns, Supabase payload fields |
 | `test_ai_robust.py` (9) | phrase cache hits, price/prep fact-check fallback, chain budget + early stop, spaceless dish match, diabatise alias, spaceless health-redirect end to end |
-| `test_guards_gaps.py` (10) | vote dedupe, chat/comment/session-id caps, memory-map bounds, reorder flow, avoid exclusions, diabetic greeting, spending/admin daily-shape |
+| `test_guards_gaps.py` (12) | vote dedupe, chat/comment/session-id caps, memory-map bounds, reorder flow, avoid exclusions, diabetic greeting, spending/admin daily-shape, serverless DATA_DIR, read-only menu save |
+| `test_protein_honesty.py` (7) | protein tiers, spec-weight stability, low-protein demotion, tiered explanations, sweet-vs-protein conflict, goal_note, payload surfacing |
 
 `tests/conftest.py` forces `CAMPUSBITE_OFFLINE=1` so the suite never touches
 the network. Sample transcripts: `transcripts/01–05` (happy, budget,
@@ -915,7 +918,7 @@ The hybrid contract (§7) is enforced in code, not vibes:
 |-------|---------------------|--------------------|
 | Engine picks items, never the LLM | `recommender.recommend()` is the only selector; LLM receives template text, returns phrasing | `POST /chat` twice (key set vs `CAMPUSBITE_OFFLINE=1`): same item ids, different wording |
 | No hallucinated prices/availability | `batch_phrase` prompt forbids new facts; validator rejects length mismatch/empties | `test_llm.py` (10): accept/reject paths |
-| Rules beat AI on conflicts | `merge_llm_patch`: budget/time only fill gaps; validated allow-lists drop unknown enums | `test_llm.py`: merge precedence |
+| Rules beat AI on conflicts | `merge_llm_patch`: budget/time/mood only fill gaps; validated allow-lists drop unknown enums; rival diet families (veg vs eggetarian vs vegan) never stack — rules win | `test_llm.py`: merge precedence |
 | Works with no key / dead quota | `openrouter_available()` gate; every failure → templates | unset key or exhaust free-tier 429s → `ai: "rule-based"`, identical flows (observed live: picks still respected budget + high-protein goal) |
 | Ambiguous messages get smarter | `parse_prefs_with_llm` JSON-mode gap-fill (max 2 calls/turn) | send `"something for the gym, not much money"` with key live → goal + default budget parsed |
 | Health wording can't be softened | `health_redirect` cards skip `batch_phrase`; disclaimer lives in rule-built replies | `intent == "health_redirect"` cards always carry template text |
@@ -966,3 +969,27 @@ MENU: 1-col   MENU: 2-col (≥680px)      ADMIN: table (≥768px) else mobile ca
 | 1024–1440 laptop/desktop | 640px chat + 320px sticky scrollable rail; full admin table; layout capped at 1180px |
 | Short landscape ≤540px height | compressed header/bubbles, composer retained |
 | Everywhere | `100dvh` heights, ≥44px targets, `prefers-reduced-motion`, focus rings, `aria-live` chat, dialog semantics on modals |
+
+---
+
+## 25. Deploying to Vercel
+
+Two Vercel projects from this one repo (free tiers suffice for a campus demo).
+
+**A. Backend (Python preset — zero adapter code).** Vercel auto-detects
+FastAPI from `requirements.txt` and serves `backend.app:app` for every route
+(see `pyproject.toml` `[tool.vercel]`). Import the repo, then set:
+
+| Var | Value |
+|-----|-------|
+| `SUPABASE_URL` + `SUPABASE_SERVICE_KEY` | **Required** — serverless `/tmp` forgets orders/feedback/memory between calls; Supabase is the persistent store (§10 schema + `sync_to_supabase.py` first) |
+| `CAMPUSBITE_DATA_DIR` | `/tmp` (bundle is read-only; menu still reads from the repo seed, saves fail silent) |
+| `OPENROUTER_API_KEY` | Optional (rule-based fallback otherwise) |
+| `OPENROUTER_TIMEOUT` / `OPENROUTER_CHAIN_BUDGET` | `8` / `8` — Hobby functions cap at 10 s; overruns degrade to templates, never 500 |
+
+**B. Frontend (Vite preset).** Same repo, Root Directory `frontend`,
+build `npm run build`, with `VITE_API_URL=https://<backend>.vercel.app`.
+
+**.env.example** lists every variable — copy to `.env` locally, paste values
+into Vercel Project Settings → Environment Variables. Real keys never enter
+the repo, logs, or the frontend bundle.

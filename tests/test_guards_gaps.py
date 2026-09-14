@@ -129,6 +129,31 @@ def test_admin_revenue_by_day_shape():
     assert all(d["total"] >= 0 and d["count"] >= 0 for d in days)
 
 
+# ---------- 6. serverless-deploy plumbing ----------
+
+def test_vercel_data_dir_override(tmp_path):
+    import subprocess, sys
+    target = tmp_path / "writable"
+    code = ("import backend.app as a, backend.memory as m;"
+            "print(a.ORDERS_PATH); print(a.FEEDBACK_PATH);"
+            "print(m.MemoryStore().path); print(len(a.store.all()))")
+    env = dict(__import__("os").environ,
+               CAMPUSBITE_DATA_DIR=str(target), CAMPUSBITE_OFFLINE="1")
+    out = subprocess.run([sys.executable, "-c", code], capture_output=True,
+                         text=True, env=env, timeout=60)
+    assert out.returncode == 0, out.stderr[-500:]
+    lines = out.stdout.strip().splitlines()
+    assert all(str(target) in ln for ln in lines[:3])
+    assert lines[3].strip() == "53"  # menu still reads from the bundle
+
+
+def test_menu_save_silent_on_readonly_fs(tmp_path):
+    from backend.store import MenuStore
+    s = MenuStore(ROOT / "data" / "menu_data.json")
+    s.path = tmp_path  # a directory: writes fail like a read-only bundle
+    s.save()  # must never raise (Supabase upserts persist instead)
+
+
 # ---------- 4. conversational gaps ----------
 
 def test_past_order_reorder_flow():
