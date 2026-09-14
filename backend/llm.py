@@ -68,7 +68,7 @@ VALID_ALLERGY = {"peanuts", "tree_nuts", "dairy", "gluten",
                  "soy", "egg", "seafood", "sesame"}
 VALID_HUNGER = {"light_bite", "light", "medium", "hungry",
                 "very_hungry", "very hungry"}
-VALID_GOAL = {"high_protein", "low_calorie", "diabetic"}
+VALID_GOAL = {"high_protein", "low_calorie", "diabetic", "period_friendly"}
 VALID_MEAL = {"breakfast", "lunch", "dinner"}
 VALID_CUISINE = {"south_indian", "north_indian", "chinese",
                  "continental", "street_food"}
@@ -328,8 +328,9 @@ _PARSE_SYSTEM = (
     "meal (one of: breakfast, lunch, dinner), cuisine (one of: "
     "south_indian, north_indian, chinese, continental, street_food), "
     "max_spice (0-3), combos_only (boolean), no_onion_garlic (boolean), "
-    "goal (one of: high_protein, low_calorie, diabetic). "
+    "goal (one of: high_protein, low_calorie, diabetic, period_friendly). "
     "If the user mentions diabetes, diabetic, sugar-free, low sugar, or sugar control, set goal to diabetic. "
+    "If the user mentions periods, periads, menstrual cramps, cramp relief, or PMS, set goal to period_friendly. "
     "Omit keys you are unsure about. Never invent menu items."
 )
 

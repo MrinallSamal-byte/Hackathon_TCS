@@ -34,6 +34,9 @@ HINGLISH: list[tuple[str, str]] = [
     ("alergy", "allergy"), ("alergi", "allergy"), ("vegiterian", "vegetarian"),
     ("diabetis", "diabetes"), ("diabities", "diabetes"),
     ("diabetise", "diabetes"), ("diabatise", "diabetes"), ("diebetes", "diabetes"),
+    ("periads", "periods"), ("periad", "period"), ("priods", "periods"), ("priod", "period"),
+    ("perids", "periods"), ("perid", "period"), ("mensuration", "menstruation"),
+    ("mensurations", "menstruation"), ("mc", "period"),
     # Common food-word typos (campus typing, no autocorrect in chat).
     ("chiken", "chicken"), ("panner", "paneer"), ("biriyani", "biryani"),
     ("momo", "momos"), ("nonveg", "non veg"),
@@ -160,6 +163,7 @@ MOOD_WORDS = {
     "celebrat": "celebrating", "party": "celebrating", "birthday": "celebrating",
     "exam": "exam-mode", "study": "exam-mode", "focus": "exam-mode",
     "very hungry": "very hungry", "starving": "very hungry", "hungry": "hungry",
+    "period": "comfort", "cramp": "comfort", "menstruat": "comfort", "pms": "comfort",
 }
 
 def parse_mood(text: str) -> Optional[str]:
@@ -437,14 +441,18 @@ def apply_refinement(text: str, prefs: UserPreferences, menu_names: Optional[lis
             notes.append("Prioritising high-protein options.")
         elif goal == "low_calorie":
             notes.append("Prioritising low-calorie options.")
+        elif goal == "period_friendly":
+            notes.append("Prioritising period-comfort, iron-rich, and cramp-soothing options.")
     if not notes:
         notes.append("Shuffling to different picks with the same constraints.")
     return p, " ".join(notes)
 
 
 def parse_goal(text: str) -> Optional[str]:
-    """Nutrition goal: high_protein (gym/protein), low_calorie (diet/light eating), or diabetic (sugar-free/low GI)."""
+    """Nutrition goal: high_protein (gym/protein), low_calorie (diet/light eating), diabetic (sugar-free/low GI), or period_friendly (menstrual comfort/cramps)."""
     t = normalize_hinglish(text).lower()
+    if re.search(r"\b(period|periods|periads|perids|priods|menstruat\w*|cramps?|dysmenorrhea|pms|monthly cycle)\b", t):
+        return "period_friendly"
     if re.search(r"\bdiab\w*|\bsugar\b|sugar free|sugar-free|low sugar|no sugar|sugar patient|low carb|keto|sugar problem|high sugar", t):
         return "diabetic"
     if any(k in t for k in ["high protein", "high-protein", "protein rich", "gym", "muscle",
@@ -471,6 +479,9 @@ def parse_health_conditions(text: str) -> list[str]:
     if (re.search(r"\bi (have|am|suffer from)\b.{0,30}\bdiab\w*", t)
             or re.search(r"\bsugar patient\b|\bmy sugar\b.*\b(high|problem)\b", t)):
         out.append("diabetes")
+    if (re.search(r"\bi (have|got|am on|suffer from)\b.{0,30}\b(periods?|periads?|perids?|priods?|cramps?|menstruat\w*|pms)\b", t)
+            or re.search(r"\b(my periods?|period cramps?|menstrual cramps?|on my period)\b", t)):
+        out.append("periods")
     return out
 
 
@@ -559,6 +570,8 @@ def parse_one_shot(text: str, base: Optional[UserPreferences] = None) -> UserPre
     goal = parse_goal(text)
     if goal:
         p.goal = goal
+        if goal == "period_friendly" and not p.mood:
+            p.mood = "comfort"
     if "combo" in text.lower():
         short = len(text.split()) <= 3
         p.combos_only = "only" in text.lower() or "combos only" in text.lower() or short

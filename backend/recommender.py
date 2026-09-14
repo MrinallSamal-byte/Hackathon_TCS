@@ -89,6 +89,58 @@ def diabetic_score(item: MenuItem) -> tuple[float, str]:
     return 4.0, "watch"
 
 
+# Period & menstrual cramp nutritional intelligence (soft signals; NEVER a hard filter):
+# - Iron replenishment (spinach, lentils, oats, eggs)
+# - Uterine relaxation & Magnesium (dark chocolate mousse, whole fruit)
+# - Soothing pelvic warmth & hydration (hot tomato soup, khichdi, green tea, masala chai)
+# - Anti-bloating & gut relief (masala chaas, sweet lime juice)
+PERIOD_BOOST_MAP: dict[str, tuple[float, str]] = {
+    "palak_roti": (24.0, "iron-rich spinach & whole wheat roti to replenish energy and ease cramps"),
+    "jain_khichdi": (22.0, "warm, light, easy-to-digest comfort khichdi that soothes the gut without gas/bloating"),
+    "combo_khichdi_chaas": (22.0, "warm comfort khichdi paired with anti-bloating digestive buttermilk"),
+    "tomato_soup": (20.0, "warm soothing broth that aids pelvic relaxation and hydration"),
+    "choco_mousse": (20.0, "rich in cocoa magnesium which eases uterine contractions and lifts PMS mood"),
+    "dal_rice": (18.0, "warm, wholesome lentil comfort providing steady iron and easy digestion"),
+    "chaas": (16.0, "probiotic buttermilk that reduces water retention and relieves menstrual bloating"),
+    "oats_upma": (16.0, "gentle complex carbs and iron for steady energy without insulin spikes"),
+    "egg_curry_rice": (15.0, "warm comforting protein with bioavailable iron"),
+    "green_tea": (12.0, "soothing, warm antioxidant tea for gentle cramp relief"),
+    "masala_chai": (12.0, "warm ginger and spices to ease cramps and nausea"),
+    "jain_fruit_bowl": (12.0, "natural hydration and potassium to fight bloating"),
+}
+
+PERIOD_AVOID_IDS: set[str] = {
+    "chole_bhature", "samosa", "jain_samosa", "vada_pav", "fries", "peri_fries",
+    "combo_chole_chaas", "gulab_jamun", "jalebi", "combo_biryani_jamun",
+    "oreo_shake", "cold_coffee", "chicken_biryani", "paneer_naan"
+}
+
+
+def period_comfort_score(item: MenuItem) -> tuple[float, str, str]:
+    """Scores items for period & menstrual cramp comfort.
+    Returns (points, tier, reason).
+    Tiers: 'boost' (warm/iron/magnesium/anti-bloating), 'neutral', 'avoid' (fried/heavy sugar).
+    """
+    if item.id in PERIOD_BOOST_MAP:
+        pts, reason = PERIOD_BOOST_MAP[item.id]
+        return pts, "boost", reason
+
+    name_ing = (item.name + " " + " ".join(item.ingredients)).lower()
+    # Deep-fried foods trigger inflammatory prostaglandins which exacerbate cramps
+    if any(k in name_ing for k in FRIED_KEYWORDS) or item.id in PERIOD_AVOID_IDS:
+        return -25.0, "avoid", "deep-fried and heavy foods trigger prostaglandins, worsening menstrual cramps and bloating"
+
+    # High refined sugar causes sharp glycemic crashes, intensifying fatigue and cramps
+    if item.sugar_g >= 25 or (item.category.value == "dessert" and item.id != "choco_mousse" and item.id not in WHOLE_FRUIT_IDS):
+        return -22.0, "avoid", "high refined sugar can cause glucose crashes that worsen cramps and fatigue"
+
+    # Moderate comfort items (warm, mild)
+    if item.category.value in ("soup", "main_course") and item.spice_level <= 1:
+        return 8.0, "neutral", "mild, warm meal"
+
+    return 3.0, "neutral", "balanced option"
+
+
 # High-protein honesty tiers (soft signal; NEVER a hard filter).
 PROTEIN_FIT_G = 15.0  # genuinely high-protein per serving
 PROTEIN_MID_G = 8.0   # decent protein, shy of the bar
@@ -282,6 +334,11 @@ def soft_score(item: MenuItem, prefs: UserPreferences, meal: Optional[str]) -> t
         # Tier is re-derived in explain_item (never stored in score parts —
         # they must stay numeric for sum()).
         parts["goal"] = diabetic_score(item)[0]
+    elif goal == "period_friendly":
+        pts, tier, _ = period_comfort_score(item)
+        parts["goal"] = pts
+        if tier == "avoid":
+            parts["taste"] = round(parts["taste"] * 0.3, 2)
 
     # Small cuisine nudge (not in spec points, folded into time slot to keep spec weights exact).
     total = sum(parts.values())
@@ -360,6 +417,12 @@ def detect_conflict(prefs: UserPreferences) -> Optional[str]:
                 "I'm showing the lowest-sugar options that still satisfy the craving. "
                 "This isn't medical advice; when in doubt, check with your doctor."
             )
+    if (prefs.goal or "").lower() == "period_friendly":
+        if any(k in craves for k in ["chole", "bhature", "samosa", "fried", "fries", "vada", "jalebi", "jamun", "biryani"]):
+            return (
+                "Quick flag: deep-fried and high-sugar treats can trigger prostaglandins and worsen cramps and bloating. "
+                "I've ranked warm, iron-rich comfort options first to help you feel better."
+            )
     return None
 
 
@@ -418,6 +481,14 @@ def explain_item(item: MenuItem, prefs: UserPreferences, meal: Optional[str],
             bits.append(f"moderate on sugar ({item.sugar_g}g sugar, {item.carbs_g}g carbs) — keep the portion small")
         else:
             bits.append(f"high in sugar/carbs ({item.sugar_g}g sugar, {item.carbs_g}g carbs) — best avoided for your sugar goal")
+    elif goal == "period_friendly":
+        _pts, tier, reason = period_comfort_score(item)
+        if tier == "boost":
+            bits.append(f"period comfort: {reason}")
+        elif tier == "avoid":
+            bits.append(f"caution for cramps: {reason}")
+        else:
+            bits.append("mild, gentle meal that is easy on cramps")
     if pair is not None:
         total = item.price + pair.price
         left = (prefs.budget - total) if prefs.budget is not None else None

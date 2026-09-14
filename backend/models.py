@@ -128,4 +128,4 @@ class UserPreferences(BaseModel):
     combos_only: bool = False
     no_onion_garlic: bool = False
     avoid: List[str] = Field(default_factory=list, description="food words to exclude (without/don't want)")
-    goal: Optional[str] = None  # high_protein / low_calorie / diabetic / None
+    goal: Optional[str] = None  # high_protein / low_calorie / diabetic / period_friendly / None

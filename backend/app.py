@@ -400,10 +400,12 @@ def find_named_item(text: str) -> Optional[MenuItem]:
     t = text.lower()
     flat = re.sub(r"[^a-z]", "", t)  # "gulabjamun" still matches "Gulab Jamun"
     best = None
+    best_exact = False
     for it in store.all():
         name = it.name.lower()
         slug = it.id.replace("_", " ")
-        if name in t or slug in t:
+        exact = (name in t or slug in t)
+        if exact:
             hit = True
         else:
             # Spaceless fallback on alpha words only ("(2 pc)" suffixes are
@@ -413,8 +415,13 @@ def find_named_item(text: str) -> Optional[MenuItem]:
             words = [w for w in re.sub(r"[^a-z ]", " ", name).split() if len(w) > 1]
             keys = {"".join(words), "".join(words[:2])} if words else set()
             hit = bool(keys) and any(k in flat for k in keys if len(k) > 3)
-        if hit and (best is None or len(it.name) > len(best.name)):
-            best = it
+        if hit:
+            if best is None:
+                best, best_exact = it, exact
+            elif exact and not best_exact:
+                best, best_exact = it, True
+            elif exact == best_exact and len(it.name) > len(best.name):
+                best, best_exact = it, exact
     return best
 
 
@@ -561,6 +568,8 @@ def recommend_headline(prefs: UserPreferences, meal: str, n: int) -> str:
         bits.append("light")
     elif (prefs.goal or "") == "diabetic":
         bits.append("diabetic-friendly")
+    elif (prefs.goal or "") == "period_friendly":
+        bits.append("period-comfort & cramp-relief")
     if prefs.cravings:
         bits.append(" + ".join(prefs.cravings[:2]))
     suffix = f" ({', '.join(bits)})" if bits else ""
@@ -615,6 +624,10 @@ HEALTH_NOTE = ("Note: I'm a canteen recommender, not a doctor — these are "
                "lower-sugar picks from the live menu, not medical advice. "
                "When in doubt, check with your doctor.")
 
+PERIOD_NOTE = ("Comfort Note: Prioritising warm, iron-replenishing & magnesium-rich comfort meals "
+               "(spinach, khichdi, hot soup, dark chocolate) while easing cramps by steering clear "
+               "of heavy deep-fried items and sugar spikes. Stay hydrated!")
+
 
 def chips_for_goal(prefs: UserPreferences) -> list[str]:
     """Goal-aware quick replies — every chip maps to a working refinement."""
@@ -625,6 +638,8 @@ def chips_for_goal(prefs: UserPreferences) -> list[str]:
         return ["More filling", "Something cheaper", "Quicker", "Show combos"]
     if goal == "low_calorie":
         return ["Something light", "Something cheaper", "Quicker", "Show combos"]
+    if goal == "period_friendly":
+        return ["Warm & comforting", "Iron-rich meals", "Anti-bloating chaas", "Dark chocolate", "Under Rs 60"]
     return ["Something cheaper", "Less spicy", "More filling", "Quicker", "Show combos", "No onion/garlic"]
 
 
@@ -806,6 +821,9 @@ def list_menu(
         out = sorted(out, key=lambda i: (i.calories, i.price))
     elif goal == "diabetic":
         out = sorted(out, key=lambda i: (i.sugar_g, i.carbs_g, -i.protein_g, i.price))
+    elif goal == "period_friendly":
+        from backend.recommender import period_comfort_score
+        out = sorted(out, key=lambda i: (-period_comfort_score(i)[0], i.price))
     else:
         out = sorted(out, key=lambda i: (i.price, -i.popularity_score))
     return {"count": len(out), "items": [item_card(i, UserPreferences(), None, ratings=rmap) for i in out[:24]]}
@@ -978,6 +996,9 @@ def chat(body: ChatBody):
             items = sorted(items, key=lambda i: (i.calories, i.price))[:12]
         elif _goal == "diabetic":
             items = sorted(items, key=lambda i: (i.sugar_g, i.carbs_g, i.price))[:12]
+        elif _goal == "period_friendly":
+            from backend.recommender import period_comfort_score
+            items = sorted(items, key=lambda i: (-period_comfort_score(i)[0], i.price))[:12]
         else:
             items = sorted(items, key=lambda i: (i.price, -i.popularity_score))[:12]
         lines = [f"{i.name} — Rs {i.price:.0f} (~{i.prep_time_minutes} min)" for i in items]
@@ -992,6 +1013,8 @@ def chat(body: ChatBody):
             "No matches for that browse — try raising the budget or clearing a filter."
         if (probe.goal or "").lower() == "diabetic":
             browse_head += f" {HEALTH_NOTE}"
+        elif (probe.goal or "").lower() == "period_friendly":
+            browse_head += f" {PERIOD_NOTE}"
         return {
             "intent": intent, "ai": browse_ai, "reply": browse_head,
             "meal": meal, "session_id": sid, "prefs": probe.model_dump(),
@@ -1341,6 +1364,34 @@ def chat(body: ChatBody):
                 "redirected_from": named.id,
                 "chips": ["Show combos", "Surprise me", "Something else"],
             }
+    elif (named and named.availability and (eff_goal or "").lower() == "period_friendly"):
+        from backend.recommender import period_comfort_score
+        _sc, tier, rsn = period_comfort_score(named)
+        if tier == "avoid":
+            if not memory_store.was_warned(mem, named.id):
+                memory_store.mark_warned(mem, named.id)
+                memory_store.record_chat(mem, body.prefs)
+                memory_store.save(sid, mem)
+                gprefs = body.prefs.model_copy(update={"goal": "period_friendly"})
+                pool = [i for i in store.live() if not i.is_combo and period_comfort_score(i)[1] == "boost"]
+                if gprefs.budget is not None:
+                    pool = [i for i in pool if i.price <= gprefs.budget + 1e-9]
+                subs = pool[:3]
+                rmap_h = rating_stats()
+                alt_cards = [item_card(s, gprefs, meal, ratings=rmap_h) for s in subs]
+                return {
+                    "intent": "health_redirect",
+                    "ai": ai_label(),
+                    "session_id": sid,
+                    "reply": (f"Since you're managing menstrual cramps / periods, {named.name} "
+                              f"can worsen cramping or bloating ({rsn}). "
+                              f"Here are warm, soothing options that replenish iron and ease cramps: "
+                              f"{', '.join(s.name for s in subs)}. {PERIOD_NOTE}"),
+                    "meal": meal, "prefs": gprefs.model_dump(),
+                    "singles": alt_cards, "combos": [],
+                    "redirected_from": named.id,
+                    "chips": ["Warm & comforting", "Iron-rich meals", "Anti-bloating chaas", "Dark chocolate"],
+                }
 
     prefs = parse_one_shot(text, body.prefs)
     # AI gap-fill on EVERY turn (not just when rules find nothing): rules win
@@ -1363,6 +1414,9 @@ def chat(body: ChatBody):
     elif (body.prefs.goal is None and stated_goal is None
             and (prefs.goal or "").lower() == "diabetic"):
         mem_note += "Keeping your diabetes in mind. "
+    elif (body.prefs.goal is None and stated_goal is None
+            and (prefs.goal or "").lower() == "period_friendly"):
+        mem_note += "Keeping period comfort & cramp relief in mind. "
     new_avoid = [a for a in (fresh.avoid or []) if a not in (body.prefs.avoid or [])]
     if new_avoid:
         mem_note += f"Skipping {', '.join(new_avoid)} as asked. "
@@ -1397,6 +1451,8 @@ def chat(body: ChatBody):
         head = " ".join(head_bits + [auto]) if head_bits else auto
     if (prefs.goal or "").lower() == "diabetic":
         head = f"{head} {HEALTH_NOTE}"
+    elif (prefs.goal or "").lower() == "period_friendly":
+        head = f"{head} {PERIOD_NOTE}"
     payload.update({
         "intent": "recommend",
         "ai": parse_used or payload.pop("ai_phrase", "rule-based"),
