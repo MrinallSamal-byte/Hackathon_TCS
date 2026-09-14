@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import random
 import re
 import uuid
@@ -31,8 +32,22 @@ from backend.recommender import (cross_contamination_warning, diabetic_fit, diab
 from backend.store import MenuStore
 
 ROOT = Path(__file__).resolve().parents[1]
-FEEDBACK_PATH = ROOT / "data" / "feedback_log.json"
-ORDERS_PATH = ROOT / "data" / "order_history.json"
+
+
+def data_dir() -> Path:
+    """Writable runtime dir. Locally ./data; on serverless hosts (Vercel —
+    read-only bundle except /tmp) point CAMPUSBITE_DATA_DIR at /tmp and use
+    Supabase for anything that must persist."""
+    d = Path(os.environ.get("CAMPUSBITE_DATA_DIR", ROOT / "data"))
+    try:
+        d.mkdir(parents=True, exist_ok=True)
+    except Exception:
+        pass
+    return d
+
+
+FEEDBACK_PATH = data_dir() / "feedback_log.json"
+ORDERS_PATH = data_dir() / "order_history.json"
 
 app = FastAPI(title="CampusBite", version="1.0.0")
 app.add_middleware(
@@ -374,6 +389,7 @@ def result_payload(res: dict, prefs: UserPreferences) -> dict[str, Any]:
         "meal": meal, "prefs": res["prefs"].model_dump(),
         "singles": singles, "combos": combos,
         "relaxed": res["relaxed"], "cheapest_note": res.get("cheapest_note"),
+        "goal_note": res.get("goal_note"),
         "cheapest": [item_card(i, res["prefs"], meal, ratings=rmap) for i in res.get("cheapest", [])],
         "conflict": res.get("conflict"),
         "ai_phrase": apply_ai_phrasing(singles + combos),
@@ -1312,11 +1328,11 @@ def chat(body: ChatBody):
             }
 
     prefs = parse_one_shot(text, body.prefs)
-    # AI gap-fill: rule-based parsing found nothing new -> one OpenRouter pass
-    # (strictly validated; rule-based values always win ties). Engine still
-    # decides every recommendation from real menu data.
+    # AI gap-fill on EVERY turn (not just when rules find nothing): rules win
+    # ties, the LLM only fills slots rules missed (mood, hunger, cuisine...).
+    # No-ops offline / without a key; engine still decides every pick.
     parse_used = ""
-    if prefs.model_dump() == body.prefs.model_dump() and len(text) > 3:
+    if len(text) > 3:
         patch, used = parse_prefs_with_llm(text)
         if patch:
             prefs = merge_llm_patch(prefs, patch)
@@ -1356,6 +1372,8 @@ def chat(body: ChatBody):
         head_bits.append(r_)
     if res.get("cheapest_note"):
         head_bits.append(res["cheapest_note"])
+    if res.get("goal_note"):
+        head_bits.append(res["goal_note"])
     if not (payload["singles"] or payload["combos"]):
         head = " ".join(head_bits) + " No safe matches right now — try 'Show all veg snacks' to browse." if head_bits else "No safe matches right now."
     else:

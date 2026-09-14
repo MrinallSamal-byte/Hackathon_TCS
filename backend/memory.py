@@ -27,6 +27,14 @@ from pathlib import Path
 from typing import Any, Optional
 
 DEFAULT_PATH = Path(__file__).resolve().parents[1] / "data" / "memory.json"
+
+
+def _default_path() -> Path:
+    """Honor CAMPUSBITE_DATA_DIR (serverless-writable override); fall back to
+    the bundled data dir."""
+    import os as _os
+    return Path(_os.environ.get("CAMPUSBITE_DATA_DIR",
+                               Path(__file__).resolve().parents[1] / "data")) / "memory.json"
 _HISTORY_CAP = 20
 # Abuse guard: per-session maps must stay bounded no matter how many
 # feedback/order/chat turns a client fires. Oldest entries evict first.
@@ -70,8 +78,8 @@ def _cap_map(d: dict, cap: int) -> dict:
 
 
 class MemoryStore:
-    def __init__(self, path: Path | str = DEFAULT_PATH):
-        self.path = Path(path)
+    def __init__(self, path: Path | str | None = None):
+        self.path = Path(path) if path is not None else _default_path()
         self._data: dict[str, dict] = {}
         self._load_local()
 

@@ -1,0 +1,16 @@
+[project]
+name = "campusbite"
+version = "1.0.0"
+description = "CampusBite — AI conversational canteen recommender (FastAPI)"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.29",
+    "pydantic>=2.6",
+    "httpx>=0.27",
+]
+
+# Vercel Python preset: auto-detects FastAPI from the dependencies above and
+# serves this ASGI app for every route (no Mangum/adapter needed).
+[tool.vercel]
+entrypoint = "backend.app:app"

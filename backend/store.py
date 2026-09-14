@@ -24,8 +24,14 @@ class MenuStore:
         self._items = {r["id"]: MenuItem(**r) for r in raw}
 
     def save(self) -> None:
-        payload = [i.model_dump() for i in self._items.values()]
-        self.path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+        # Best-effort: on read-only hosts (e.g. Vercel serverless) the bundled
+        # menu file can't be rewritten — Supabase upserts (done by callers)
+        # remain the persistent path, so a file failure must never 500.
+        try:
+            payload = [i.model_dump() for i in self._items.values()]
+            self.path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+        except Exception:
+            pass
 
     # ----- reads -----
     def all(self) -> list[MenuItem]:

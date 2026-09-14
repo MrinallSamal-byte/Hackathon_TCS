@@ -89,6 +89,31 @@ def diabetic_score(item: MenuItem) -> tuple[float, str]:
     return 4.0, "watch"
 
 
+# High-protein honesty tiers (soft signal; NEVER a hard filter).
+PROTEIN_FIT_G = 15.0  # genuinely high-protein per serving
+PROTEIN_MID_G = 8.0   # decent protein, shy of the bar
+
+
+def protein_tier(item: MenuItem) -> str:
+    """fit (>=15g) / mid (8-14g) / low (<8g). Only fit items may be
+    presented as high-protein picks."""
+    try:
+        p = float(item.protein_g)
+    except (TypeError, ValueError):
+        return "low"
+    if p >= PROTEIN_FIT_G:
+        return "fit"
+    if p >= PROTEIN_MID_G:
+        return "mid"
+    return "low"
+
+
+SWEET_CRAVING_WORDS = {"sweet", "dessert", "chocolate", "mithai", "shake",
+                       "ice cream", "jalebi", "brownie", "cake", "pastry",
+                       "candy", "soda", "cola", "lassi", "halwa", "kheer",
+                       "jamun", "rasgulla", "jaggery"}
+
+
 def normalize_mood(raw: Optional[str]) -> Optional[str]:
     if not raw:
         return None
@@ -117,6 +142,10 @@ def passes_dietary(item: MenuItem, prefs: UserPreferences) -> bool:
 
     if "veg" in restr or "vegetarian" in restr:
         if "non_veg" in tags or "egg" in tags:
+            return False
+    if "eggetarian" in restr:
+        # Egg OK, meat blocked.
+        if "non_veg" in tags:
             return False
     if "non_veg" in restr:
         # Explicit meat request: only true non-veg dishes (egg-only excluded).
@@ -240,8 +269,15 @@ def soft_score(item: MenuItem, prefs: UserPreferences, meal: Optional[str]) -> t
     goal = (prefs.goal or "").lower()
     if goal == "high_protein":
         parts["goal"] = 12.0 if item.protein_g >= 15 else (6.0 if item.protein_g >= 8 else 0.0)
+        if protein_tier(item) == "low":
+            # A 4g-protein sweet chai must not top a protein ranking on taste:
+            # halve the craving bonus so protein-dense picks win. Weights for
+            # everyone else are untouched (spec table still exact).
+            parts["taste"] = round(parts["taste"] * 0.5, 2)
     elif goal == "low_calorie":
         parts["goal"] = 12.0 if item.calories <= 300 else (6.0 if item.calories <= 450 else 0.0)
+        if item.calories > 450:
+            parts["taste"] = round(parts["taste"] * 0.5, 2)
     elif goal == "diabetic":
         # Tier is re-derived in explain_item (never stored in score parts —
         # they must stay numeric for sum()).
@@ -296,19 +332,29 @@ def generate_dynamic_combos(
 def detect_conflict(prefs: UserPreferences) -> Optional[str]:
     restr = {r.lower() for r in prefs.dietary_restrictions}
     craves = " ".join(prefs.cravings or []).lower()
-    strict_veg = bool({"vegan", "jain", "veg", "vegetarian"} & restr)
+    strict_veg = bool({"vegan", "jain", "veg", "vegetarian", "eggetarian"} & restr)
     if strict_veg and any(k in craves for k in MEAT_KEYWORDS):
-        which = "vegan" if "vegan" in restr else ("jain" if "jain" in restr else "vegetarian")
+        if "vegan" in restr:
+            which = "vegan"
+        elif "jain" in restr:
+            which = "jain"
+        elif "eggetarian" in restr:
+            which = "eggetarian"
+        else:
+            which = "vegetarian"
         return (
             f"Quick flag: you asked for {which} options but also craved "
             f"'{', '.join(prefs.cravings)}'. I'll show the best {which} matches — "
             "meat/egg items are filtered out by your dietary rule."
         )
+    if (prefs.goal or "").lower() == "high_protein":
+        if any(k in craves for k in SWEET_CRAVING_WORDS):
+            return (
+                "Quick flag: sweet treats are rarely high-protein — I've ranked "
+                "protein first while keeping things you'll enjoy."
+            )
     if (prefs.goal or "").lower() == "diabetic":
-        sweet_words = {"sweet", "dessert", "chocolate", "mithai", "shake", "ice cream",
-                       "jalebi", "brownie", "cake", "pastry", "candy", "soda", "cola",
-                       "lassi", "halwa", "kheer", "jamun", "rasgulla", "jaggery"}
-        if any(k in craves for k in sweet_words):
+        if any(k in craves for k in SWEET_CRAVING_WORDS):
             return (
                 "Quick flag: heavy sweets can spike blood sugar with diabetes — "
                 "I'm showing the lowest-sugar options that still satisfy the craving. "
@@ -354,8 +400,13 @@ def explain_item(item: MenuItem, prefs: UserPreferences, meal: Optional[str],
     elif prefs.cravings:
         bits.append(f"covers your craving for {', '.join(prefs.cravings)} ({', '.join(item.taste_profile)})")
     goal = (prefs.goal or "").lower()
-    if goal == "high_protein" and item.protein_g >= 8:
-        bits.append(f"packs {item.protein_g}g protein for your gym goal")
+    if goal == "high_protein":
+        # Honest tiers only — a 4g chai is never a "high-protein pick".
+        tier = protein_tier(item)
+        if tier == "fit":
+            bits.append(f"packs {item.protein_g}g protein for your gym goal")
+        elif tier == "mid":
+            bits.append(f"{item.protein_g}g protein — decent, though shy of the 15g high-protein bar")
     elif goal == "low_calorie" and item.calories <= 450:
         bits.append(f"just {item.calories} kcal, fits your light-diet goal")
     elif goal == "diabetic":
@@ -521,8 +572,26 @@ def recommend(
         fallback = rank([i for i in live if not i.is_combo][:10], prefs, meal)[:top_singles]
         singles = fallback
 
+    # Honest goal note: when the user asked for high-protein but nothing shown
+    # clears the 15g bar (e.g. tight budget), say so plainly instead of
+    # headlining 4g chai as a protein pick.
+    goal_note = None
+    if (prefs.goal or "").lower() == "high_protein":
+        shown_protein: list[float] = [i.protein_g for i, _, _ in singles]
+        for c in combos_out:
+            if c.get("is_dynamic"):
+                shown_protein.append(sum(i.protein_g for i in c["items"]))
+            elif c.get("item") is not None:
+                shown_protein.append(c["item"].protein_g)
+        if shown_protein and max(shown_protein) < PROTEIN_FIT_G:
+            budget_txt = f"Rs {prefs.budget:.0f}" if prefs.budget is not None else "this budget"
+            goal_note = (f"Heads up: nothing truly high-protein (15g+) fits {budget_txt} — "
+                         "showing the highest-protein options under budget.")
+            # Note: the sweet-craving nuance travels via detect_conflict, so it
+            # is deliberately not repeated here.
+
     return {
         "meal": meal, "singles": singles, "combos": combos_out, "dynamic_raw": dynamic,
-        "relaxed": relaxed, "cheapest_note": cheapest_note,
+        "relaxed": relaxed, "cheapest_note": cheapest_note, "goal_note": goal_note,
         "cheapest": [], "conflict": detect_conflict(prefs), "prefs": prefs,
     }

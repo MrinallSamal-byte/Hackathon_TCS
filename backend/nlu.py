@@ -34,6 +34,9 @@ HINGLISH: list[tuple[str, str]] = [
     ("alergy", "allergy"), ("alergi", "allergy"), ("vegiterian", "vegetarian"),
     ("diabetis", "diabetes"), ("diabities", "diabetes"),
     ("diabetise", "diabetes"), ("diabatise", "diabetes"), ("diebetes", "diabetes"),
+    # Common food-word typos (campus typing, no autocorrect in chat).
+    ("chiken", "chicken"), ("panner", "paneer"), ("biriyani", "biryani"),
+    ("momo", "momos"), ("nonveg", "non veg"),
     ("kuch", ""), ("mujhe", "i"), ("hai", "is"), ("kya", "what"), ("aur", "and"),
 ]
 
@@ -56,7 +59,11 @@ def parse_budget(text: str) -> Optional[float]:
     m = re.search(r"between\s+(\d+)\s+and\s+(\d+)", t)
     if m:
         return float(max(int(m.group(1)), int(m.group(2))))
-    m = re.search(rf"under\s+{RUPEE}?\s*(\d+)", t)
+    # Indian "80/-" notation.
+    m = re.search(r"(\d+)\s*/-", t)
+    if m:
+        return float(m.group(1))
+    m = re.search(rf"(?:under|below)\s*{RUPEE}?\s*(\d+)", t)
     if m:
         return float(m.group(1))
     m = re.search(rf"{RUPEE}\s*(\d+)\s*(?:max|max budget|budget|only|limit)?", t)
@@ -83,7 +90,49 @@ def parse_budget(text: str) -> Optional[float]:
     m = re.search(r"(?:max|within|around|upto|up to)\s+(?:rs\.?|inr|₹)?\s*(\d+)(?!\s*(?:mins?|minutes?))", t)
     if m:
         return float(m.group(1))
+    # Spelled-out numbers ("eighty rupees", "under fifty", "one hundred twenty").
+    m = re.search(rf"({_WORD_RUN})\s*(?:{RUPEE}|bucks|rupees?)", t)
+    if m:
+        w = _words_to_number(m.group(1))
+        if w is not None:
+            return w
+    m = re.search(rf"(?:under|below|budget(?: of)?|max|within|around|upto|up to)\s*(?:is\s+)?(?:{RUPEE})?\s*({_WORD_RUN})", t)
+    if m:
+        w = _words_to_number(m.group(1))
+        if w is not None:
+            return w
     return None
+
+
+_ONES = {"zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
+         "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10,
+         "eleven": 11, "twelve": 12, "thirteen": 13, "fourteen": 14,
+         "fifteen": 15, "sixteen": 16, "seventeen": 17, "eighteen": 18,
+         "nineteen": 19}
+_TENS = {"twenty": 20, "thirty": 30, "forty": 40, "fifty": 50,
+         "sixty": 60, "seventy": 70, "eighty": 80, "ninety": 90}
+_WORD_RUN = r"[a-z]+(?:[\s-]+[a-z]+){0,4}"
+
+
+def _words_to_number(run: str) -> Optional[float]:
+    """'eighty' -> 80, 'one hundred twenty' -> 120. None when no number words."""
+    toks = [w for w in re.split(r"[\s-]+", run.lower()) if w and w != "and"]
+    if not toks or any(w not in _ONES and w not in _TENS
+                       and w not in ("hundred", "thousand") for w in toks):
+        return None
+    total, cur = 0, 0
+    for w in toks:
+        if w in _ONES:
+            cur += _ONES[w]
+        elif w in _TENS:
+            cur += _TENS[w]
+        elif w == "hundred":
+            cur = (cur or 1) * 100
+        elif w == "thousand":
+            total += (cur or 1) * 1000
+            cur = 0
+    total += cur
+    return float(total) if 0 < total <= 100000 else None
 
 
 def parse_time(text: str) -> Optional[int]:
@@ -93,6 +142,11 @@ def parse_time(text: str) -> Optional[int]:
         return 5
     m = re.search(r"(\d+)\s*(?:mins?|minutes?)", t)
     if m and any(k in t for k in ["got", "have", "only", "within", "under", "max", "in ", "want", "andar"]):
+        return int(m.group(1))
+    # Bare number with a time cue ("ready in 10", "dinner in 15"). Capped at
+    # 60 so budget-like numbers never leak into prep time.
+    m = re.search(r"(?:ready\s+)?in\s+(\d+)(?!\s*(?:rs\.?|inr|₹|bucks|rupees?|items?|peoples?|friends?|persons?))", t)
+    if m and int(m.group(1)) <= 60:
         return int(m.group(1))
     m = re.search(r"got\s+(\d+)", t)
     if m:
@@ -119,6 +173,9 @@ def parse_mood(text: str) -> Optional[str]:
 def parse_dietary_allergy(text: str) -> tuple[list[str], list[str], bool]:
     t = normalize_hinglish(text).lower()
     diet: list[str] = []
+    if re.search(r"\beggetarian\b|\beggiterian\b", t):
+        # Vegetarian + egg OK, meat blocked (handled in passes_dietary).
+        diet.append("eggetarian")
     if re.search(r"non[\s\-_]?veg|nonveg", t):
         # Explicit "non veg" — but a vegan/jain/veg claim alongside wins
         # (keeps the vegan+craving-chicken conflict path intact).
@@ -157,6 +214,9 @@ def parse_dietary_allergy(text: str) -> tuple[list[str], list[str], bool]:
             # with allergy words as allergy.
             if v == "egg" and ("free" in t or "eggless" in t) and "allerg" not in t:
                 continue
+            if v == "egg" and not re.search(r"\begg\b", t):
+                # "eggetarian" contains "egg" but EATS egg — never an allergy.
+                continue
             if v in ("dairy", "gluten") and "free" in t and "allerg" not in t:
                 # "dairy-free" already captured as diet; skip allergy unless explicit
                 if f"{k}" in t and "allerg" not in t and "intoler" not in t:
@@ -180,6 +240,8 @@ def parse_cravings(text: str) -> list[str]:
     found = []
     for w in CRAVING_WORDS:
         if w in t and w not in found:
+            if w == "egg" and "eggetarian" in t:
+                continue  # the diet word, not a craving
             found.append(w)
     return found
 
@@ -242,7 +304,7 @@ def detect_intent(text: str) -> str:
     t = text.strip().lower()
     if not t or len(t) < 2:
         return "nonsense"
-    if re.match(r"^(hi|hey|hello|yo|good (morning|afternoon|evening))\b", t):
+    if re.match(r"^(hi+|hey|hello|helo|hii+|yo|namaste|namaskar|ram ram|good (morning|afternoon|evening))\b", t):
         return "greeting"
     if re.search(r"\b(thanks|thank you|shukriya|dhanyavad)\b", t):
         return "thanks"
@@ -279,7 +341,9 @@ def detect_intent(text: str) -> str:
     if re.search(r"\b(specials?|deal of the day|today'?s (special|deal|offer)|today.*special)\b", t):
         return "special"
     if re.search(r"cb-\d+", t) or "my order" in t or "where" in t and "order" in t \
-            or "track" in t or ("status" in t and "order" in t) or "ready" in t:
+            or "track" in t or ("status" in t and "order" in t) \
+            or ("ready" in t and ("order" in t or "token" in t or "cb-" in t
+                                 or "pickup" in t or re.search(r"\b(my|food|meal|tray)\b", t))):
         return "status"
     if "complete my meal" in t or "fill my tray" in t or "with remaining" in t:
         return "suggest"
@@ -302,7 +366,7 @@ def detect_intent(text: str) -> str:
         return "smalltalk"
     if parse_goal(t) is not None:
         return "recommend"
-    if re.search(r"(₹|rs|budget|hungry|veg|vegan|jain|spicy|sweet|mins?|hurry|mood|combo|snack|breakfast|lunch|dinner|allergy|cheesy|light|refreshing|comfort|chai|coffee|dosa|biryani|maggi|momos|protein|gym|diet|calorie|healthy|cheap|sasta|teekha|bhukh|bhook|khana|thirsty|mutton|paneer|fries|soup|juice|lassi|eat|food|meal|thali|plate|surprise|trending|popular|bestseller|best|special|diab[ea]t|sugar|keto|carb|without|don'?t want|\bavoid\b)", t):
+    if re.search(r"(₹|rs|budget|hungry|veg|vegan|jain|eggetarian|nonveg|spicy|sweet|mins?|hurry|mood|combo|snack|breakfast|lunch|dinner|allergy|cheesy|light|refreshing|comfort|chai|coffee|dosa|biryani|biriyani|maggi|momo|noodles|paneer|panner|chicken|chiken|mutton|egg|fries|soup|juice|lassi|eat|food|meal|thali|plate|protein|gym|diet|calorie|healthy|surprise|trending|popular|bestseller|best|special|diab[ea]t|sugar|keto|carb|cheap|sasta|teekha|bhukh|bhook|khana|thirsty|without|don'?t want|\bavoid\b)", t):
         return "recommend"
     # Anything with a parseable budget/time/goal is a food request even without keywords.
     if parse_budget(t) is not None or parse_time(t) is not None or parse_goal(t) is not None:

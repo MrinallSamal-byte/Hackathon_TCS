@@ -62,7 +62,7 @@ DEFAULT_CHAIN = [
 VALID_MOODS = {"energizing", "comfort", "light", "indulgent", "study_fuel",
                "homesick", "celebratory", "happy", "stressed", "tired",
                "celebrating", "exam-mode", "hungry", "very hungry"}
-VALID_DIET = {"veg", "vegetarian", "vegan", "jain", "egg_free",
+VALID_DIET = {"veg", "vegetarian", "vegan", "jain", "eggetarian", "egg_free",
               "halal", "gluten_free", "dairy_free"}
 VALID_ALLERGY = {"peanuts", "tree_nuts", "dairy", "gluten",
                  "soy", "egg", "seafood", "sesame"}
@@ -320,7 +320,8 @@ _PARSE_SYSTEM = (
     "these optional keys: budget (number, rupees max), max_prep_time "
     "(number, minutes), mood (one of: happy, stressed, tired, homesick, "
     "celebrating, exam-mode, hungry, very hungry), dietary_restrictions "
-    "(array, any of: veg, vegan, jain, egg_free, halal, gluten_free, "
+    "(array, any of: veg, vegetarian, vegan, jain, eggetarian (vegetarian "
+    "who eats egg), egg_free, halal, gluten_free, "
     "dairy_free), allergies (array, any of: peanuts, tree_nuts, dairy, "
     "gluten, soy, egg, seafood, sesame), cravings (array of short food "
     "words), hunger (one of: light_bite, medium, hungry, very_hungry), "
@@ -434,10 +435,19 @@ def merge_llm_patch(base_prefs: Any, patch: dict[str, Any]) -> Any:
     for key in ("mood", "hunger", "meal", "cuisine", "max_spice"):
         if patch.get(key) is not None and not getattr(p, key, None):
             setattr(p, key, patch[key])
+    # Core diet families are mutually exclusive (veg != eggetarian != vegan):
+    # the LLM must never append a rival family next to a rule-parsed one
+    # (e.g. "correcting" eggetarian to vegetarian would silently re-block egg).
+    _FAMILY = {"veg", "vegetarian", "vegan", "jain", "eggetarian"}
+    have_family = {d for d in (getattr(p, "dietary_restrictions", []) or []) if d in _FAMILY}
     for key in ("dietary_restrictions", "cravings"):
         for v in patch.get(key, []):
+            if key == "dietary_restrictions" and v in _FAMILY and have_family and v not in have_family:
+                continue
             if v not in getattr(p, key):
                 getattr(p, key).append(v)
+                if key == "dietary_restrictions" and v in _FAMILY:
+                    have_family.add(v)
     for a in patch.get("allergies", []):
         if a not in [str(x).split(".")[-1].lower() for x in p.allergies]:
             try:
