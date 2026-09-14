@@ -722,6 +722,21 @@ class OrderStatusBody(BaseModel):
 
 # ---------- routes ----------
 
+@app.get("/")
+def root():
+    """API index — this deployment serves JSON only; the biteMatch website
+    (React/Vite) is a separate deployment that calls these endpoints."""
+    return {
+        "name": "biteMatch API",
+        "docs": "/docs",
+        "health": "/health",
+        "try": {"chat": "POST /chat {message}",
+                "menu": "GET /menu?max_price=80&dietary=veg",
+                "specials": "GET /specials",
+                "order_status": "GET /order/CB-123"},
+    }
+
+
 @app.get("/health")
 def health():
     return {"ok": True, "items": len(store.all()), "live": len(store.live()), "time": datetime.now().isoformat()}
