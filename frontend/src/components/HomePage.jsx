@@ -3,7 +3,7 @@ import {
   Mic, Sparkles, Clock, Utensils, MessageSquare,
   Flame, ShoppingBag, ShieldCheck, ArrowRight,
   TrendingUp, Dumbbell, Zap, ChevronRight, Store,
-  CheckCircle2, Compass, RefreshCw, Users, Award, Timer, Code2
+  CheckCircle2, Compass, RefreshCw, Users, Award, Timer, Code2, BookOpen, ExternalLink
 } from 'lucide-react';
 
 export function HomePage({ onNavigate, onLaunchSearch, liveCount }) {
@@ -566,15 +566,15 @@ export function HomePage({ onNavigate, onLaunchSearch, liveCount }) {
 
           <div style={{ maxWidth: 860, position: 'relative', zIndex: 1 }}>
             <div className="hero-pill-badge" style={{ marginBottom: 14, background: 'var(--brand-soft)', color: 'var(--brand)' }}>
-              <Award size={14} /> TCS Hackathon · Lightning Sprint
+              <Award size={14} /> 🥉 3rd Place Winner · TCS Hackathon 2026
             </div>
 
             <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 900, letterSpacing: '-0.03em', margin: '0 0 16px', lineHeight: 1.15 }}>
-              Built in under 1 hour by Mrinal Samal & 5 teammates.
+              Built in under 1 hour by Mrinal Samal & 5 teammates — 3rd Place Winner.
             </h2>
 
             <p style={{ fontSize: 16, color: 'var(--text-2)', lineHeight: 1.75, margin: '0 0 20px' }}>
-              This project was created during a fast-paced hackathon conducted by <strong>TCS</strong>. The original problem statement challenged teams to build a <em>base recommendation system for a college canteen</em>.
+              This project was created during a fast-paced hackathon conducted by <strong>TCS</strong>. The original problem statement challenged teams to build a <em>base recommendation system for a college canteen</em>. Our project secured <strong>3rd Place</strong> among competing teams!
             </p>
 
             <p style={{ fontSize: 16, color: 'var(--text-2)', lineHeight: 1.75, margin: '0 0 28px' }}>
@@ -609,10 +609,10 @@ export function HomePage({ onNavigate, onLaunchSearch, liveCount }) {
               <div style={{ background: 'var(--surface-2)', padding: '18px 20px', borderRadius: 20, border: '1px solid var(--hairline)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--brand)', marginBottom: 6 }}>
                   <Award size={18} />
-                  <span className="micro-label" style={{ color: 'var(--text-3)' }}>EVENT</span>
+                  <span className="micro-label" style={{ color: 'var(--text-3)' }}>AWARD</span>
                 </div>
-                <div className="mono" style={{ fontSize: 24, fontWeight: 900, color: 'var(--text-1)' }}>TCS Hackathon</div>
-                <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 4 }}>College Canteen Challenge</div>
+                <div className="mono" style={{ fontSize: 24, fontWeight: 900, color: 'var(--brand)' }}>3rd Place 🥉</div>
+                <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 4 }}>TCS Hackathon 2026</div>
               </div>
 
               <div style={{ background: 'var(--surface-2)', padding: '18px 20px', borderRadius: 20, border: '1px solid var(--hairline)' }}>
@@ -651,11 +651,54 @@ export function HomePage({ onNavigate, onLaunchSearch, liveCount }) {
                   A Note from the Builders
                 </strong>
                 <p style={{ margin: 0, fontSize: 14, color: 'var(--text-2)', lineHeight: 1.65 }}>
-                  "I know a few minor things are missing or could use polish, but yeah — this is what we could build in under 1 hour using modern AI capabilities! What traditionally took days of boilerplates, mocks, and manual UI wiring was designed, tested against 158 test specs, and shipped end-to-end in 60 minutes."
+                  "I know a few minor things are missing or could use polish, but yeah — this is what we could build in under 1 hour using modern AI capabilities nowadays! What traditionally took days of boilerplates, mocks, and manual UI wiring was designed, tested against 158 test specs, and shipped end-to-end in 60 minutes."
                 </p>
                 <div style={{ marginTop: 10, fontSize: 12.5, fontWeight: 700, color: 'var(--brand)' }}>
                   — Mrinal Samal & Team (TCS Hackathon 2026)
                 </div>
+              </div>
+            </div>
+
+            {/* Learn More & Architecture Documentation Link */}
+            <div style={{
+              background: 'var(--surface-2)',
+              border: '1.5px solid var(--brand-soft-border)',
+              borderRadius: 20,
+              padding: '22px 24px',
+              marginTop: 20,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 10
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 800, color: 'var(--brand)', letterSpacing: '0.04em' }}>
+                <BookOpen size={17} /> WANT TO LEARN HOW THIS PROJECT WORKS?
+              </div>
+              <p style={{ margin: 0, fontSize: 14.5, color: 'var(--text-2)', lineHeight: 1.65 }}>
+                If you are interested in learning about more of this project, exploring the deterministic scoring model, clinical dietary algorithms, or interacting with the endpoints directly, refer to our live interactive API documentation:
+              </p>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 4 }}>
+                <a
+                  href="https://hackathon-tcs-azure.vercel.app/docs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-secondary"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    textDecoration: 'none',
+                    fontSize: 13.5,
+                    fontWeight: 700,
+                    padding: '10px 18px',
+                    color: 'var(--brand)',
+                    background: 'var(--surface)',
+                    border: '1.5px solid var(--brand-soft-border)'
+                  }}
+                >
+                  <BookOpen size={16} />
+                  <span>https://hackathon-tcs-azure.vercel.app/docs</span>
+                  <ExternalLink size={14} />
+                </a>
               </div>
             </div>
           </div>

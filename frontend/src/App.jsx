@@ -3,7 +3,8 @@ import { createPortal } from 'react-dom';
 import {
   Send, SlidersHorizontal, ShoppingBag, Trash2, LayoutGrid,
   MessageSquare, Sun, Moon, Plus, UtensilsCrossed, Flame,
-  Menu as MenuIcon, X, Mic, CheckCircle2, ArrowRight, Store, Clock, Sparkles
+  Menu as MenuIcon, X, Mic, CheckCircle2, ArrowRight, Store, Clock, Sparkles,
+  Award, BookOpen, ExternalLink, Timer, Users, Code2
 } from 'lucide-react';
 import { api } from './api.js';
 import { HomePage } from './components/HomePage.jsx';
@@ -53,6 +54,7 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [orderModal, setOrderModal] = useState(null);
+  const [aboutModal, setAboutModal] = useState(false);
   const [coupon, setCoupon] = useState('');
   const [couponError, setCouponError] = useState('');
   const [discount, setDiscount] = useState(0);
@@ -148,11 +150,14 @@ export default function App() {
   }, [tray.length]);
 
   useEffect(() => {
-    if (orderModal) {
+    if (orderModal || aboutModal) {
       const prevOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
       const onKeyDown = (e) => {
-        if (e.key === 'Escape') setOrderModal(null);
+        if (e.key === 'Escape') {
+          setOrderModal(null);
+          setAboutModal(false);
+        }
       };
       window.addEventListener('keydown', onKeyDown);
       return () => {
@@ -160,7 +165,7 @@ export default function App() {
         window.removeEventListener('keydown', onKeyDown);
       };
     }
-  }, [orderModal]);
+  }, [orderModal, aboutModal]);
 
   async function send(text, silent) {
     const msg = (text || '').trim();
@@ -458,20 +463,6 @@ export default function App() {
     </aside>
   );
 
-  const goToAbout = () => {
-    setMobileMenuOpen(false);
-    if (view !== 'home') {
-      setView('home');
-      setTimeout(() => {
-        const el = document.getElementById('about');
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
-      }, 90);
-    } else {
-      const el = document.getElementById('about');
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   return (
     <div className="app-shell">
       {/* Floating Cravio Navigation Header */}
@@ -497,12 +488,6 @@ export default function App() {
               Home
             </button>
             <button
-              className="nav-link"
-              onClick={goToAbout}
-            >
-              About
-            </button>
-            <button
               className={`nav-link${view === 'chat' ? ' active' : ''}`}
               onClick={() => { launchFromHome(); setMobileMenuOpen(false); }}
             >
@@ -524,6 +509,49 @@ export default function App() {
 
           {/* Action CTAs */}
           <div className="nav-actions">
+            {/* 3rd Place Award / About Circle Button */}
+            <button
+              className="icon-btn about-circle-btn"
+              aria-label="About biteMatch · TCS Hackathon 3rd Place"
+              title="About Project · 3rd Place at TCS Hackathon"
+              onClick={() => setAboutModal(true)}
+              style={{
+                position: 'relative',
+                borderRadius: '50%',
+                background: 'var(--brand-soft)',
+                color: 'var(--brand)',
+                border: '1.5px solid var(--brand-soft-border)',
+                width: 38,
+                height: 38,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 2px 8px rgba(255, 107, 87, 0.18)',
+                cursor: 'pointer'
+              }}
+            >
+              <Award size={18} strokeWidth={2.2} />
+              <span style={{
+                position: 'absolute',
+                top: -3,
+                right: -3,
+                background: 'var(--brand)',
+                color: '#FFFFFF',
+                fontSize: '9px',
+                fontWeight: 900,
+                width: 15,
+                height: 15,
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: 'var(--font-data)',
+                border: '1.5px solid var(--surface)'
+              }}>
+                3
+              </span>
+            </button>
+
             <button
               className="icon-btn"
               aria-label="Toggle dark / light theme"
@@ -576,9 +604,10 @@ export default function App() {
             </button>
             <button
               className="nav-link"
-              onClick={goToAbout}
+              onClick={() => { setMobileMenuOpen(false); setAboutModal(true); }}
+              style={{ display: 'flex', alignItems: 'center', gap: 8 }}
             >
-              About Team
+              <Award size={16} color="var(--brand)" /> 3rd Place TCS Hackathon · About
             </button>
             <button
               className={`nav-link${view === 'chat' ? ' active' : ''}`}
@@ -891,6 +920,147 @@ export default function App() {
                 Done / Back to Food
               </button>
             </span>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* About Project & TCS Hackathon Modal */}
+      {aboutModal && typeof document !== 'undefined' && createPortal(
+        <div
+          role="dialog" aria-modal="true" aria-label="About biteMatch and TCS Hackathon 3rd Place"
+          onKeyDown={(e) => { if (e.key === 'Escape') setAboutModal(false); }}
+          onClick={(e) => { if (e.target === e.currentTarget) setAboutModal(false); }}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 9999,
+            background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+            animation: 'fadeIn 0.2s ease-out'
+          }}
+        >
+          <div style={{
+            background: 'var(--surface)', border: '1.5px solid var(--brand-soft-border)',
+            borderRadius: 32, padding: '32px 28px', maxWidth: 540, width: '100%',
+            maxHeight: '90vh', overflowY: 'auto',
+            boxShadow: 'var(--shadow-elevated)', animation: 'modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+            position: 'relative'
+          }}>
+            {/* Header with Close button */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+              <div className="hero-pill-badge" style={{ background: 'var(--brand-soft)', color: 'var(--brand)', margin: 0 }}>
+                <Award size={14} /> 🥉 3rd Place Winner · TCS Hackathon 2026
+              </div>
+              <button
+                className="icon-btn"
+                aria-label="Close about dialog"
+                onClick={() => setAboutModal(false)}
+                style={{ width: 32, height: 32, borderRadius: '50%' }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <h2 style={{ fontSize: 'clamp(22px, 3.5vw, 28px)', fontWeight: 900, margin: '0 0 12px', letterSpacing: '-0.03em', lineHeight: 1.2 }}>
+              Built in under 1 hour by Mrinal Samal & 5 teammates.
+            </h2>
+
+            <p style={{ color: 'var(--text-2)', fontSize: 14.5, lineHeight: 1.65, margin: '0 0 16px' }}>
+              Created during a fast-paced hackathon conducted by <strong>TCS</strong>, where the challenge prompt was to build a <em>base recommendation system for a college canteen</em>. Our project secured <strong>3rd Place</strong>!
+            </p>
+
+            <p style={{ color: 'var(--text-2)', fontSize: 14.5, lineHeight: 1.65, margin: '0 0 20px' }}>
+              Instead of stopping at a basic script, <strong>Mrinal Samal</strong> and <strong>5 other teammates</strong> pushed to engineer a full-featured, production-ready system in under 60 minutes — packed with voice craving capture, Hinglish NLU, clinical dietary validation, diabetic carb guards, live queue telemetry, parallel prep ETA, combo auto-filling, split billing, and a canteen admin console.
+            </p>
+
+            {/* Quick Metrics */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: 8,
+              marginBottom: 18,
+              textAlign: 'center'
+            }}>
+              <div style={{ background: 'var(--surface-2)', padding: '10px 6px', borderRadius: 14, border: '1px solid var(--hairline)' }}>
+                <div className="micro-label" style={{ fontSize: 9.5, color: 'var(--text-3)' }}>SPRINT</div>
+                <div className="mono" style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-1)', marginTop: 2 }}>&lt; 1 Hr</div>
+              </div>
+              <div style={{ background: 'var(--surface-2)', padding: '10px 6px', borderRadius: 14, border: '1px solid var(--hairline)' }}>
+                <div className="micro-label" style={{ fontSize: 9.5, color: 'var(--text-3)' }}>TEAM</div>
+                <div className="mono" style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-1)', marginTop: 2 }}>6 Devs</div>
+              </div>
+              <div style={{ background: 'var(--surface-2)', padding: '10px 6px', borderRadius: 14, border: '1px solid var(--brand)' }}>
+                <div className="micro-label" style={{ fontSize: 9.5, color: 'var(--brand)' }}>AWARD</div>
+                <div className="mono" style={{ fontSize: 15, fontWeight: 800, color: 'var(--brand)', marginTop: 2 }}>3rd 🥉</div>
+              </div>
+              <div style={{ background: 'var(--surface-2)', padding: '10px 6px', borderRadius: 14, border: '1px solid var(--hairline)' }}>
+                <div className="micro-label" style={{ fontSize: 9.5, color: 'var(--text-3)' }}>TESTS</div>
+                <div className="mono" style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-1)', marginTop: 2 }}>158 Pass</div>
+              </div>
+            </div>
+
+            {/* Builder's Reflection */}
+            <div style={{
+              background: 'var(--surface-2)',
+              borderLeft: '3px solid var(--brand)',
+              borderRadius: 14,
+              padding: '12px 16px',
+              fontSize: 13,
+              color: 'var(--text-2)',
+              lineHeight: 1.6,
+              marginBottom: 18
+            }}>
+              <em>"I know a few minor things are missing or could use polish, but yeah — this is what we could build in under 1 hour using modern AI capabilities nowadays! What would traditionally take days was conceived, tested, and deployed live in 60 minutes."</em>
+              <div style={{ fontWeight: 700, color: 'var(--text-1)', marginTop: 6 }}>— Mrinal Samal & Teammates</div>
+            </div>
+
+            {/* Documentation & How It Works Callout */}
+            <div style={{
+              background: 'var(--surface-2)',
+              border: '1.5px solid var(--brand-soft-border)',
+              borderRadius: 16,
+              padding: '16px',
+              marginBottom: 20
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, color: 'var(--brand)', letterSpacing: '0.04em', marginBottom: 6 }}>
+                <BookOpen size={15} /> WANT TO LEARN HOW THIS WORKS?
+              </div>
+              <p style={{ margin: '0 0 10px', fontSize: 13, color: 'var(--text-2)', lineHeight: 1.55 }}>
+                If you are interested in learning about more of this project, its architecture, and how it works under the hood, refer to our live interactive API documentation:
+              </p>
+              <a
+                href="https://hackathon-tcs-azure.vercel.app/docs"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-secondary"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '9px 14px',
+                  fontSize: 12.5,
+                  textDecoration: 'none',
+                  color: 'var(--brand)',
+                  fontWeight: 700,
+                  borderRadius: 10,
+                  background: 'var(--surface)',
+                  border: '1px solid var(--brand-soft-border)'
+                }}
+              >
+                <span className="mono" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  https://hackathon-tcs-azure.vercel.app/docs
+                </span>
+                <ExternalLink size={14} style={{ flexShrink: 0, marginLeft: 8 }} />
+              </a>
+            </div>
+
+            <button
+              className="btn btn-primary"
+              style={{ width: '100%', padding: '12px 18px', fontSize: 14 }}
+              onClick={() => setAboutModal(false)}
+            >
+              Close / Back to App
+            </button>
           </div>
         </div>,
         document.body
