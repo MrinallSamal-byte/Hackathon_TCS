@@ -481,6 +481,35 @@ def build_items() -> list[MenuItem]:
     }
     for it in items:
         it.protein_g = protein.get(it.id, 0)
+    # Estimated nutrition (carbs/sugar/fiber, g) — powers diabetic + low-calorie
+    # goals with data-grounded numbers instead of keyword guesses. Estimates,
+    # not lab values; admins can correct any item via PATCH /admin/items/{id}.
+    nutrition = {
+        "masala_dosa": (58, 4, 4), "idli_sambar": (48, 3, 5), "poha": (42, 3, 3),
+        "aloo_paratha": (62, 5, 6), "jain_poha": (40, 3, 3), "egg_bhurji_pav": (28, 3, 2),
+        "oats_upma": (32, 2, 6), "bread_omelette": (26, 2, 1),
+        "chole_bhature": (85, 6, 10), "rajma_chawal": (88, 5, 12), "veg_biryani": (92, 7, 6),
+        "chicken_biryani": (85, 6, 4), "paneer_naan": (55, 8, 4), "dal_rice": (82, 3, 8),
+        "hakka_noodles_veg": (68, 5, 4), "chicken_noodles": (62, 5, 3),
+        "veg_fried_rice": (72, 4, 4), "jain_khichdi": (70, 3, 7),
+        "palak_roti": (52, 4, 8), "egg_curry_rice": (75, 4, 3),
+        "samosa": (32, 3, 3), "vada_pav": (40, 3, 3), "maggi": (52, 2, 2),
+        "cheese_maggi": (54, 3, 2), "veg_momos": (42, 2, 3), "chicken_momos": (38, 2, 2),
+        "fries": (44, 0, 4), "peri_fries": (46, 1, 4), "peanut_masala": (8, 2, 5),
+        "jain_samosa": (31, 4, 3), "filter_coffee": (10, 8, 0), "masala_chai": (12, 10, 0),
+        "cold_coffee": (38, 30, 0), "mango_lassi": (36, 28, 1), "lime_juice": (22, 18, 0),
+        "oreo_shake": (62, 48, 1), "chaas": (6, 4, 0), "green_tea": (0, 0, 0),
+        "tomato_soup": (22, 10, 2), "pb_smoothie": (32, 22, 4),
+        "gulab_jamun": (42, 32, 0), "brownie": (48, 32, 2), "fruit_custard": (34, 24, 2),
+        "jalebi": (58, 44, 0), "choco_mousse": (30, 24, 3), "jain_fruit_bowl": (28, 20, 4),
+        "vanilla_scoop": (24, 20, 0),
+        "combo_dosa_coffee": (68, 12, 4), "combo_chole_chaas": (91, 10, 10),
+        "combo_maggi_chai": (64, 12, 2), "combo_biryani_jamun": (127, 38, 4),
+        "combo_momos_juice": (64, 20, 3), "combo_khichdi_chaas": (76, 7, 7),
+    }
+    for it in items:
+        c, s, f = nutrition.get(it.id, (0, 0, 0))
+        it.carbs_g, it.sugar_g, it.fiber_g = c, s, f
     # Fix accidental invalid mood tag placeholder logic above (keep data clean).
     for it in items:
         it.mood_tags = [m for m in it.mood_tags if m in

@@ -18,6 +18,11 @@ HINGLISH: list[tuple[str, str]] = [
     ("zyada bhukh", "very hungry"), ("ghar ka", "homely"),
     ("phir se", "again"), ("bina pyaaz", "no onion"), ("bina lehsun", "no garlic"),
     ("kam teekha", "less spicy"), ("zyada teekha", "extra spicy"),
+    ("thoda teekha", "medium spice"), ("garma garam", "warm"),
+    ("chhoti bhookh", "light bite"), ("choti bhookh", "light bite"),
+    ("heavy khana", "very hungry"), ("nashta", "breakfast"),
+    ("chai nashta", "breakfast combo"), ("pocket friendly", "cheap"),
+    ("post workout", "high protein"), ("gym diet", "high protein"),
     ("bhukh", "hungry"), ("bhook", "hungry"), ("bhukha", "hungry"),
     ("jaldi", "hurry"), ("teekha", "spicy"), ("tikha", "spicy"),
     ("meetha", "sweet"), ("mitha", "sweet"), ("sasta", "cheap"), ("saste", "cheap"),
@@ -26,6 +31,9 @@ HINGLISH: list[tuple[str, str]] = [
     ("bina", "no"), ("kam", "less"), ("zyada", "extra"),
     ("subah", "morning"), ("dopahar", "afternoon"), ("raat", "night"), ("shaam", "evening"),
     ("dikhao", "show"), ("batao", "suggest"), ("bata", "suggest"), ("chahiye", "want"),
+    ("alergy", "allergy"), ("alergi", "allergy"), ("vegiterian", "vegetarian"),
+    ("diabetis", "diabetes"), ("diabities", "diabetes"),
+    ("diabetise", "diabetes"), ("diabatise", "diabetes"), ("diebetes", "diabetes"),
     ("kuch", ""), ("mujhe", "i"), ("hai", "is"), ("kya", "what"), ("aur", "and"),
 ]
 
@@ -58,10 +66,21 @@ def parse_budget(text: str) -> Optional[float]:
     m = re.search(rf"(\d+)\s*{RUPEE}", t)
     if m:
         return float(m.group(1))
+    # "100 budget" / "100 rs budget" / "100 max budget"
+    m = re.search(r"(\d+)\s*(?:rs\.?|inr|rupees?)?\s*budget", t)
+    if m:
+        return float(m.group(1))
+    # "i have 100" / "got 100" / "have 100 to spend" (not matching 20 mins)
+    m = re.search(r"(?:have|got|with)\s+(?:a\s+)?(?:budget\s+of\s+)?(?:rs\.?|inr|₹)?\s*(\d+)(?!\s*(?:mins?|minutes?|sec|hours?|items?|peoples?|friends?|persons?))", t)
+    if m:
+        return float(m.group(1))
     m = re.search(r"budget(?: of)?\s*(?:is\s*)?(\d+)", t)
     if m:
         return float(m.group(1))
     m = re.search(r"(\d+)\s*(?:bucks|rupees?)\s*(?:max|only|budget)?", t)
+    if m:
+        return float(m.group(1))
+    m = re.search(r"(?:max|within|around|upto|up to)\s+(?:rs\.?|inr|₹)?\s*(\d+)(?!\s*(?:mins?|minutes?))", t)
     if m:
         return float(m.group(1))
     return None
@@ -126,7 +145,9 @@ def parse_dietary_allergy(text: str) -> tuple[list[str], list[str], bool]:
     mapping = {"peanut": "peanuts", "groundnut": "peanuts", "tree nut": "tree_nuts",
                "almond": "tree_nuts", "cashew": "tree_nuts", "walnut": "tree_nuts",
                "dairy": "dairy", "milk": "dairy", "lactose": "dairy",
-               "gluten": "gluten", "wheat": "gluten",
+               "paneer": "dairy", "curd": "dairy", "dahi": "dairy",
+               "ghee": "dairy", "malai": "dairy", "khoya": "dairy",
+               "gluten": "gluten", "wheat": "gluten", "maida": "gluten", "atta": "gluten",
                "soy": "soy", "soya": "soy", "egg": "egg",
                "seafood": "seafood", "fish": "seafood", "prawn": "seafood", "shrimp": "seafood",
                "sesame": "sesame", "til": "sesame"}
@@ -229,7 +250,34 @@ def detect_intent(text: str) -> str:
             any(k in t for k in ["bye", "exit", "quit", "done", "that's all", "tata"]):
         return "exit"
     if re.search(r"\b(repeat|reorder|again)\b", t) or "last order" in t or "same order" in t:
+        # ...unless it's a QUESTION about the past ("what did I order?")
+        if re.search(r"\b(what|which|when|show|tell|list)\b", t) and \
+                re.search(r"\b(order|ate|eaten|eat|meal|had)\b", t):
+            return "orders"
         return "reorder"
+    # New real-world intents (checked before generic status/order so plurals route right).
+    if re.search(r"cancel.*(cb-\d+|order)|cancel my order|cancel order", t):
+        return "cancel_order"
+    if re.search(r"\b(my orders|order history|past orders|recent orders|my bills|my receipts|my last meal|past meals)\b", t):
+        return "orders"
+    if re.search(r"\bwhat did i (order|eat|have)|what have i (ordered|eaten|had)\b", t):
+        return "orders"
+    if re.search(r"\b(favorit\w*|favourit\w*|wishlist|saved|my saves)\b", t):
+        return "favorites"
+    if re.search(r"(how much.*spend|my spending|today.*spent|week.*spent|spent today|total spent|my expenses)", t):
+        return "spending"
+    if re.search(r"\b(trending|most popular|bestsellers?|best sellers?|what('| i)?s popular|top dishes|most loved)\b", t):
+        return "trending"
+    if re.search(r"\b(coupon|coupons|discount|promo|offer|student10|festive15|firstorder)\b", t):
+        return "coupon"
+    if re.search(r"\b(my profile|my diet|my defaults|dietary profile|save.*(diet|profile|default)|set.*default)\b", t):
+        return "profile"
+    if re.search(r"\b(split.*bill|split.*tray|per person|share.*bill)\b", t):
+        return "split"
+    if re.search(r"\b(surprise(\s+me)?|feeling lucky|pick for me|choose for me)\b", t):
+        return "surprise"
+    if re.search(r"\b(specials?|deal of the day|today'?s (special|deal|offer)|today.*special)\b", t):
+        return "special"
     if re.search(r"cb-\d+", t) or "my order" in t or "where" in t and "order" in t \
             or "track" in t or ("status" in t and "order" in t) or "ready" in t:
         return "status"
@@ -252,10 +300,12 @@ def detect_intent(text: str) -> str:
     if any(k in t for k in ["who are you", "weather", "cricket", "movie", "joke", "python",
                             "capital of", "meaning of life", "tell me about"]):
         return "smalltalk"
-    if re.search(r"(₹|rs|budget|hungry|veg|vegan|jain|spicy|sweet|mins?|hurry|mood|combo|snack|breakfast|lunch|dinner|allergy|cheesy|light|refreshing|comfort|chai|coffee|dosa|biryani|maggi|momos|protein|gym|diet|calorie|healthy|cheap|sasta|teekha|bhukh|bhook|khana|thirsty|mutton|paneer|fries|soup|juice|lassi|eat|food|meal|thali|plate)", t):
+    if parse_goal(t) is not None:
         return "recommend"
-    # Anything with a parseable budget/time is a food request even without keywords.
-    if parse_budget(t) is not None or parse_time(t) is not None:
+    if re.search(r"(₹|rs|budget|hungry|veg|vegan|jain|spicy|sweet|mins?|hurry|mood|combo|snack|breakfast|lunch|dinner|allergy|cheesy|light|refreshing|comfort|chai|coffee|dosa|biryani|maggi|momos|protein|gym|diet|calorie|healthy|cheap|sasta|teekha|bhukh|bhook|khana|thirsty|mutton|paneer|fries|soup|juice|lassi|eat|food|meal|thali|plate|surprise|trending|popular|bestseller|best|special|diab[ea]t|sugar|keto|carb|without|don'?t want|\bavoid\b)", t):
+        return "recommend"
+    # Anything with a parseable budget/time/goal is a food request even without keywords.
+    if parse_budget(t) is not None or parse_time(t) is not None or parse_goal(t) is not None:
         return "recommend"
     if len(t.split()) <= 3:
         # Short + unrecognized (e.g. "xyz123", "ok", "hmm") -> graceful redirect.
@@ -314,18 +364,29 @@ def apply_refinement(text: str, prefs: UserPreferences, menu_names: Optional[lis
         # rotate: clear cuisine so engine explores
         p.cuisine = None
         notes.append("Trying a different cuisine.")
+    goal = parse_goal(text)
+    if goal:
+        p.goal = goal
+        if goal == "diabetic":
+            notes.append("Prioritising diabetic-friendly, sugar-free options.")
+        elif goal == "high_protein":
+            notes.append("Prioritising high-protein options.")
+        elif goal == "low_calorie":
+            notes.append("Prioritising low-calorie options.")
     if not notes:
         notes.append("Shuffling to different picks with the same constraints.")
     return p, " ".join(notes)
 
 
 def parse_goal(text: str) -> Optional[str]:
-    """Nutrition goal: high_protein (gym/protein) or low_calorie (diet/light eating)."""
+    """Nutrition goal: high_protein (gym/protein), low_calorie (diet/light eating), or diabetic (sugar-free/low GI)."""
     t = normalize_hinglish(text).lower()
+    if re.search(r"\bdiab\w*|\bsugar\b|sugar free|sugar-free|low sugar|no sugar|sugar patient|low carb|keto|sugar problem|high sugar", t):
+        return "diabetic"
     if any(k in t for k in ["high protein", "high-protein", "protein rich", "gym", "muscle",
                             "bodybuild", "workout meal"]):
         return "high_protein"
-    if re.search(r"\bprotein\b", t):
+    if re.search(r"\bprotein\b|\bprotien\b|\bproten\b", t):
         return "high_protein"
     if any(k in t for k in ["low cal", "low-cal", "low calorie", "weight loss", "lose weight",
                             "diet food", "on a diet", "healthy", "light diet"]):
@@ -333,6 +394,55 @@ def parse_goal(text: str) -> Optional[str]:
     if re.search(r"\bon diet\b|\bdieting\b", t):
         return "low_calorie"
     return None
+
+
+def parse_health_conditions(text: str) -> list[str]:
+    """Explicit health conditions the user states about THEMSELVES.
+
+    Only conditions the engine can act on are returned (elsewhere we must
+    never pretend to manage a condition we don't model).
+    """
+    t = normalize_hinglish(text).lower()
+    out: list[str] = []
+    if (re.search(r"\bi (have|am|suffer from)\b.{0,30}\bdiab\w*", t)
+            or re.search(r"\bsugar patient\b|\bmy sugar\b.*\b(high|problem)\b", t)):
+        out.append("diabetes")
+    return out
+
+
+# Words handled by dedicated diet/allergy flags — never double-count as avoid.
+_AVOID_SKIP = {"onion", "garlic", "sugar", "egg", "veg", "vegan", "jain",
+               "gluten", "dairy", "halal", "oil", "salt", "spicy", "spice"}
+
+
+def parse_avoid(text: str) -> list[str]:
+    """Food words the user wants EXCLUDED ("without paneer", "no cheese",
+    "don't want maggi"). Capped, de-duped, diet words filtered out."""
+    t = normalize_hinglish(text).lower()
+    found: list[str] = []
+    patterns = [
+        r"\bwithout\s+([a-z][a-z ]{1,24}?)(?:,| and |\.|$)",
+        r"\bdon'?t want\s+([a-z][a-z ]{1,24}?)(?:,| and |\.|$)",
+        r"\bavoid\s+([a-z][a-z ]{1,24}?)(?:,| and |\.|$)",
+        r"\bno\s+([a-z]{2,24})\b",
+    ]
+    for rx in patterns:
+        for m in re.finditer(rx, t):
+            chunk = m.group(1).strip()
+            # keep the head noun phrase (max 2 words: "paneer", "leafy greens")
+            words = [w for w in chunk.split() if w not in
+                     {"any", "with", "the", "a", "an", "please", "food", "items", "dish"}]
+            words = words[:2]
+            if not words:
+                continue
+            term = " ".join(words)
+            if term in _AVOID_SKIP or len(term) < 2:
+                continue
+            if term not in found:
+                found.append(term)
+            if len(found) >= 4:
+                return found
+    return found
 
 
 def parse_one_shot(text: str, base: Optional[UserPreferences] = None) -> UserPreferences:
@@ -366,6 +476,9 @@ def parse_one_shot(text: str, base: Optional[UserPreferences] = None) -> UserPre
     for c in cravings:
         if c not in p.cravings:
             p.cravings.append(c)
+    for a in parse_avoid(text):
+        if a not in p.avoid:
+            p.avoid.append(a)
     hunger = parse_hunger(text)
     if hunger:
         p.hunger = hunger

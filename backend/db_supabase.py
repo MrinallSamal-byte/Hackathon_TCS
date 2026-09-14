@@ -93,7 +93,7 @@ def log_feedback(row: dict[str, Any]) -> bool:
         import httpx
         payload = {"item_id": row.get("item_id"), "rating": row.get("rating"),
                    "comment": row.get("comment"), "budget": row.get("budget"),
-                   "mood": row.get("mood")}
+                   "mood": row.get("mood"), "session_id": row.get("session_id") or None}
         r = httpx.post(f"{url}/rest/v1/feedback_log", timeout=10,
                        headers={**_headers(key)}, json=payload)
         return r.status_code in (200, 201)
@@ -110,7 +110,11 @@ def log_order(row: dict[str, Any]) -> bool:
         import httpx
         payload = {"token": row.get("token"), "tray": row.get("tray", []),
                    "total": row.get("total", 0), "budget": row.get("budget"),
-                   "eta": row.get("eta")}
+                   "eta": row.get("eta"), "session_id": row.get("session_id") or None,
+                   "payable": row.get("payable", row.get("total", 0)),
+                   "coupon": row.get("coupon"), "discount": row.get("discount", 0),
+                   "counter": row.get("counter"), "counter_label": row.get("counter_label"),
+                   "status_override": row.get("status_override")}
         r = httpx.post(f"{url}/rest/v1/order_history", timeout=10,
                        headers={**_headers(key)}, json=payload)
         return r.status_code in (200, 201)

@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from pathlib import Path
 from typing import Any, Optional
 
@@ -30,11 +31,31 @@ from typing import Any, Optional
 
 _OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
+
+def _env_float(name: str, default: float) -> float:
+    try:
+        return float(os.getenv(name, default))
+    except (TypeError, ValueError):
+        return default
+
+
+# Per-model HTTP timeout (s). The chain has 9 models — a 30 s timeout each
+# could stall one chat turn for minutes when quota is exhausted. 12 s per
+# model plus an overall chain budget keeps the worst case bounded; every
+# failure still degrades to the identical rule-based templates.
+_MODEL_TIMEOUT = _env_float("OPENROUTER_TIMEOUT", 12.0)
+_CHAIN_BUDGET = _env_float("OPENROUTER_CHAIN_BUDGET", 25.0)
+
 DEFAULT_CHAIN = [
+    "nex-agi/nex-n2.5-mini:free",
+    "liquid/lfm-2.5-2.6b:free",
+    "nex-agi/nex-n2.5-pro:free",
     "nvidia/nemotron-3-super-120b-a12b:free",
-    "poolside/laguna-xs-2.1:free",
-    "thinkingmachines/inkling:free",
-    "thinkingmachines/inkling-small:free",
+    "nvidia/nemotron-3.5-lightning:free",
+    "google/gemma-4-31b-it:free",
+    "inclusionai/ling-3.0-flash-fin:free",
+    "dots-studio/dots-3-note-preview:free",
+    "poolside/laguna-s-2.1:free",
 ]
 
 # Strict allow-lists for anything the LLM may return.
@@ -47,7 +68,7 @@ VALID_ALLERGY = {"peanuts", "tree_nuts", "dairy", "gluten",
                  "soy", "egg", "seafood", "sesame"}
 VALID_HUNGER = {"light_bite", "light", "medium", "hungry",
                 "very_hungry", "very hungry"}
-VALID_GOAL = {"high_protein", "low_calorie"}
+VALID_GOAL = {"high_protein", "low_calorie", "diabetic"}
 VALID_MEAL = {"breakfast", "lunch", "dinner"}
 VALID_CUISINE = {"south_indian", "north_indian", "chinese",
                  "continental", "street_food"}
@@ -92,7 +113,8 @@ def llm_available() -> bool:
 # ---------- transport ----------
 
 def _post_openrouter(model: str, messages: list[dict], max_tokens: int,
-                     temperature: float, json_mode: bool) -> Optional[str]:
+                     temperature: float, json_mode: bool,
+                     timeout: Optional[float] = None) -> Optional[str]:
     """Single OpenRouter call. Returns message content or None on any failure."""
     key = os.getenv("OPENROUTER_API_KEY")
     if not key:
@@ -110,7 +132,7 @@ def _post_openrouter(model: str, messages: list[dict], max_tokens: int,
         # Don't burn the token budget on hidden reasoning traces.
         payload["reasoning"] = {"enabled": False, "exclude": True}
         r = httpx.post(
-            _OPENROUTER_URL, timeout=30,
+            _OPENROUTER_URL, timeout=timeout if timeout is not None else _MODEL_TIMEOUT,
             headers={"Authorization": f"Bearer {key}",
                      "Content-Type": "application/json",
                      "HTTP-Referer": "http://localhost:8000",
@@ -134,12 +156,18 @@ def _post_openrouter(model: str, messages: list[dict], max_tokens: int,
 def complete(messages: list[dict], max_tokens: int = 220,
              temperature: float = 0.5,
              json_mode: bool = False) -> tuple[Optional[str], str]:
-    """Try each model in the chain. Returns (text_or_None, model_used_or_rule)."""
+    """Try each model in the chain. Returns (text_or_None, model_used_or_rule).
+
+    Stops starting new models once the overall chain budget is spent, so one
+    chat turn can never hang for minutes when the free tier is exhausted."""
     if os.getenv("CAMPUSBITE_OFFLINE") == "1":
         return None, "rule-based"
     if not openrouter_available():
         return None, "rule-based"
+    deadline = time.monotonic() + max(_CHAIN_BUDGET, 0)
     for model in get_model_chain():
+        if time.monotonic() >= deadline:
+            break
         out = _post_openrouter(model, messages, max_tokens, temperature, json_mode)
         if out:
             return out, model.split("/")[-1]
@@ -158,11 +186,20 @@ _PHRASE_SYSTEM = (
 )
 
 
-def batch_phrase(texts: list[str]) -> tuple[list[str], str]:
+def batch_phrase(texts: list[str], facts: Optional[list[dict]] = None) -> tuple[list[str], str]:
     """Phrase N explanations in a single model call. Returns (texts, model).
-    Any failure (quota, mismatch, empty) returns the originals + rule-based."""
+    Any failure (quota, mismatch, empty) returns the originals + rule-based.
+    When `facts` (aligned {name, price, prep?}) are given, each rephrased text
+    must still contain its item name + price digits (+ prep minutes when the
+    fact carries one) — failures fall back per-item instead of discarding the
+    whole batch. Identical batches are served from a small in-memory cache so
+    repeats (specials, trending, greeting picks) cost zero quota/latency."""
     if not texts or not openrouter_available():
         return texts, "rule-based"
+    key = _phrase_cache_key(texts, facts)
+    hit = _PHRASE_CACHE.get(key)
+    if hit is not None:
+        return list(hit[0]), hit[1]
     numbered = "\n".join(f"{i + 1}. {t}" for i, t in enumerate(texts))
     out, model = complete(
         [{"role": "system", "content": _PHRASE_SYSTEM},
@@ -174,12 +211,66 @@ def batch_phrase(texts: list[str]) -> tuple[list[str], str]:
     try:
         start, end = out.index("["), out.rindex("]")
         arr = json.loads(out[start:end + 1])
-        if (isinstance(arr, list) and len(arr) == len(texts)
+        if not (isinstance(arr, list) and len(arr) == len(texts)
                 and all(isinstance(s, str) and s.strip() for s in arr)):
-            return [s.strip() for s in arr], model
+            return texts, "rule-based"
     except (ValueError, json.JSONDecodeError):
-        pass
-    return texts, "rule-based"
+        return texts, "rule-based"
+    if not facts:
+        _phrase_cache_store(key, [s.strip() for s in arr], model)
+        return [s.strip() for s in arr], model
+    kept = 0
+    merged = []
+    for orig, new, fact in zip(texts, arr, facts):
+        new = new.strip()
+        name = str((fact or {}).get("name") or "").strip().lower()
+        price = (fact or {}).get("price")
+        prep = (fact or {}).get("prep")
+        ok = bool(new)
+        if name:
+            ok = ok and name in new.lower()
+        try:
+            ok = ok and (str(int(float(price))) in new)
+        except (TypeError, ValueError):
+            pass
+        if prep is not None:
+            # Prep minutes must survive rephrasing as digits ("~10 min" may
+            # become "10 mins" — only the number is enforced).
+            try:
+                ok = ok and (str(int(float(prep))) in new)
+            except (TypeError, ValueError):
+                pass
+        merged.append(new if ok else orig)
+        kept += 1 if ok else 0
+    _phrase_cache_store(key, merged, (model if kept else "rule-based"))
+    return merged, (model if kept else "rule-based")
+
+
+# ---------- small in-memory phrase cache (identical batches cost nothing) ----------
+
+_PHRASE_CACHE: dict[str, tuple[list[str], str]] = {}
+_PHRASE_CACHE_MAX = 256
+
+
+def _phrase_cache_key(texts: list[str], facts: Optional[list[dict]]) -> str:
+    slim: list[Any] = [texts]
+    if facts:
+        slim.append([{k: (f or {}).get(k) for k in ("name", "price", "prep")} for f in facts])
+    try:
+        return json.dumps(slim, sort_keys=True, default=str)
+    except (TypeError, ValueError):
+        return repr(slim)
+
+
+def _phrase_cache_store(key: str, texts: list[str], model: str) -> None:
+    if len(_PHRASE_CACHE) >= _PHRASE_CACHE_MAX:
+        _PHRASE_CACHE.pop(next(iter(_PHRASE_CACHE)))
+    _PHRASE_CACHE[key] = (list(texts), model)
+
+
+def clear_phrase_cache() -> None:
+    """Test helper — drop all cached phrasings."""
+    _PHRASE_CACHE.clear()
 
 
 def phrase_explanation(template_text: str) -> str:
@@ -236,7 +327,8 @@ _PARSE_SYSTEM = (
     "meal (one of: breakfast, lunch, dinner), cuisine (one of: "
     "south_indian, north_indian, chinese, continental, street_food), "
     "max_spice (0-3), combos_only (boolean), no_onion_garlic (boolean), "
-    "goal (one of: high_protein, low_calorie). "
+    "goal (one of: high_protein, low_calorie, diabetic). "
+    "If the user mentions diabetes, diabetic, sugar-free, low sugar, or sugar control, set goal to diabetic. "
     "Omit keys you are unsure about. Never invent menu items."
 )
 

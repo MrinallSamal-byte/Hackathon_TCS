@@ -24,6 +24,9 @@
     "prep_time_minutes": 10,
     "calories": 320,
     "protein_g": 8,
+    "carbs_g": 58,
+    "sugar_g": 4,
+    "fiber_g": 4,
     "portion_size": "medium",
     "spice_level": 1,
     "taste_profile": [
@@ -68,6 +71,9 @@
     "prep_time_minutes": 8,
     "calories": 260,
     "protein_g": 6,
+    "carbs_g": 48,
+    "sugar_g": 3,
+    "fiber_g": 5,
     "portion_size": "medium",
     "spice_level": 1,
     "taste_profile": [
@@ -114,6 +120,9 @@
     "prep_time_minutes": 7,
     "calories": 240,
     "protein_g": 5,
+    "carbs_g": 42,
+    "sugar_g": 3,
+    "fiber_g": 3,
     "portion_size": "light",
     "spice_level": 1,
     "taste_profile": [
@@ -158,6 +167,9 @@
     "prep_time_minutes": 12,
     "calories": 450,
     "protein_g": 9,
+    "carbs_g": 62,
+    "sugar_g": 5,
+    "fiber_g": 6,
     "portion_size": "heavy",
     "spice_level": 2,
     "taste_profile": [
@@ -204,6 +216,9 @@
     "prep_time_minutes": 7,
     "calories": 230,
     "protein_g": 5,
+    "carbs_g": 40,
+    "sugar_g": 3,
+    "fiber_g": 3,
     "portion_size": "light",
     "spice_level": 0,
     "taste_profile": [
@@ -249,6 +264,9 @@
     "prep_time_minutes": 10,
     "calories": 380,
     "protein_g": 14,
+    "carbs_g": 28,
+    "sugar_g": 3,
+    "fiber_g": 2,
     "portion_size": "medium",
     "spice_level": 2,
     "taste_profile": [
@@ -294,6 +312,9 @@
     "prep_time_minutes": 10,
     "calories": 220,
     "protein_g": 8,
+    "carbs_g": 32,
+    "sugar_g": 2,
+    "fiber_g": 6,
     "portion_size": "light",
     "spice_level": 1,
     "taste_profile": [
@@ -338,6 +359,9 @@
     "prep_time_minutes": 8,
     "calories": 360,
     "protein_g": 13,
+    "carbs_g": 26,
+    "sugar_g": 2,
+    "fiber_g": 1,
     "portion_size": "medium",
     "spice_level": 1,
     "taste_profile": [
@@ -381,6 +405,9 @@
     "prep_time_minutes": 15,
     "calories": 650,
     "protein_g": 14,
+    "carbs_g": 85,
+    "sugar_g": 6,
+    "fiber_g": 10,
     "portion_size": "filling",
     "spice_level": 2,
     "taste_profile": [
@@ -427,6 +454,9 @@
     "prep_time_minutes": 15,
     "calories": 580,
     "protein_g": 15,
+    "carbs_g": 88,
+    "sugar_g": 5,
+    "fiber_g": 12,
     "portion_size": "filling",
     "spice_level": 2,
     "taste_profile": [
@@ -472,6 +502,9 @@
     "prep_time_minutes": 20,
     "calories": 620,
     "protein_g": 9,
+    "carbs_g": 92,
+    "sugar_g": 7,
+    "fiber_g": 6,
     "portion_size": "filling",
     "spice_level": 2,
     "taste_profile": [
@@ -518,6 +551,9 @@
     "prep_time_minutes": 22,
     "calories": 750,
     "protein_g": 28,
+    "carbs_g": 85,
+    "sugar_g": 6,
+    "fiber_g": 4,
     "portion_size": "filling",
     "spice_level": 3,
     "taste_profile": [
@@ -563,6 +599,9 @@
     "prep_time_minutes": 18,
     "calories": 700,
     "protein_g": 22,
+    "carbs_g": 55,
+    "sugar_g": 8,
+    "fiber_g": 4,
     "portion_size": "heavy",
     "spice_level": 2,
     "taste_profile": [
@@ -609,6 +648,9 @@
     "prep_time_minutes": 15,
     "calories": 520,
     "protein_g": 14,
+    "carbs_g": 82,
+    "sugar_g": 3,
+    "fiber_g": 8,
     "portion_size": "heavy",
     "spice_level": 1,
     "taste_profile": [
@@ -655,6 +697,9 @@
     "prep_time_minutes": 12,
     "calories": 480,
     "protein_g": 8,
+    "carbs_g": 68,
+    "sugar_g": 5,
+    "fiber_g": 4,
     "portion_size": "heavy",
     "spice_level": 2,
     "taste_profile": [
@@ -702,6 +747,9 @@
     "prep_time_minutes": 14,
     "calories": 560,
     "protein_g": 20,
+    "carbs_g": 62,
+    "sugar_g": 5,
+    "fiber_g": 3,
     "portion_size": "heavy",
     "spice_level": 2,
     "taste_profile": [
@@ -748,6 +796,9 @@
     "prep_time_minutes": 12,
     "calories": 460,
     "protein_g": 7,
+    "carbs_g": 72,
+    "sugar_g": 4,
+    "fiber_g": 4,
     "portion_size": "heavy",
     "spice_level": 1,
     "taste_profile": [
@@ -793,6 +844,9 @@
     "prep_time_minutes": 18,
     "calories": 480,
     "protein_g": 12,
+    "carbs_g": 70,
+    "sugar_g": 3,
+    "fiber_g": 7,
     "portion_size": "heavy",
     "spice_level": 0,
     "taste_profile": [
@@ -840,6 +894,9 @@
     "prep_time_minutes": 18,
     "calories": 600,
     "protein_g": 18,
+    "carbs_g": 52,
+    "sugar_g": 4,
+    "fiber_g": 8,
     "portion_size": "heavy",
     "spice_level": 1,
     "taste_profile": [
@@ -884,6 +941,9 @@
     "prep_time_minutes": 16,
     "calories": 590,
     "protein_g": 16,
+    "carbs_g": 75,
+    "sugar_g": 4,
+    "fiber_g": 3,
     "portion_size": "filling",
     "spice_level": 2,
     "taste_profile": [
@@ -928,6 +988,9 @@
     "prep_time_minutes": 5,
     "calories": 300,
     "protein_g": 5,
+    "carbs_g": 32,
+    "sugar_g": 3,
+    "fiber_g": 3,
     "portion_size": "light",
     "spice_level": 2,
     "taste_profile": [
@@ -972,6 +1035,9 @@
     "prep_time_minutes": 6,
     "calories": 350,
     "protein_g": 6,
+    "carbs_g": 40,
+    "sugar_g": 3,
+    "fiber_g": 3,
     "portion_size": "medium",
     "spice_level": 3,
     "taste_profile": [
@@ -1016,6 +1082,9 @@
     "prep_time_minutes": 8,
     "calories": 380,
     "protein_g": 7,
+    "carbs_g": 52,
+    "sugar_g": 2,
+    "fiber_g": 2,
     "portion_size": "medium",
     "spice_level": 2,
     "taste_profile": [
@@ -1062,6 +1131,9 @@
     "prep_time_minutes": 9,
     "calories": 480,
     "protein_g": 11,
+    "carbs_g": 54,
+    "sugar_g": 3,
+    "fiber_g": 2,
     "portion_size": "medium",
     "spice_level": 1,
     "taste_profile": [
@@ -1108,6 +1180,9 @@
     "prep_time_minutes": 12,
     "calories": 320,
     "protein_g": 6,
+    "carbs_g": 42,
+    "sugar_g": 2,
+    "fiber_g": 3,
     "portion_size": "medium",
     "spice_level": 2,
     "taste_profile": [
@@ -1154,6 +1229,9 @@
     "prep_time_minutes": 13,
     "calories": 420,
     "protein_g": 14,
+    "carbs_g": 38,
+    "sugar_g": 2,
+    "fiber_g": 2,
     "portion_size": "medium",
     "spice_level": 2,
     "taste_profile": [
@@ -1196,6 +1274,9 @@
     "prep_time_minutes": 10,
     "calories": 380,
     "protein_g": 4,
+    "carbs_g": 44,
+    "sugar_g": 0,
+    "fiber_g": 4,
     "portion_size": "medium",
     "spice_level": 0,
     "taste_profile": [
@@ -1236,6 +1317,9 @@
     "prep_time_minutes": 11,
     "calories": 400,
     "protein_g": 4,
+    "carbs_g": 46,
+    "sugar_g": 1,
+    "fiber_g": 4,
     "portion_size": "medium",
     "spice_level": 3,
     "taste_profile": [
@@ -1282,6 +1366,9 @@
     "prep_time_minutes": 3,
     "calories": 280,
     "protein_g": 13,
+    "carbs_g": 8,
+    "sugar_g": 2,
+    "fiber_g": 5,
     "portion_size": "light",
     "spice_level": 2,
     "taste_profile": [
@@ -1327,6 +1414,9 @@
     "prep_time_minutes": 5,
     "calories": 290,
     "protein_g": 5,
+    "carbs_g": 31,
+    "sugar_g": 4,
+    "fiber_g": 3,
     "portion_size": "light",
     "spice_level": 1,
     "taste_profile": [
@@ -1367,6 +1457,9 @@
     "prep_time_minutes": 3,
     "calories": 80,
     "protein_g": 4,
+    "carbs_g": 10,
+    "sugar_g": 8,
+    "fiber_g": 0,
     "portion_size": "light",
     "spice_level": 0,
     "taste_profile": [
@@ -1409,6 +1502,9 @@
     "prep_time_minutes": 4,
     "calories": 90,
     "protein_g": 4,
+    "carbs_g": 12,
+    "sugar_g": 10,
+    "fiber_g": 0,
     "portion_size": "light",
     "spice_level": 0,
     "taste_profile": [
@@ -1451,6 +1547,9 @@
     "prep_time_minutes": 6,
     "calories": 280,
     "protein_g": 8,
+    "carbs_g": 38,
+    "sugar_g": 30,
+    "fiber_g": 0,
     "portion_size": "medium",
     "spice_level": 0,
     "taste_profile": [
@@ -1493,6 +1592,9 @@
     "prep_time_minutes": 5,
     "calories": 260,
     "protein_g": 7,
+    "carbs_g": 36,
+    "sugar_g": 28,
+    "fiber_g": 1,
     "portion_size": "medium",
     "spice_level": 0,
     "taste_profile": [
@@ -1536,6 +1638,9 @@
     "prep_time_minutes": 4,
     "calories": 120,
     "protein_g": 1,
+    "carbs_g": 22,
+    "sugar_g": 18,
+    "fiber_g": 0,
     "portion_size": "light",
     "spice_level": 0,
     "taste_profile": [
@@ -1580,6 +1685,9 @@
     "prep_time_minutes": 7,
     "calories": 450,
     "protein_g": 8,
+    "carbs_g": 62,
+    "sugar_g": 48,
+    "fiber_g": 1,
     "portion_size": "medium",
     "spice_level": 0,
     "taste_profile": [
@@ -1622,6 +1730,9 @@
     "prep_time_minutes": 2,
     "calories": 60,
     "protein_g": 3,
+    "carbs_g": 6,
+    "sugar_g": 4,
+    "fiber_g": 0,
     "portion_size": "light",
     "spice_level": 0,
     "taste_profile": [
@@ -1663,6 +1774,9 @@
     "prep_time_minutes": 3,
     "calories": 5,
     "protein_g": 0,
+    "carbs_g": 0,
+    "sugar_g": 0,
+    "fiber_g": 0,
     "portion_size": "light",
     "spice_level": 0,
     "taste_profile": [
@@ -1706,6 +1820,9 @@
     "prep_time_minutes": 10,
     "calories": 180,
     "protein_g": 4,
+    "carbs_g": 22,
+    "sugar_g": 10,
+    "fiber_g": 2,
     "portion_size": "light",
     "spice_level": 1,
     "taste_profile": [
@@ -1750,6 +1867,9 @@
     "prep_time_minutes": 6,
     "calories": 340,
     "protein_g": 14,
+    "carbs_g": 32,
+    "sugar_g": 22,
+    "fiber_g": 4,
     "portion_size": "medium",
     "spice_level": 0,
     "taste_profile": [
@@ -1793,6 +1913,9 @@
     "prep_time_minutes": 4,
     "calories": 300,
     "protein_g": 4,
+    "carbs_g": 42,
+    "sugar_g": 32,
+    "fiber_g": 0,
     "portion_size": "light",
     "spice_level": 0,
     "taste_profile": [
@@ -1838,6 +1961,9 @@
     "prep_time_minutes": 5,
     "calories": 380,
     "protein_g": 5,
+    "carbs_g": 48,
+    "sugar_g": 32,
+    "fiber_g": 2,
     "portion_size": "light",
     "spice_level": 0,
     "taste_profile": [
@@ -1881,6 +2007,9 @@
     "prep_time_minutes": 5,
     "calories": 220,
     "protein_g": 4,
+    "carbs_g": 34,
+    "sugar_g": 24,
+    "fiber_g": 2,
     "portion_size": "light",
     "spice_level": 0,
     "taste_profile": [
@@ -1923,6 +2052,9 @@
     "prep_time_minutes": 8,
     "calories": 420,
     "protein_g": 3,
+    "carbs_g": 58,
+    "sugar_g": 44,
+    "fiber_g": 0,
     "portion_size": "medium",
     "spice_level": 0,
     "taste_profile": [
@@ -1965,6 +2097,9 @@
     "prep_time_minutes": 5,
     "calories": 260,
     "protein_g": 4,
+    "carbs_g": 30,
+    "sugar_g": 24,
+    "fiber_g": 3,
     "portion_size": "light",
     "spice_level": 0,
     "taste_profile": [
@@ -2008,6 +2143,9 @@
     "prep_time_minutes": 5,
     "calories": 150,
     "protein_g": 1,
+    "carbs_g": 28,
+    "sugar_g": 20,
+    "fiber_g": 4,
     "portion_size": "light",
     "spice_level": 0,
     "taste_profile": [
@@ -2050,6 +2188,9 @@
     "prep_time_minutes": 2,
     "calories": 180,
     "protein_g": 3,
+    "carbs_g": 24,
+    "sugar_g": 20,
+    "fiber_g": 0,
     "portion_size": "light",
     "spice_level": 0,
     "taste_profile": [
@@ -2093,6 +2234,9 @@
     "prep_time_minutes": 10,
     "calories": 400,
     "protein_g": 12,
+    "carbs_g": 68,
+    "sugar_g": 12,
+    "fiber_g": 4,
     "portion_size": "heavy",
     "spice_level": 1,
     "taste_profile": [
@@ -2140,6 +2284,9 @@
     "prep_time_minutes": 15,
     "calories": 710,
     "protein_g": 17,
+    "carbs_g": 91,
+    "sugar_g": 10,
+    "fiber_g": 10,
     "portion_size": "filling",
     "spice_level": 2,
     "taste_profile": [
@@ -2190,6 +2337,9 @@
     "prep_time_minutes": 8,
     "calories": 470,
     "protein_g": 11,
+    "carbs_g": 64,
+    "sugar_g": 12,
+    "fiber_g": 2,
     "portion_size": "heavy",
     "spice_level": 2,
     "taste_profile": [
@@ -2238,6 +2388,9 @@
     "prep_time_minutes": 22,
     "calories": 1050,
     "protein_g": 32,
+    "carbs_g": 127,
+    "sugar_g": 38,
+    "fiber_g": 4,
     "portion_size": "filling",
     "spice_level": 3,
     "taste_profile": [
@@ -2286,6 +2439,9 @@
     "prep_time_minutes": 12,
     "calories": 440,
     "protein_g": 7,
+    "carbs_g": 64,
+    "sugar_g": 20,
+    "fiber_g": 3,
     "portion_size": "heavy",
     "spice_level": 2,
     "taste_profile": [
@@ -2336,6 +2492,9 @@
     "prep_time_minutes": 18,
     "calories": 540,
     "protein_g": 15,
+    "carbs_g": 76,
+    "sugar_g": 7,
+    "fiber_g": 7,
     "portion_size": "filling",
     "spice_level": 0,
     "taste_profile": [

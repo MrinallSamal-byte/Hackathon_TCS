@@ -86,6 +86,42 @@ create table if not exists public.chat_memory (
   updated_at timestamptz not null default now()
 );
 
+-- ============ migration: columns for features added after the first seed ====
+-- Idempotent: safe to run on a database created from any earlier version.
+-- Nutrition estimates (estimates, not lab values) power diabetic/low-carb goals.
+alter table public.menu_items
+  add column if not exists protein_g integer not null default 0 check (protein_g >= 0);
+alter table public.menu_items
+  add column if not exists carbs_g integer not null default 0 check (carbs_g >= 0);
+alter table public.menu_items
+  add column if not exists sugar_g integer not null default 0 check (sugar_g >= 0);
+alter table public.menu_items
+  add column if not exists fiber_g integer not null default 0 check (fiber_g >= 0);
+
+-- Coupons / pickup counters / status overrides + session link for My Orders.
+alter table public.order_history
+  add column if not exists session_id text;
+alter table public.order_history
+  add column if not exists payable numeric not null default 0;
+alter table public.order_history
+  add column if not exists coupon text;
+alter table public.order_history
+  add column if not exists discount numeric not null default 0;
+alter table public.order_history
+  add column if not exists counter text;
+alter table public.order_history
+  add column if not exists counter_label text;
+alter table public.order_history
+  add column if not exists status_override text
+    check (status_override in ('READY', 'COMPLETED', 'CANCELLED'));
+
+-- Session link for per-user feedback trends.
+alter table public.feedback_log
+  add column if not exists session_id text;
+
+create index if not exists order_history_session_idx on public.order_history (session_id);
+create index if not exists feedback_log_session_idx on public.feedback_log (session_id);
+
 alter table public.chat_memory enable row level security;
 
 drop policy if exists "public upsert own memory" on public.chat_memory;

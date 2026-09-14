@@ -28,6 +28,12 @@ from typing import Any, Optional
 
 DEFAULT_PATH = Path(__file__).resolve().parents[1] / "data" / "memory.json"
 _HISTORY_CAP = 20
+# Abuse guard: per-session maps must stay bounded no matter how many
+# feedback/order/chat turns a client fires. Oldest entries evict first.
+_LIKES_CAP = 200
+_ORDERS_MAP_CAP = 200
+_WARNED_CAP = 100
+_COUPONS_CAP = 10
 
 LIKED_BOOST = 8.0
 ORDERED_BOOST = 3.0
@@ -44,12 +50,23 @@ def blank(session_id: str) -> dict[str, Any]:
         "orders": {},
         "likes": {},
         "chats": 0,
+        "favorites": [],
+        "profile": {},
+        "health_conditions": [],
+        "health_warned": {},
         "updated_at": _now(),
     }
 
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _cap_map(d: dict, cap: int) -> dict:
+    """Evict oldest keys while a per-session map exceeds its cap."""
+    while len(d) > cap:
+        d.pop(next(iter(d)))
+    return d
 
 
 class MemoryStore:
@@ -90,6 +107,16 @@ class MemoryStore:
         if not mem:
             mem = blank(session_id)
             self._data[session_id] = mem
+        # Backfill new keys for memories created before these features existed.
+        mem.setdefault("favorites", [])
+        mem.setdefault("profile", {})
+        mem.setdefault("health_conditions", [])
+        mem.setdefault("health_warned", {})
+        mem.setdefault("orders", {})
+        mem.setdefault("likes", {})
+        mem.setdefault("budgets", [])
+        mem.setdefault("moods", [])
+        mem.setdefault("chats", 0)
         return mem
 
     def save(self, session_id: str, mem: dict[str, Any]) -> None:
@@ -120,17 +147,130 @@ class MemoryStore:
         return mem
 
     def record_feedback(self, mem: dict, item_id: str, rating: int) -> dict:
+        likes = mem.setdefault("likes", {})
         if rating > 0:
-            mem["likes"][item_id] = 1
+            likes[item_id] = 1
         elif rating < 0:
-            mem["likes"][item_id] = -1
+            likes[item_id] = -1
+        _cap_map(likes, _LIKES_CAP)
         return mem
 
     def record_order(self, mem: dict, item_ids: list[str]) -> dict:
         orders = mem.setdefault("orders", {})
         for i in item_ids:
             orders[i] = int(orders.get(i, 0)) + 1
+        _cap_map(orders, _ORDERS_MAP_CAP)
         return mem
+
+    # ----- favorites + profile (additive; never affect hard filters) -----
+    def toggle_favorite(self, mem: dict, item_id: str) -> bool:
+        favs = mem.setdefault("favorites", [])
+        if item_id in favs:
+            favs.remove(item_id)
+            return False
+        favs.append(item_id)
+        mem["favorites"] = favs[-50:]
+        return True
+
+    def get_profile(self, mem: dict) -> dict:
+        return dict(mem.get("profile") or {})
+
+    def save_profile(self, mem: dict, patch: dict) -> dict:
+        prof = dict(mem.get("profile") or {})
+        for k in ("dietary_restrictions", "allergies", "goal", "budget",
+                  "weekly_budget", "no_onion_garlic", "hunger", "cuisine",
+                  "max_spice", "max_prep_time", "health_conditions"):
+            if k in patch and patch[k] is not None:
+                prof[k] = patch[k]
+        mem["profile"] = prof
+        return prof
+
+    def record_health(self, mem: dict, stated: dict) -> list[str]:
+        """Persist user-stated health facts so next visits auto-respect them.
+
+        stated: {"goal":..|None, "dietary":[..], "allergies":[..], "conditions":[..]}.
+        Diet is REPLACED (a new claim supersedes), allergies/conditions UNION.
+        Returns the newly-added conditions (for acknowledgement replies).
+        """
+        prof = dict(mem.get("profile") or {})
+        if stated.get("goal"):
+            prof["goal"] = stated["goal"]
+        if stated.get("dietary"):
+            prof["dietary_restrictions"] = list(stated["dietary"])
+        if stated.get("allergies"):
+            cur = list(prof.get("allergies") or [])
+            for a in stated["allergies"]:
+                if a not in cur:
+                    cur.append(a)
+            prof["allergies"] = cur
+        added: list[str] = []
+        if stated.get("conditions"):
+            cur_c = list(mem.get("health_conditions") or []) + list(prof.get("health_conditions") or [])
+            for c in stated["conditions"]:
+                if c not in cur_c:
+                    cur_c.append(c)
+                    added.append(c)
+            mem["health_conditions"] = sorted(set(cur_c))
+            prof["health_conditions"] = sorted(set(cur_c))
+        mem["profile"] = prof
+        return added
+
+    def mark_warned(self, mem: dict, item_id: str) -> None:
+        warned = mem.setdefault("health_warned", {})
+        warned[item_id] = warned.get(item_id, 0) + 1
+        _cap_map(warned, _WARNED_CAP)
+
+    def was_warned(self, mem: dict, item_id: str) -> bool:
+        return int((mem.get("health_warned") or {}).get(item_id, 0)) > 0
+
+    def apply_profile_defaults(self, mem: dict, prefs: Any) -> Any:
+        """Fill prefs fields the user didn't state from their saved profile."""
+        prof = mem.get("profile") or {}
+        if not prof:
+            return prefs
+        try:
+            data = prefs.model_dump()
+            is_model = True
+        except Exception:
+            data = dict(prefs) if isinstance(prefs, dict) else {}
+            is_model = False
+        if not data.get("dietary_restrictions") and prof.get("dietary_restrictions"):
+            data["dietary_restrictions"] = list(prof["dietary_restrictions"])
+        if not data.get("allergies") and prof.get("allergies"):
+            try:
+                from backend.models import Allergen as _Alg
+                conv = []
+                for a in prof["allergies"]:
+                    try:
+                        conv.append(_Alg(a))
+                    except Exception:
+                        continue
+                if conv:
+                    data["allergies"] = conv
+            except Exception:
+                pass
+        def _missing(v: Any) -> bool:
+            # NOTE: `0 in (None, [], {}, False)` is True in Python (0 == False),
+            # so max_spice=0 ("no spice") must NOT count as missing.
+            return v is None or v is False or v == [] or v == {}
+
+        def _present(v: Any) -> bool:
+            return v is not None and v != [] and v != {}
+
+        for k in ("goal", "hunger", "cuisine", "max_spice", "max_prep_time",
+                  "no_onion_garlic", "budget"):
+            if _missing(data.get(k)) and _present(prof.get(k)):
+                # budget=False never happens; keep guard simple and safe
+                if k == "no_onion_garlic" and not prof.get(k):
+                    continue
+                data[k] = prof[k]
+        if is_model:
+            try:
+                from backend.models import UserPreferences as _UP
+                return _UP(**{k: v for k, v in data.items() if k in _UP.model_fields})
+            except Exception:
+                return prefs
+        return data
 
     # ----- derived personalization -----
     def usual_budget(self, mem: dict) -> Optional[float]:

@@ -81,6 +81,9 @@ class MenuItem(BaseModel):
     prep_time_minutes: int = Field(..., ge=2, le=25)
     calories: int = Field(..., ge=0)
     protein_g: int = Field(default=0, ge=0, description="protein grams (for gym/diet goals)")
+    carbs_g: int = Field(default=0, ge=0, description="carbs grams, estimated (for diabetic/low-carb goals)")
+    sugar_g: int = Field(default=0, ge=0, description="sugar grams, estimated incl. natural sugars")
+    fiber_g: int = Field(default=0, ge=0, description="fiber grams, estimated")
     portion_size: PortionSize
     spice_level: int = Field(..., ge=0, le=3)
     taste_profile: List[str] = Field(default_factory=list)
@@ -124,4 +127,5 @@ class UserPreferences(BaseModel):
     max_spice: Optional[int] = None
     combos_only: bool = False
     no_onion_garlic: bool = False
-    goal: Optional[str] = None  # high_protein / low_calorie / None
+    avoid: List[str] = Field(default_factory=list, description="food words to exclude (without/don't want)")
+    goal: Optional[str] = None  # high_protein / low_calorie / diabetic / None

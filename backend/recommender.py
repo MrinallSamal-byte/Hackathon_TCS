@@ -47,6 +47,47 @@ CRAVING_TO_TASTE: dict[str, str] = {
 
 MEAT_KEYWORDS = {"chicken", "mutton", "fish", "egg", "prawn", "seafood", "keema", "meat", "non-veg", "non veg"}
 
+# Deep-fried / refined-carb flags for honest diabetic scoring (labels, not filters).
+FRIED_KEYWORDS = {"fried", "samosa", "vada", "fries", "bhature", "pakora", "jalebi", "bajji"}
+WHOLE_FRUIT_IDS = {"jain_fruit_bowl"}
+
+
+def _has_added_sugar(item: MenuItem) -> bool:
+    return any(w in " ".join(item.ingredients).lower()
+               for w in ["sugar", "jaggery", "honey", "syrup", "chocolate", "ice cream"])
+
+
+def diabetic_fit(item: MenuItem) -> bool:
+    """Strict lower-sugar suitability (soft signal; NEVER a hard filter).
+
+    Whole fruit is allowed despite natural sugars; deep-fried items, desserts
+    and added-sugar drinks never qualify no matter how small the portion.
+    """
+    name_ing = (item.name + " " + " ".join(item.ingredients)).lower()
+    if any(k in name_ing for k in FRIED_KEYWORDS):
+        return False
+    if item.category.value == "dessert" and item.id not in WHOLE_FRUIT_IDS:
+        return False
+    if (item.category.value == "beverage" and item.sugar_g > 5
+            and _has_added_sugar(item)):
+        return False
+    return item.sugar_g <= 10 and item.carbs_g <= 45
+
+
+def diabetic_score(item: MenuItem) -> tuple[float, str]:
+    """Data-grounded diabetic signal. Returns (points, tier).
+
+    Tiers: fit (genuinely lower-sugar) / watch (ok in small portions) / avoid.
+    """
+    if diabetic_fit(item):
+        pts = 16.0 + min(6.0, item.fiber_g * 1.0 + item.protein_g * 0.3)
+        return round(pts, 2), "fit"
+    if item.category.value == "dessert" or item.sugar_g > 28:
+        return -25.0, "avoid"
+    if item.sugar_g > 15 or item.carbs_g > 60:
+        return -10.0, "avoid"
+    return 4.0, "watch"
+
 
 def normalize_mood(raw: Optional[str]) -> Optional[str]:
     if not raw:
@@ -139,6 +180,12 @@ def passes_hard_filters(item: MenuItem, prefs: UserPreferences, meal: Optional[s
     if prefs.cuisine and item.cuisine.value != prefs.cuisine:
         # combos with mixed cuisine still must match if user pinned a cuisine
         return False
+    if prefs.avoid:
+        # "without paneer" / "don't want maggi" — hard exclusion on
+        # name + ingredients (substring, case-insensitive).
+        hay = (item.name + " " + " ".join(item.ingredients)).lower()
+        if any(a in hay for a in prefs.avoid):
+            return False
     if meal and not prefs.combos_only:
         st = {s.value for s in item.serving_times}
         if meal not in st and "all_day" not in st:
@@ -195,6 +242,10 @@ def soft_score(item: MenuItem, prefs: UserPreferences, meal: Optional[str]) -> t
         parts["goal"] = 12.0 if item.protein_g >= 15 else (6.0 if item.protein_g >= 8 else 0.0)
     elif goal == "low_calorie":
         parts["goal"] = 12.0 if item.calories <= 300 else (6.0 if item.calories <= 450 else 0.0)
+    elif goal == "diabetic":
+        # Tier is re-derived in explain_item (never stored in score parts —
+        # they must stay numeric for sum()).
+        parts["goal"] = diabetic_score(item)[0]
 
     # Small cuisine nudge (not in spec points, folded into time slot to keep spec weights exact).
     total = sum(parts.values())
@@ -253,6 +304,16 @@ def detect_conflict(prefs: UserPreferences) -> Optional[str]:
             f"'{', '.join(prefs.cravings)}'. I'll show the best {which} matches — "
             "meat/egg items are filtered out by your dietary rule."
         )
+    if (prefs.goal or "").lower() == "diabetic":
+        sweet_words = {"sweet", "dessert", "chocolate", "mithai", "shake", "ice cream",
+                       "jalebi", "brownie", "cake", "pastry", "candy", "soda", "cola",
+                       "lassi", "halwa", "kheer", "jamun", "rasgulla", "jaggery"}
+        if any(k in craves for k in sweet_words):
+            return (
+                "Quick flag: heavy sweets can spike blood sugar with diabetes — "
+                "I'm showing the lowest-sugar options that still satisfy the craving. "
+                "This isn't medical advice; when in doubt, check with your doctor."
+            )
     return None
 
 
@@ -297,6 +358,15 @@ def explain_item(item: MenuItem, prefs: UserPreferences, meal: Optional[str],
         bits.append(f"packs {item.protein_g}g protein for your gym goal")
     elif goal == "low_calorie" and item.calories <= 450:
         bits.append(f"just {item.calories} kcal, fits your light-diet goal")
+    elif goal == "diabetic":
+        # Honest tiers only — never call a fried/sugary item "diabetic-friendly".
+        _pts, tier = diabetic_score(item)
+        if tier == "fit":
+            bits.append(f"lower-sugar pick ({item.sugar_g}g sugar, {item.carbs_g}g carbs) for your sugar goal")
+        elif tier == "watch":
+            bits.append(f"moderate on sugar ({item.sugar_g}g sugar, {item.carbs_g}g carbs) — keep the portion small")
+        else:
+            bits.append(f"high in sugar/carbs ({item.sugar_g}g sugar, {item.carbs_g}g carbs) — best avoided for your sugar goal")
     if pair is not None:
         total = item.price + pair.price
         left = (prefs.budget - total) if prefs.budget is not None else None
@@ -312,6 +382,10 @@ def explain_item(item: MenuItem, prefs: UserPreferences, meal: Optional[str],
 def substitutes_for(target: MenuItem, pool: list[MenuItem], prefs: UserPreferences,
                     meal: Optional[str], n: int = 3) -> list[MenuItem]:
     cands = [i for i in pool if i.availability and i.id != target.id and passes_dietary(i, prefs)]
+    if prefs.avoid:
+        cands = [i for i in cands
+                 if not any(a in (i.name + " " + " ".join(i.ingredients)).lower()
+                            for a in prefs.avoid)]
     if prefs.budget is not None:
         cands = [i for i in cands if i.price <= prefs.budget]
     def closeness(i: MenuItem) -> float:
@@ -355,6 +429,10 @@ def recommend(
         for i in all_items:
             if not i.is_combo or not i.availability:
                 continue
+            if p.avoid:
+                hay = (i.name + " " + " ".join(i.ingredients)).lower()
+                if any(a in hay for a in p.avoid):
+                    continue
             if p.budget is not None and i.price > p.budget + 1e-9:
                 continue
             if p.max_prep_time is not None and effective_prep_time(i, queue) > p.max_prep_time:

@@ -69,6 +69,57 @@ class MenuStore:
             self.save()
         return item
 
+    def update_item(self, item_id: str, patch: dict, persist: bool = True) -> MenuItem:
+        """Generic admin edit (additive): price, prep_time, popularity, nutrition, availability."""
+        item = self._require(item_id)
+        allowed = {"price", "prep_time_minutes", "popularity_score", "calories",
+                   "protein_g", "carbs_g", "sugar_g", "fiber_g",
+                   "availability", "description", "spice_level"}
+        data = item.model_dump()
+        for k, v in (patch or {}).items():
+            if k not in allowed:
+                continue
+            if k == "price" and (not isinstance(v, (int, float)) or v < 0):
+                raise ValueError("Price must be >= 0")
+            if k == "prep_time_minutes" and (not isinstance(v, int) or isinstance(v, bool) or not 2 <= v <= 25):
+                raise ValueError("prep_time_minutes must be an integer 2..25")
+            if k == "popularity_score" and (not isinstance(v, int) or not 0 <= v <= 100):
+                raise ValueError("popularity_score must be 0..100")
+            if k in ("calories", "protein_g", "carbs_g", "sugar_g", "fiber_g") \
+                    and (not isinstance(v, int) or isinstance(v, bool) or v < 0):
+                raise ValueError(f"{k} must be an integer >= 0")
+            if k == "spice_level" and (not isinstance(v, int) or not 0 <= v <= 3):
+                raise ValueError("spice_level must be 0..3")
+            if k == "availability" and not isinstance(v, bool):
+                raise ValueError("availability must be boolean")
+            data[k] = v
+        from backend.models import MenuItem as _MI
+        updated = _MI(**data)
+        self._items[item_id] = updated
+        if persist:
+            self.save()
+        return updated
+
+    def bulk_availability(self, ids: list[str], available: bool, persist: bool = True) -> int:
+        n = 0
+        for i in ids or []:
+            if i in self._items:
+                self._items[i].availability = available
+                n += 1
+        if persist and n:
+            self.save()
+        return n
+
+    def mark_all_live(self, persist: bool = True) -> int:
+        n = 0
+        for it in self._items.values():
+            if not it.availability:
+                it.availability = True
+                n += 1
+        if persist and n:
+            self.save()
+        return n
+
     def add_item(self, data: dict, persist: bool = True) -> MenuItem:
         item = MenuItem(**data)
         if item.id in self._items:
