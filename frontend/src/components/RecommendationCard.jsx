@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Clock, Flame, Wheat, ThumbsUp, ThumbsDown, ChevronDown, Plus, UtensilsCrossed, Sparkles, Heart, MessageSquare } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { Clock, Flame, Wheat, ThumbsUp, ThumbsDown, ChevronDown, Plus, UtensilsCrossed, Sparkles, Heart, MessageSquare, X, AlertTriangle, ShoppingBag } from 'lucide-react';
 import { Badge, DietMarker } from './bits.jsx';
 import { api } from '../api.js';
 import { num } from './panels.jsx';
@@ -27,11 +28,13 @@ export function RecommendationCard({ card, onAdd, onFeedback, onAlternatives, is
   const [reviewComment, setReviewComment] = useState('');
   const [reviewVote, setReviewVote] = useState(1);
   const [details, setDetails] = useState(null);
+
   const openDetails = async () => {
     if (card.is_dynamic || !card.id) return;
     try { setDetails(await api.getItem(card.id)); }
     catch { setDetails({ error: true, name: card.name }); }
   };
+
   const loadReviews = async () => {
     if (!showReviews && !reviews && !reviewsError && card.id && !card.is_dynamic) {
       try { setReviews(await api.reviews(card.id)); }
@@ -39,6 +42,7 @@ export function RecommendationCard({ card, onAdd, onFeedback, onAlternatives, is
     }
     setShowReviews(!showReviews);
   };
+
   const isTryOrSpecial = Boolean(card.explanation && (
     card.explanation.toLowerCase().includes('give it a try') ||
     card.explanation.toLowerCase().includes('chef') ||
@@ -47,9 +51,33 @@ export function RecommendationCard({ card, onAdd, onFeedback, onAlternatives, is
     card.explanation.toLowerCase().includes('favorite')
   ));
   const [open, setOpen] = useState(isTryOrSpecial);
+
   // Cards are keyed by id in most lists, but identical ids can be reused at
   // the same position across searches — resync disclosure state per dish.
-  useEffect(() => { setOpen(isTryOrSpecial); setShowReviews(false); setReviews(null); setReviewsError(false); setReviewComment(''); }, [card.id]); // eslint-disable-line
+  useEffect(() => {
+    setOpen(isTryOrSpecial);
+    setShowReviews(false);
+    setReviews(null);
+    setReviewsError(false);
+    setReviewComment('');
+  }, [card.id]); // eslint-disable-line
+
+  // Prevent background body scrolling and enable Escape to close modal
+  useEffect(() => {
+    if (details) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      const onKeyDown = (e) => {
+        if (e.key === 'Escape') setDetails(null);
+      };
+      window.addEventListener('keydown', onKeyDown);
+      return () => {
+        document.body.style.overflow = prev;
+        window.removeEventListener('keydown', onKeyDown);
+      };
+    }
+  }, [details]);
+
   const soldOut = card.availability === false;
   const badges = [];
   const tags = new Set(card.dietary_tags || []);
@@ -118,13 +146,18 @@ export function RecommendationCard({ card, onAdd, onFeedback, onAlternatives, is
         )}
       </div>
       <div className="card-foot">
-        <span style={{ display: 'flex', gap: 4 }}>
+        <span style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
           <button className="why-btn" onClick={() => setOpen(!open)} aria-expanded={open}>
             <Sparkles size={14} /> WHY THIS PICK <ChevronDown size={14} style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
           </button>
           {!card.is_dynamic && (
             <button className="why-btn" onClick={openDetails} aria-label={`Full details for ${card.name}`}>
               DETAILS
+            </button>
+          )}
+          {!card.is_dynamic && (
+            <button className="why-btn" onClick={loadReviews} aria-expanded={showReviews}>
+              <MessageSquare size={13} /> {showReviews ? 'HIDE REVIEWS' : `REVIEWS${reviews ? ` (${reviews.review_count})` : ''}`}
             </button>
           )}
         </span>
@@ -154,113 +187,287 @@ export function RecommendationCard({ card, onAdd, onFeedback, onAlternatives, is
         </span>
       </div>
       {open && card.explanation && <p className="why-text">{card.explanation}</p>}
-      {!card.is_dynamic && (
-        <div style={{ padding: '0 16px 12px' }}>
-          <button className="why-btn" onClick={loadReviews} aria-expanded={showReviews} style={{ fontSize: 12 }}>
-            <MessageSquare size={13} /> {showReviews ? 'HIDE REVIEWS' : `REVIEWS${reviews ? ` (${reviews.review_count})` : ''}`}
-          </button>
-          {showReviews && (
-            <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {reviewsError && (
-                <div style={{ fontSize: 12.5, color: 'var(--red-text)' }}>Could not load reviews — check connection and retry.</div>
-              )}
-              {!reviewsError && (reviews && reviews.comments && reviews.comments.length > 0 ? reviews.comments.slice(0, 3).map((r, i) => (
-                <div key={`${r.at || 'norev'}-${i}`} style={{ fontSize: 12.5, color: 'var(--text-2)', background: 'var(--surface-2)', borderRadius: 10, padding: '6px 10px' }}>
-                  {r.rating > 0 ? '👍 ' : r.rating < 0 ? '👎 ' : ''}{r.comment}
-                </div>
-              )) : (
+      {!card.is_dynamic && showReviews && (
+        <div style={{ padding: '0 16px 12px', marginTop: 8 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {reviewsError && (
+              <div style={{ fontSize: 12.5, color: 'var(--red-text)' }}>Could not load reviews — check connection and retry.</div>
+            )}
+            {!reviewsError && (
+              reviews && reviews.comments && reviews.comments.length > 0 ? (
+                reviews.comments.slice(0, 3).map((r, i) => (
+                  <div key={`${r.at || 'norev'}-${i}`} style={{ fontSize: 12.5, color: 'var(--text-2)', background: 'var(--surface-2)', borderRadius: 10, padding: '6px 10px' }}>
+                    {r.rating > 0 ? '👍 ' : r.rating < 0 ? '👎 ' : ''}{r.comment}
+                  </div>
+                ))
+              ) : (
                 <div style={{ fontSize: 12.5, color: 'var(--text-3)' }}>No written reviews yet — be the first with a comment below.</div>
-              ))}
-              <span style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                <button
-                  type="button" className="icon-btn" aria-label="Review as liked" title="Review as liked"
-                  aria-pressed={reviewVote > 0} onClick={() => setReviewVote(1)}
-                  style={reviewVote > 0 ? { color: 'var(--brand)' } : undefined}
-                >
-                  <ThumbsUp size={14} strokeWidth={1.8} />
-                </button>
-                <button
-                  type="button" className="icon-btn" aria-label="Review as disliked" title="Review as disliked"
-                  aria-pressed={reviewVote < 0} onClick={() => setReviewVote(-1)}
-                  style={reviewVote < 0 ? { color: 'var(--brand)' } : undefined}
-                >
-                  <ThumbsDown size={14} strokeWidth={1.8} />
-                </button>
-                <input
-                  aria-label={`Write a review for ${card.name}`}
-                  placeholder="Add a quick review..."
-                  value={reviewComment}
-                  onChange={(e) => setReviewComment(e.target.value)}
-                  style={{ flex: 1, background: 'var(--surface-2)', border: '1px solid var(--hairline)', borderRadius: 10, padding: '8px 10px', color: 'var(--text-1)', fontSize: 12.5 }}
-                />
-                <button
-                  className="btn btn-secondary" style={{ padding: '8px 12px', fontSize: 12 }}
-                  onClick={() => { if (reviewComment.trim() && onFeedback) { onFeedback(card, reviewVote, reviewComment.trim()); setReviewComment(''); setReviews(null); setReviewsError(false); } }}
-                >
-                  Post
-                </button>
-              </span>
-            </div>
-          )}
+              )
+            )}
+            <span style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 4 }}>
+              <button
+                type="button" className="icon-btn" aria-label="Review as liked" title="Review as liked"
+                aria-pressed={reviewVote > 0} onClick={() => setReviewVote(1)}
+                style={reviewVote > 0 ? { color: 'var(--brand)' } : undefined}
+              >
+                <ThumbsUp size={14} strokeWidth={1.8} />
+              </button>
+              <button
+                type="button" className="icon-btn" aria-label="Review as disliked" title="Review as disliked"
+                aria-pressed={reviewVote < 0} onClick={() => setReviewVote(-1)}
+                style={reviewVote < 0 ? { color: 'var(--brand)' } : undefined}
+              >
+                <ThumbsDown size={14} strokeWidth={1.8} />
+              </button>
+              <input
+                aria-label={`Write a review for ${card.name}`}
+                placeholder="Add a quick review..."
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+                style={{ flex: 1, background: 'var(--surface-2)', border: '1px solid var(--hairline)', borderRadius: 10, padding: '8px 10px', color: 'var(--text-1)', fontSize: 12.5 }}
+              />
+              <button
+                className="btn btn-secondary" style={{ padding: '8px 12px', fontSize: 12 }}
+                onClick={() => { if (reviewComment.trim() && onFeedback) { onFeedback(card, reviewVote, reviewComment.trim()); setReviewComment(''); setReviews(null); setReviewsError(false); } }}
+              >
+                Post
+              </button>
+            </span>
+          </div>
         </div>
       )}
-      {details && (
+
+      {/* Full Details Modal - Rendered into document.body to escape any parent CSS transforms */}
+      {details && typeof document !== 'undefined' && createPortal(
         <div
-          role="dialog" aria-modal="true" aria-label={`${details.name || card.name} details`}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${details.name || card.name} details`}
           onClick={(e) => { if (e.target === e.currentTarget) setDetails(null); }}
           style={{
-            position: 'fixed', inset: 0, zIndex: 90, background: 'rgba(0,0,0,0.6)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9999,
+            background: 'rgba(0, 0, 0, 0.68)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 16,
+            animation: 'fadeIn 0.2s ease',
           }}
         >
-          <div style={{
-            background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 20,
-            padding: 24, maxWidth: 440, width: '100%', maxHeight: '80vh', overflowY: 'auto',
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-              <strong style={{ fontSize: 18 }}>{details.name || card.name}</strong>
-              <button type="button" className="icon-btn" aria-label="Close details" onClick={() => setDetails(null)}>✕</button>
+          <div
+            style={{
+              background: 'var(--surface)',
+              border: '1.5px solid var(--hairline)',
+              borderRadius: 24,
+              padding: '24px 24px 20px',
+              maxWidth: 480,
+              width: '100%',
+              maxHeight: '88vh',
+              overflowY: 'auto',
+              boxShadow: '0 24px 60px rgba(0, 0, 0, 0.45)',
+              animation: 'rise 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 14,
+            }}
+          >
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 6 }}>
+                  <DietMarker tags={details.dietary_tags || card.dietary_tags} />
+                  {(details.category || card.category) && (
+                    <span className="badge" style={{ textTransform: 'uppercase' }}>
+                      {(details.category || card.category).replace('_', ' ')}
+                    </span>
+                  )}
+                  {(details.is_combo || card.is_combo) && (
+                    <span className="badge" style={{ background: 'var(--brand-soft)', color: 'var(--brand)', fontWeight: 800 }}>
+                      COMBO
+                    </span>
+                  )}
+                </div>
+                <h3 style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-1)', margin: 0, letterSpacing: '-0.02em' }}>
+                  {details.name || card.name}
+                </h3>
+              </div>
+              <button
+                type="button"
+                className="icon-btn"
+                aria-label="Close details"
+                onClick={() => setDetails(null)}
+                style={{ width: 34, height: 34, borderRadius: '50%', flexShrink: 0 }}
+              >
+                <X size={18} strokeWidth={2} />
+              </button>
             </div>
+
             {details.error ? (
               <p style={{ color: 'var(--text-2)', fontSize: 14 }}>Could not load details — check connection.</p>
             ) : (
               <>
-                <p style={{ color: 'var(--text-2)', fontSize: 13.5, lineHeight: 1.55 }}>{details.description}</p>
-                <div className="micro-label mono" style={{ margin: '10px 0 4px' }}>
-                  ₹{num(details.price).toFixed(0)} · {details.prep_time_minutes} MIN · {details.calories} KCAL · {details.protein_g ?? 0}G PROTEIN · {details.carbs_g ?? 0}G CARBS · {details.sugar_g ?? 0}G SUGAR · {details.fiber_g ?? 0}G FIBER · SPICE {details.spice_level}/3
+                {/* Price & Prep hero bar */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  justifyContent: 'space-between',
+                  background: 'var(--surface-2)',
+                  padding: '12px 16px',
+                  borderRadius: 16,
+                  border: '1px solid var(--hairline)',
+                }}>
+                  <div className="item-price mono" style={{ fontSize: 24, fontWeight: 800 }}>
+                    ₹{num(details.price ?? card.price).toFixed(0)}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13, color: 'var(--text-2)' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      <Clock size={14} color="var(--brand)" /> {details.prep_time_minutes ?? card.prep_time_minutes} MIN
+                    </span>
+                    <Spice level={details.spice_level ?? card.spice_level ?? 0} />
+                  </div>
                 </div>
+
+                {/* Description */}
+                {(details.description || card.description) && (
+                  <p style={{ color: 'var(--text-2)', fontSize: 13.5, lineHeight: 1.55, margin: 0 }}>
+                    {details.description || card.description}
+                  </p>
+                )}
+
+                {/* Nutrition Grid */}
+                <div>
+                  <div className="micro-label" style={{ marginBottom: 6, color: 'var(--text-2)' }}>
+                    NUTRITION BREAKDOWN (PER SERVING)
+                  </div>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(4, 1fr)',
+                    gap: 8,
+                  }}>
+                    <div style={{ background: 'var(--surface-2)', padding: '8px 6px', borderRadius: 12, textAlign: 'center', border: '1px solid var(--hairline)' }}>
+                      <div className="micro-label" style={{ fontSize: 9.5, color: 'var(--text-3)' }}>CALORIES</div>
+                      <div className="mono" style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-1)', marginTop: 2 }}>
+                        {details.calories ?? 0}
+                      </div>
+                      <div style={{ fontSize: 9, color: 'var(--text-3)' }}>kcal</div>
+                    </div>
+                    <div style={{ background: 'var(--surface-2)', padding: '8px 6px', borderRadius: 12, textAlign: 'center', border: '1px solid var(--hairline)' }}>
+                      <div className="micro-label" style={{ fontSize: 9.5, color: (details.protein_g ?? 0) >= 15 ? '#10B981' : 'var(--text-3)' }}>PROTEIN</div>
+                      <div className="mono" style={{ fontSize: 14, fontWeight: 700, color: (details.protein_g ?? 0) >= 15 ? '#10B981' : 'var(--text-1)', marginTop: 2 }}>
+                        {details.protein_g ?? 0}g
+                      </div>
+                      <div style={{ fontSize: 9, color: (details.protein_g ?? 0) >= 15 ? '#10B981' : 'var(--text-3)' }}>
+                        {(details.protein_g ?? 0) >= 15 ? 'high' : 'standard'}
+                      </div>
+                    </div>
+                    <div style={{ background: 'var(--surface-2)', padding: '8px 6px', borderRadius: 12, textAlign: 'center', border: '1px solid var(--hairline)' }}>
+                      <div className="micro-label" style={{ fontSize: 9.5, color: 'var(--text-3)' }}>CARBS</div>
+                      <div className="mono" style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-1)', marginTop: 2 }}>
+                        {details.carbs_g ?? 0}g
+                      </div>
+                      <div style={{ fontSize: 9, color: 'var(--text-3)' }}>energy</div>
+                    </div>
+                    <div style={{ background: 'var(--surface-2)', padding: '8px 6px', borderRadius: 12, textAlign: 'center', border: '1px solid var(--hairline)' }}>
+                      <div className="micro-label" style={{ fontSize: 9.5, color: (details.sugar_g ?? 0) <= 5 ? '#10B981' : (details.sugar_g ?? 0) > 15 ? 'var(--red)' : 'var(--text-3)' }}>SUGAR</div>
+                      <div className="mono" style={{ fontSize: 14, fontWeight: 700, color: (details.sugar_g ?? 0) <= 5 ? '#10B981' : (details.sugar_g ?? 0) > 15 ? 'var(--red)' : 'var(--text-1)', marginTop: 2 }}>
+                        {details.sugar_g ?? 0}g
+                      </div>
+                      <div style={{ fontSize: 9, color: (details.sugar_g ?? 0) <= 5 ? '#10B981' : (details.sugar_g ?? 0) > 15 ? 'var(--red)' : 'var(--text-3)' }}>
+                        {(details.sugar_g ?? 0) <= 5 ? 'low' : (details.sugar_g ?? 0) > 15 ? 'high' : 'moderate'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Ingredients */}
                 {(details.ingredients || []).length > 0 && (
-                  <div style={{ fontSize: 13, color: 'var(--text-2)', marginTop: 6 }}>
-                    <span className="micro-label">INGREDIENTS — </span>{details.ingredients.join(', ')}
+                  <div style={{ background: 'var(--surface-2)', padding: '10px 14px', borderRadius: 12, fontSize: 12.5, border: '1px solid var(--hairline)' }}>
+                    <span className="micro-label" style={{ color: 'var(--text-3)', display: 'block', marginBottom: 4 }}>
+                      INGREDIENTS
+                    </span>
+                    <span style={{ color: 'var(--text-1)', lineHeight: 1.5 }}>
+                      {details.ingredients.join(', ')}
+                    </span>
                   </div>
                 )}
+
+                {/* Allergens warning */}
                 {(details.allergens || []).length > 0 && (
-                  <div style={{ fontSize: 13, color: 'var(--brand)', marginTop: 6, fontWeight: 700 }}>
-                    CONTAINS: {details.allergens.join(', ').toUpperCase()}
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    background: 'var(--brand-soft)', border: '1px solid var(--brand-soft-border)',
+                    padding: '8px 12px', borderRadius: 12, color: 'var(--brand)', fontSize: 12, fontWeight: 700,
+                  }}>
+                    <AlertTriangle size={15} strokeWidth={2} style={{ flexShrink: 0 }} />
+                    <span>CONTAINS ALLERGENS: {details.allergens.join(', ').toUpperCase()}</span>
                   </div>
                 )}
-                <div style={{ fontSize: 12.5, color: 'var(--text-2)', marginTop: 6 }}>
-                  {(details.dietary_tags || []).join(' · ').toUpperCase() || 'NO DIET TAGS'}
-                  {(details.likes > 0 || details.dislikes > 0) && ` · ${details.likes} LIKED / ${details.dislikes} PASSED`}
+
+                {/* Dietary Tags & Student Reviews */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, fontSize: 12, color: 'var(--text-2)' }}>
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    {(details.dietary_tags || []).map((t) => (
+                      <Badge key={t}>{t.replace('_', ' ').toUpperCase()}</Badge>
+                    ))}
+                  </div>
+                  {(details.likes > 0 || details.dislikes > 0) && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
+                      <ThumbsUp size={12} color="var(--brand)" /> {details.likes} student{details.likes === 1 ? '' : 's'} liked
+                    </div>
+                  )}
                 </div>
+
+                {/* Sold Out & Alternatives */}
                 {details.sold_out_note && (
-                  <p style={{ color: 'var(--brand)', fontSize: 13, fontWeight: 700 }}>{details.sold_out_note}</p>
+                  <div style={{ background: 'var(--surface-2)', border: '1px solid var(--brand)', borderRadius: 12, padding: '10px 14px', color: 'var(--brand)', fontSize: 13, fontWeight: 700 }}>
+                    {details.sold_out_note}
+                  </div>
                 )}
                 {(details.alternatives || []).length > 0 && (
-                  <div style={{ marginTop: 10 }}>
-                    <div className="micro-label">CLOSEST ALTERNATIVES</div>
+                  <div>
+                    <div className="micro-label" style={{ marginBottom: 6 }}>CLOSEST ALTERNATIVES</div>
                     {details.alternatives.map((a) => (
-                      <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: '1px solid var(--hairline)', fontSize: 13 }}>
-                        <span>{a.name} · ₹{num(a.price).toFixed(0)}</span>
+                      <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, padding: '8px 10px', background: 'var(--surface-2)', borderRadius: 10, marginBottom: 6, fontSize: 13 }}>
+                        <span style={{ fontWeight: 600 }}>{a.name} · ₹{num(a.price).toFixed(0)}</span>
                         <button className="btn-add" onClick={() => { onAdd && onAdd(a); setDetails(null); }}>+ ADD</button>
                       </div>
                     ))}
                   </div>
                 )}
+
+                {/* Actions */}
+                <div style={{ marginTop: 6, paddingTop: 12, borderTop: '1px solid var(--hairline)', display: 'flex', gap: 10 }}>
+                  {soldOut || details.availability === false ? (
+                    <button
+                      className="btn btn-danger" style={{ flex: 1 }}
+                      onClick={() => { onAlternatives && onAlternatives(card); setDetails(null); }}
+                    >
+                      SEE ALTERNATIVES
+                    </button>
+                  ) : (
+                    <button
+                      className="btn btn-primary" style={{ flex: 1, padding: '12px 18px', fontSize: 13.5, fontWeight: 800 }}
+                      onClick={() => { onAdd && onAdd(details || card); setDetails(null); }}
+                    >
+                      <ShoppingBag size={16} /> ADD TO TRAY · ₹{num(details.price ?? card.price).toFixed(0)}
+                    </button>
+                  )}
+                  <button
+                    className="btn btn-secondary" style={{ padding: '12px 16px' }}
+                    onClick={() => setDetails(null)}
+                  >
+                    Close
+                  </button>
+                </div>
               </>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </article>
   );

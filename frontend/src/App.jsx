@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Send, SlidersHorizontal, ShoppingBag, Trash2, LayoutGrid,
   MessageSquare, Sun, Moon, Plus, UtensilsCrossed, Flame,
@@ -145,6 +146,21 @@ export default function App() {
   useEffect(() => {
     if (tray.length === 0) setSheetHidden(false);
   }, [tray.length]);
+
+  useEffect(() => {
+    if (orderModal) {
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      const onKeyDown = (e) => {
+        if (e.key === 'Escape') setOrderModal(null);
+      };
+      window.addEventListener('keydown', onKeyDown);
+      return () => {
+        document.body.style.overflow = prevOverflow;
+        window.removeEventListener('keydown', onKeyDown);
+      };
+    }
+  }, [orderModal]);
 
   async function send(text, silent) {
     const msg = (text || '').trim();
@@ -773,21 +789,22 @@ export default function App() {
       )}
 
       {/* Order Confirmation Modal */}
-      {orderModal && (
+      {orderModal && typeof document !== 'undefined' && createPortal(
         <div
           role="dialog" aria-modal="true" aria-label={`Order ${orderModal.token} confirmed`}
           onKeyDown={(e) => { if (e.key === 'Escape') setOrderModal(null); }}
           onClick={(e) => { if (e.target === e.currentTarget) setOrderModal(null); }}
           style={{
-            position: 'fixed', inset: 0, zIndex: 100,
-            background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(10px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20
+            position: 'fixed', inset: 0, zIndex: 9999,
+            background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+            animation: 'fadeIn 0.2s ease-out'
           }}
         >
           <div style={{
             background: 'var(--surface)', border: '1.5px solid var(--brand-soft-border)',
             borderRadius: 32, padding: '36px 28px', maxWidth: 460, width: '100%',
-            textAlign: 'center', boxShadow: 'var(--shadow-elevated)', animation: 'rise 0.3s ease'
+            textAlign: 'center', boxShadow: 'var(--shadow-elevated)', animation: 'modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
           }}>
             <div style={{
               width: 64, height: 64, borderRadius: '50%', background: 'var(--brand-soft)',
@@ -849,7 +866,8 @@ export default function App() {
               </button>
             </span>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       <Toast text={toast} />
