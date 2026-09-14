@@ -153,6 +153,11 @@ export default function App() {
     if (!silent) setMessages((m) => [...m, nextMsg({ role: 'user', text: msg })]);
     setInput('');
     setLoading(true);
+    // Clear stale results at request start so the typing indicator never
+    // stacks above last turn's cards (skeleton + old picks looked broken).
+    setCards([]);
+    setSuggest(null);
+    setQuickAdd([]);
     const effPrefs = withVeg(prefs);
     try {
       const r = await api.chat(msg, effPrefs, undefined, sid);
@@ -698,8 +703,6 @@ export default function App() {
                   <FilterDrawer filters={filters} onChange={setFilters} onApply={browseWithFilters} />
                 </div>
               )}
-
-              <div ref={bottomRef} />
             </div>
 
             {/* Chat Composer Sticky inside Chat Column - Never overlaps sidebar */}
@@ -734,6 +737,9 @@ export default function App() {
                 </button>
               </div>
             </div>
+            {/* Scroll target AFTER the composer: at full scroll the input rests
+                in-flow below the last card instead of sticking over it. */}
+            <div ref={bottomRef} />
           </main>
 
           {railPanel}

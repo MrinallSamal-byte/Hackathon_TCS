@@ -97,7 +97,7 @@ export function RecommendationCard({ card, onAdd, onFeedback, onAlternatives, is
         </div>
         {(card.likes > 0 || card.dislikes > 0) && (
           <div className="micro-label" style={{ marginTop: 8, display: 'flex', gap: 6, alignItems: 'center', color: 'var(--text-2)' }}>
-            <ThumbsUp size={12} strokeWidth={2} color="var(--brand)" /> {card.likes} students recommend{card.dislikes > 0 ? ` · ${card.dislikes} passed` : ''}
+            <ThumbsUp size={12} strokeWidth={2} color="var(--brand)" /> {card.likes} student{card.likes === 1 ? '' : 's'} recommend{card.dislikes > 0 ? ` · ${card.dislikes} disliked` : ''}
           </div>
         )}
         <div className="card-row3">
