@@ -458,6 +458,20 @@ export default function App() {
     </aside>
   );
 
+  const goToAbout = () => {
+    setMobileMenuOpen(false);
+    if (view !== 'home') {
+      setView('home');
+      setTimeout(() => {
+        const el = document.getElementById('about');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 90);
+    } else {
+      const el = document.getElementById('about');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="app-shell">
       {/* Floating Cravio Navigation Header */}
@@ -481,6 +495,12 @@ export default function App() {
               onClick={() => { setView('home'); setMobileMenuOpen(false); }}
             >
               Home
+            </button>
+            <button
+              className="nav-link"
+              onClick={goToAbout}
+            >
+              About
             </button>
             <button
               className={`nav-link${view === 'chat' ? ' active' : ''}`}
@@ -553,6 +573,12 @@ export default function App() {
               onClick={() => { setView('home'); setMobileMenuOpen(false); }}
             >
               Home
+            </button>
+            <button
+              className="nav-link"
+              onClick={goToAbout}
+            >
+              About Team
             </button>
             <button
               className={`nav-link${view === 'chat' ? ' active' : ''}`}

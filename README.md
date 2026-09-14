@@ -23,8 +23,29 @@ leftover tray budget gets filled with the best sides.
 
 ---
 
+## 🏆 About the Project & TCS Hackathon Sprint
+
+> **Built in under 1 hour during a Hackathon conducted by TCS.**  
+> **Team:** **Mrinal Samal** + 5 other teammates (Team of 6).  
+> **Challenge:** Create a base recommendation system for a college canteen.
+
+When given the problem statement to create a base recommendation system for a campus canteen, our team (**Mrinal Samal and 5 teammates**) decided to explore the frontier of modern rapid AI-assisted development. Instead of submitting a basic recommendation script, we built **biteMatch** — a feature-rich, full-stack AI food discovery platform:
+
+- **Multimodal AI Craving Search**: Natural language voice input & Hinglish parsing (`"Rs 60 mein kuch spicy veg"`).
+- **Deterministic Core + Hybrid LLM**: High-speed deterministic filtering paired with OpenRouter LLM reasoning with guaranteed zero hallucinations.
+- **Smart Combinatorics & Tray Auto-fill**: Budget-optimized combo pairing, parallel prep time calculations, and leftover budget auto-filling.
+- **Clinical Nutrition & Allergen Guards**: Diabetic GI/carb bounds, strict Jain (no onion/garlic), vegan, halal, and allergen verification.
+- **Live Counter Telemetry & Kitchen Ticketing**: Token state machine, parallel prep ETA calculation, receipt generator, and Canteen Admin dashboard.
+- **158 Automated Unit Tests**: Robust test coverage across all NLU, API, recommender, and memory logic.
+
+> 💬 **A Note from the Builders:**  
+> *"I know a few minor things are missing or could use polish, but yeah — this is what we could build in under 1 hour using modern AI capabilities nowadays! What would typically take several days of scaffolding, contract design, and manual UI wiring was designed, verified across 158 test specs, and deployed to production in a single intense 60-minute sprint."*
+
+---
+
 ## Table of contents
 
+0. [About the Project & Team](#-about-the-project--tcs-hackathon-sprint)
 1. [Tech stack](#1-tech-stack)
 2. [System architecture](#2-system-architecture)
 3. [Request lifecycle](#3-request-lifecycle-chat)

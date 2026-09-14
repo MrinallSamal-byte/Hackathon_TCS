@@ -3,7 +3,7 @@ import {
   Mic, Sparkles, Clock, Utensils, MessageSquare,
   Flame, ShoppingBag, ShieldCheck, ArrowRight,
   TrendingUp, Dumbbell, Zap, ChevronRight, Store,
-  CheckCircle2, Compass, RefreshCw
+  CheckCircle2, Compass, RefreshCw, Users, Award, Timer, Code2
 } from 'lucide-react';
 
 export function HomePage({ onNavigate, onLaunchSearch, liveCount }) {
@@ -538,6 +538,131 @@ export function HomePage({ onNavigate, onLaunchSearch, liveCount }) {
       </section>
 
       {/* =====================================================================
+          ABOUT SECTION — TCS HACKATHON & TEAM
+          ===================================================================== */}
+      <section id="about" style={{ padding: '0 20px 80px', maxWidth: 1180, margin: '0 auto' }}>
+        <div style={{
+          background: 'var(--surface)',
+          border: '1.5px solid var(--hairline)',
+          borderRadius: 36,
+          padding: 'clamp(28px, 5vw, 56px)',
+          boxShadow: 'var(--shadow-card)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          {/* Subtle accent glow */}
+          <div style={{
+            position: 'absolute',
+            top: -60,
+            right: -60,
+            width: 220,
+            height: 220,
+            borderRadius: '50%',
+            background: 'var(--brand-soft)',
+            filter: 'blur(55px)',
+            pointerEvents: 'none',
+            opacity: 0.8
+          }} />
+
+          <div style={{ maxWidth: 860, position: 'relative', zIndex: 1 }}>
+            <div className="hero-pill-badge" style={{ marginBottom: 14, background: 'var(--brand-soft)', color: 'var(--brand)' }}>
+              <Award size={14} /> TCS Hackathon · Lightning Sprint
+            </div>
+
+            <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 900, letterSpacing: '-0.03em', margin: '0 0 16px', lineHeight: 1.15 }}>
+              Built in under 1 hour by Mrinal Samal & 5 teammates.
+            </h2>
+
+            <p style={{ fontSize: 16, color: 'var(--text-2)', lineHeight: 1.75, margin: '0 0 20px' }}>
+              This project was created during a fast-paced hackathon conducted by <strong>TCS</strong>. The original problem statement challenged teams to build a <em>base recommendation system for a college canteen</em>.
+            </p>
+
+            <p style={{ fontSize: 16, color: 'var(--text-2)', lineHeight: 1.75, margin: '0 0 28px' }}>
+              Rather than stopping at a basic script, <strong>Mrinal Samal</strong> and <strong>5 other teammates</strong> rallied together to see how far modern AI and rapid full-stack architecture could take the idea within 60 minutes. We engineered <strong>biteMatch</strong> with a comprehensive set of production-grade features: multimodal voice craving capture, conversational Hinglish comprehension, clinical dietary validation (diabetic carb bounds, allergen checks, Jain no-onion-garlic), live queue telemetry, parallel prep ETA calculation, dynamic combo auto-fill, coupon discounts, split billing, and an end-to-end canteen kitchen admin console.
+            </p>
+
+            {/* Sprint Stats Grid */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+              gap: 14,
+              marginBottom: 28
+            }}>
+              <div style={{ background: 'var(--surface-2)', padding: '18px 20px', borderRadius: 20, border: '1px solid var(--hairline)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--brand)', marginBottom: 6 }}>
+                  <Timer size={18} />
+                  <span className="micro-label" style={{ color: 'var(--text-3)' }}>SPRINT DURATION</span>
+                </div>
+                <div className="mono" style={{ fontSize: 24, fontWeight: 900, color: 'var(--text-1)' }}>&lt; 1 Hour</div>
+                <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 4 }}>Ideation to live deployment</div>
+              </div>
+
+              <div style={{ background: 'var(--surface-2)', padding: '18px 20px', borderRadius: 20, border: '1px solid var(--hairline)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--brand)', marginBottom: 6 }}>
+                  <Users size={18} />
+                  <span className="micro-label" style={{ color: 'var(--text-3)' }}>TEAM</span>
+                </div>
+                <div className="mono" style={{ fontSize: 24, fontWeight: 900, color: 'var(--text-1)' }}>6 Builders</div>
+                <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 4 }}>Mrinal Samal + 5 teammates</div>
+              </div>
+
+              <div style={{ background: 'var(--surface-2)', padding: '18px 20px', borderRadius: 20, border: '1px solid var(--hairline)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--brand)', marginBottom: 6 }}>
+                  <Award size={18} />
+                  <span className="micro-label" style={{ color: 'var(--text-3)' }}>EVENT</span>
+                </div>
+                <div className="mono" style={{ fontSize: 24, fontWeight: 900, color: 'var(--text-1)' }}>TCS Hackathon</div>
+                <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 4 }}>College Canteen Challenge</div>
+              </div>
+
+              <div style={{ background: 'var(--surface-2)', padding: '18px 20px', borderRadius: 20, border: '1px solid var(--hairline)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--brand)', marginBottom: 6 }}>
+                  <Code2 size={18} />
+                  <span className="micro-label" style={{ color: 'var(--text-3)' }}>TEST SUITE</span>
+                </div>
+                <div className="mono" style={{ fontSize: 24, fontWeight: 900, color: 'var(--text-1)' }}>158 Tests</div>
+                <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 4 }}>FastAPI + Vite + OpenRouter</div>
+              </div>
+            </div>
+
+            {/* Honest Builder Reflection Note */}
+            <div style={{
+              background: 'var(--surface-2)',
+              borderLeft: '4px solid var(--brand)',
+              borderTop: '1px solid var(--hairline)',
+              borderRight: '1px solid var(--hairline)',
+              borderBottom: '1px solid var(--hairline)',
+              borderRadius: 18,
+              padding: '20px 24px',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 16
+            }}>
+              <div style={{
+                width: 38, height: 38, borderRadius: '50%',
+                background: 'var(--brand-soft)', color: 'var(--brand)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                marginTop: 2
+              }}>
+                <Sparkles size={18} />
+              </div>
+              <div>
+                <strong style={{ fontSize: 15, color: 'var(--text-1)', display: 'block', marginBottom: 4 }}>
+                  A Note from the Builders
+                </strong>
+                <p style={{ margin: 0, fontSize: 14, color: 'var(--text-2)', lineHeight: 1.65 }}>
+                  "I know a few minor things are missing or could use polish, but yeah — this is what we could build in under 1 hour using modern AI capabilities! What traditionally took days of boilerplates, mocks, and manual UI wiring was designed, tested against 158 test specs, and shipped end-to-end in 60 minutes."
+                </p>
+                <div style={{ marginTop: 10, fontSize: 12.5, fontWeight: 700, color: 'var(--brand)' }}>
+                  — Mrinal Samal & Team (TCS Hackathon 2026)
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* =====================================================================
           CAMPUS LAUNCH BANNER & CTA
           ===================================================================== */}
       <section style={{ padding: '0 20px 80px', maxWidth: 1180, margin: '0 auto' }}>
@@ -589,6 +714,7 @@ export function HomePage({ onNavigate, onLaunchSearch, liveCount }) {
             <div style={{ display: 'grid', gap: 10, marginTop: 14, fontSize: 14 }}>
               <a href="#how-it-works" style={{ color: 'var(--text-2)', textDecoration: 'none' }}>How it Works</a>
               <a href="#features" style={{ color: 'var(--text-2)', textDecoration: 'none' }}>Features</a>
+              <a href="#about" style={{ color: 'var(--text-2)', textDecoration: 'none' }}>About the Team</a>
               <span style={{ color: 'var(--text-2)', cursor: 'pointer' }} onClick={() => onNavigate('chat')}>AI Chat</span>
               <span style={{ color: 'var(--text-2)', cursor: 'pointer' }} onClick={() => onNavigate('menu')}>Live Menu</span>
             </div>
