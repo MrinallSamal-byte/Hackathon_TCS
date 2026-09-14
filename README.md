@@ -102,37 +102,51 @@ permitted uses, solid-stroke geometry only. Full spec in §14.
 
 ## 2. System architecture
 
-```
-                              +-------------------+
-                              |  React 18 + Vite  |
-                              |  chat, tray,      |
-                              |  filters, admin   |
-                              +---------+---------+
-                                        |  REST/JSON (fetch)
-                                        v
-  +------------------+      +---------------------+      +------------------+
-  |  OpenRouter      |      |  FastAPI (app.py)   |      |  Supabase        |
-  |  free-model      |<---->|  chat orchestration |<---->|  Postgres        |
-  |  chain (phrasing |  AI  |  tray/order/        |  DB  |  menu, feedback, |
-  |  + parse assist) |      |  feedback/admin     |      |  orders, memory  |
-  +------------------+      +----------+----------+      +------------------+
-                                       |
-                    +------------------+------------------+
-                    |                  |                  |
-            +-------v-------+  +-------v-------+  +-------v-------+
-            | NLU (nlu.py)  |  | Engine        |  | Memory        |
-            | regex/keyword |  | (recommender) |  | (memory.py)   |
-            | intent+slots  |  | hard filters, |  | session prefs,|
-            | 1-2 questions |  | soft scoring, |  | likes, orders,|
-            | max, then act |  | combos, Alt   |  | usual budget  |
-            +---------------+  +-------+-------+  +-------+-------+
-                                       |                  |
-                              +--------v------------------v--------+
-                              |  JSON files (data/)               |
-                              |  menu_data.json = seed of truth   |
-                              |  memory.json / feedback / orders  |
-                              |  mirror + offline fallback        |
-                              +-----------------------------------+
+```mermaid
+flowchart TD
+    subgraph ClientLayer["Frontend Client (React 18 + Vite)"]
+        UI["CampusBite Web UI<br/>(Chat, Tray, Menus, Filters, Admin)"]
+        State["Client State & Storage<br/>(LocalStorage Session, Prefs, Tray)"]
+    end
+
+    subgraph EdgeLayer["Vercel Edge Network / CDN"]
+        Edge["Global Edge Network & HTTPS Termination"]
+    end
+
+    subgraph BackendLayer["Backend Serverless (FastAPI ASGI)"]
+        Router["FastAPI App Router<br/>(app.py)"]
+        
+        subgraph CoreEngines["Core Decision & NLU Pipelines"]
+            NLU["NLU & Intent Dispatcher<br/>(nlu.py: 22 Intents, Regex, Typo Normalization)"]
+            Engine["Deterministic Recommendation Core<br/>(recommender.py: Hard Filters, Scoring, Combos)"]
+            Memory["Session Memory Manager<br/>(memory.py: Affinities, Usual Budget, Health)"]
+            Queue["Live Queue Estimator<br/>(queue.py: Counter Delays & Peaks)"]
+        end
+    end
+
+    subgraph ExternalAI["External AI Layer"]
+        OpenRouter["OpenRouter Free-Model Chain<br/>(Nemotron -> Laguna -> Inkling)"]
+        TemplateFallback["Deterministic Template Engine<br/>(Zero-Downtime Offline Fallback)"]
+    end
+
+    subgraph DataTier["Data Tier (Dual Storage Engine)"]
+        Supabase[("Supabase PostgreSQL<br/>(menu_items, feedback_log,<br/>order_history, chat_memory)")]
+        LocalJSON[("Local JSON Files (data/)<br/>(menu_data.json, memory.json,<br/>feedback, order mirrors)")]
+    end
+
+    UI -->|"HTTPS REST / JSON (fetch)"| Edge
+    Edge -->|"Serverless ASGI Invocation"| Router
+    Router --> NLU
+    Router --> Engine
+    Router --> Memory
+    Router --> Queue
+    NLU -.->|"Ambiguous Query Gap-Fill"| OpenRouter
+    Engine -->|"Batch Card Phrasing"| OpenRouter
+    OpenRouter -.->|"Quota / Timeout / Offline"| TemplateFallback
+    Memory <-->|"Dual-Write / Read with Fallback"| Supabase
+    Memory <-->|"Local Mirror Fallback"| LocalJSON
+    Engine <-->|"Live Menu Data & Analytics"| LocalJSON
+    Supabase -.->|"Sync Mirror"| LocalJSON
 ```
 
 Key principles:
@@ -151,26 +165,45 @@ Key principles:
 
 ## 3. Request lifecycle (chat)
 
-```
-User: "Rs 70, spicy veg, 10 mins"
-  |
-  v
-POST /chat { message, prefs, session_id }
-  |
-  +--> load memory(session_id) ............ Supabase chat_memory -> JSON mirror
-  +--> detect_intent ...................... greeting | recommend | refine |
-  |                                          browse | sold_out | smalltalk ...
-  +--> parse_one_shot ..................... budget/time/mood/diet/craving/...
-  +--> [nothing parsed?] LLM gap-fill ..... validated patch, rules win ties
-  +--> [budget missing?] usual-budget ..... median of past budgets + note
-  +--> recommend() ........................ hard filters -> scoring -> top 3+2
-  +--> memory boosts ...................... likes +8, ordered +3, disliked -25,
-  |                                          cuisine affinity +3 (re-sorts)
-  +--> batch_phrase() ..................... ONE model call for all explanations
-  +--> record + save memory ............... prefs/budgets/moods/chats -> DB+JSON
-  |
-  v
-{ reply, singles[3], combos[2], prefs, chips, ai, session_id }
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Student as Student (User)
+    participant UI as Vite / React Frontend
+    participant API as FastAPI Backend (/chat)
+    participant Mem as Memory Store
+    participant NLU as NLU & Intent Engine
+    participant LLM as OpenRouter LLM Chain
+    participant Rec as Recommender Core
+    participant DB as Storage (Supabase / JSON)
+
+    Student->>UI: Types: "Rs 70, spicy veg, 10 mins"
+    UI->>API: POST /chat {message, prefs, session_id}
+    API->>Mem: load_memory(session_id)
+    Mem-->>API: Returns history, health flags, usual budget
+    API->>NLU: detect_intent(text) + parse_one_shot(text)
+    NLU-->>API: Intent="recommend", slots={budget:70, craving:spicy, diet:[veg], time:10}
+    alt If slots empty or highly ambiguous
+        API->>LLM: Gap-fill query (schema-validated patch)
+        LLM-->>API: Validated preference overrides
+    end
+    alt If budget omitted by user
+        API->>Mem: Look up usual_budget (past median)
+    end
+    API->>Rec: recommend(items, prefs, meal, queues)
+    Note over Rec: 1. Hard Filters (diet, allergen, budget, prep)<br/>2. Soft Scoring (+30 mood, +25 taste, +15 pop)<br/>3. Synthesize Top 3 Singles + Top 2 Combos
+    Rec-->>API: Ranked candidate cards + breakdowns
+    API->>Mem: Apply memory boosts (+8 liked, -25 disliked, +3 cuisine)
+    API->>LLM: batch_phrase(cards, prefs) [Single batched call]
+    alt Model available & valid JSON
+        LLM-->>API: Natural conversational card explanations
+    else 429 quota / offline / timeout
+        API->>API: Use deterministic rule templates
+    end
+    API->>Mem: record_turn(session_id, prefs, message, response)
+    API->>DB: Dual-write session updates (Supabase + JSON mirror)
+    API-->>UI: Return JSON {reply, singles[3], combos[2], chips, session_id}
+    UI-->>Student: Renders interactive dish cards, combos & action chips
 ```
 
 AI cost per chat turn: **max 2 model calls** (1 optional parse gap-fill +
@@ -179,6 +212,51 @@ AI cost per chat turn: **max 2 model calls** (1 optional parse gap-fill +
 ---
 
 ## 4. Recommendation engine (deterministic core)
+
+```mermaid
+flowchart TD
+    Start["Incoming Menu Items (35 live campus dishes)"] --> HFilter{"Step 1: Hard Filters<br/>(Zero Compromise)"}
+    
+    HFilter -->|"Item Inactive (available=false)"| Drop1["Reject: Out of Stock"]
+    HFilter -->|"Diet Conflict (e.g. Non-Veg for Veg)"| Drop2["Reject: Diet Incompatible"]
+    HFilter -->|"Allergen Match (e.g. Peanuts, Dairy)"| Drop3["Reject: Unsafe Allergen"]
+    HFilter -->|"Prep Time > Max Prep Cap"| Drop4["Reject: Exceeds Time Cap"]
+    HFilter -->|"Serving Meal Mismatch"| Drop5["Reject: Not Served at this Hour"]
+    HFilter -->|"Price > Budget Cap"| Drop6["Reject: Over Budget"]
+    
+    HFilter -->|"Passes ALL Hard Filters"| Scoring["Step 2: Soft Scoring Engine"]
+    
+    subgraph SoftScoreMatrix["Weighted Soft Scoring (+100 max)"]
+        S1["+30 pts: Mood Tag Match"]
+        S2["+25 pts: Taste / Craving Match"]
+        S3["+15 pts: Popularity Score (0-15 scaled)"]
+        S4["+10 pts: Portion Fits Hunger Level"]
+        S5["+10 pts: Exact Meal Match (+5 all-day)"]
+        S6["+5 pts: Price Efficiency (Budget Utilization)"]
+        S7["+12 pts: Nutrition Goal Fit (High Protein / Low Calorie / Diabetic)"]
+        S8["+8 / -25 pts: Personal Memory (Liked +8, Ordered +3, Disliked -25)"]
+    end
+    
+    Scoring --> SoftScoreMatrix
+    SoftScoreMatrix --> Rank["Sort by Total Score Descending"]
+    
+    Rank --> ComboGen["Step 3: Dynamic Combo Builder<br/>(Mains + Sides/Drinks within Budget)"]
+    ComboGen --> TopSel["Select Top 3 Singles + Top 2 Combos"]
+    
+    TopSel --> AltCheck{"Any Results Found?"}
+    AltCheck -->|"Yes"| Output["Return Top 3 Singles + Top 2 Combos<br/>+ Data-Grounded Explanations"]
+    
+    AltCheck -->|"No Matches Found"| AltTree["Step 4: Alternative Strategies Engine"]
+    subgraph FallbackStrategies["Alternative Strategies Decision Tree"]
+        F1["Named Item Sold Out? -> 2-3 same-category safe substitutes"]
+        F2["Over Budget? -> Cheaper swaps or rebuilt dynamic combo"]
+        F3["Budget < Lowest Price? -> Kind note + 2-3 cheapest campus items"]
+        F4["Zero Matches? -> Sequential relaxation: meal -> time (+10m) -> spice -> cuisine (NEVER diet)"]
+        F5["Diet Conflict? -> e.g., Vegan asking for chicken: warn gently + show best vegan dishes"]
+    end
+    AltTree --> FallbackStrategies
+    FallbackStrategies --> Output
+```
 
 ### Step 1 — hard filters (ALL must pass; dietary/allergen NEVER relax)
 
@@ -574,6 +652,39 @@ ETA = max prep (parallel cooking); over-budget warns with the exact excess.
 
 ## 13. Conversation flows and NLU
 
+```mermaid
+flowchart LR
+    UserQuery["User Input Message<br/>(English, Hinglish, Typos)"] --> Normalizer["Hinglish & Typo Normalizer<br/>(diabetise -> diabetes, protien -> protein,<br/>vegiterian -> vegetarian, alergy -> allergy)"]
+    Normalizer --> NLUParser["NLU Intent Classifier & Slot Parser"]
+    
+    subgraph IntentCategories["22 Dispatched Intent Pipelines"]
+        direction TB
+        I1["1. Greeting & Welcome Back<br/>(Time-of-day meal greeting)"]
+        I2["2. One-Shot Recommendation<br/>(Budget + Diet + Time + Craving)"]
+        I3["3. Clarification & Refinement<br/>('make it cheaper', 'veg only')"]
+        I4["4. Health & Diabetes Flow<br/>('i have diabetise', 'low sugar')"]
+        I5["5. Counter-To-Self Conflict<br/>(Diabetic asking for sweets)"]
+        I6["6. Smart Tray & Combos<br/>('add to tray', 'complete meal')"]
+        I7["7. Live Order & Tracking<br/>('where is my order CB-123')"]
+        I8["8. Re-order & History<br/>('repeat last order', 'my orders')"]
+        I9["9. Specials & Trending<br/>('today special', 'trending')"]
+        I10["10. Group Bills & Coupons<br/>('split bill 3 ways', 'coupons')"]
+    end
+    
+    NLUParser --> IntentCategories
+    
+    subgraph ExecutionDispatch["Response Execution Engine"]
+        direction TB
+        E1["Deterministic Recommender<br/>(Filters -> Soft Scores -> Combos)"]
+        E2["Queue & Status Tracker<br/>(Counter delays + Token state)"]
+        E3["Health & Disclaimer Engine<br/>(Tiers + Medical disclaimer)"]
+        E4["Profile & Memory Store<br/>(Likes, orders, usual budget)"]
+    end
+
+    IntentCategories --> ExecutionDispatch
+    ExecutionDispatch --> ClientRender["UI Component Update<br/>(Reply Text + Dish Cards + Quick Chips + Trays)"]
+```
+
 22 intents (rule-based, typo-tolerant, Hinglish-normalized before every
 parse — `diabetise→diabetes`, `protien→protein`, `alergy→allergy`,
 `vegiterian→vegetarian`):
@@ -754,6 +865,60 @@ logs or the frontend bundle.
     "leaves Rs Y" cards; UI has COMPLETE MY MEAL buttons (rail + chat) and a
     suggestion section, plus a `"complete my meal"` chat intent that points at it.
 
+```mermaid
+flowchart LR
+    AddItem["User Adds Item to Tray"] --> TrayState["Tray State Updated<br/>(localStorage + React State)"]
+    TrayState --> Validate["Validate Tray (/tray/validate)<br/>- Sum Item Prices<br/>- Check Against Budget Cap<br/>- Calculate Parallel Prep ETA"]
+    
+    Validate --> BudgetCheck{"Remaining Budget > 0?"}
+    BudgetCheck -->|"Yes (e.g., Rs 35 left)"| SuggestAPI["Call Complete-My-Meal (/tray/suggest)"]
+    SuggestAPI --> FilterSides["Filter Sides, Drinks & Desserts<br/>- Price <= Remaining Budget<br/>- Match Dietary & Allergen Safety"]
+    FilterSides --> SuggestCards["Render 'Leaves Rs X' Quick-Add Cards"]
+    
+    Validate --> ApplyCoupon["Apply Coupon Code (/coupons)<br/>e.g., CAMPUS20, SAVE10"]
+    ApplyCoupon --> DiscountCalc["Compute Discount & Net Payable Total"]
+    
+    DiscountCalc --> SplitPrompt{"Split Bill with Friends?"}
+    SplitPrompt -->|"Call /bill/split"| SplitCalc["Divide Net Total by N People<br/>Show Exact Per-Person Share & Savings"]
+```
+
+```mermaid
+stateDiagram-v2
+    [*] --> PENDING: POST /order (Tray Items + Budget + Session)
+    
+    state PENDING {
+        [*] --> TokenGen
+        TokenGen: Generate unique token (e.g. CB-123)
+        TokenGen --> CalcQueue: Query Live Counter Queue (/queue)
+        CalcQueue: ETA = Max Prep Time + Counter Queue Delay
+    }
+    
+    PENDING --> PREPARING: Kitchen acknowledges order
+    
+    state PREPARING {
+        LiveCountdown: Real-time status tracker active
+        CanCancel: Student can cancel order (DELETE /order/CB-123)
+    }
+    
+    PREPARING --> READY: Kitchen / Admin marks status READY (PATCH /admin/orders/CB-123)
+    PREPARING --> CANCELLED: Student or Admin cancels (Cannot cancel once READY)
+    
+    state READY {
+        ReadyAlert: Green banner on student UI
+        PickupCounter: Directs to specific counter (Main / Snacks / Beverages)
+    }
+    
+    READY --> COMPLETED: Customer picks up tray & order fulfilled
+    
+    state COMPLETED {
+        FeedbackLoop: 1-Tap Thumbs Up / Down Prompt
+        ReorderHook: Available in Order History for 1-Tap Reorder
+    }
+    
+    COMPLETED --> [*]
+    CANCELLED --> [*]
+```
+
 Later batches (all covered in §§12–14, 21–24 and `test_top20.py` /
 `test_bugfix.py`): order history + cancel + live tracking, favorites,
 dietary profiles, student coupons, item reviews, pickup counters, bill split,
@@ -811,20 +976,29 @@ mind."* plus lower-sugar picks — no re-stating needed. Stated diets and
 allergies persist the same way (diet replaces, allergies union); the Profile
 panel shows and lets you remove saved health notes.
 
-```
-User: "i have diabetise"
-  |
-  v
-fresh parse (no base) ──> goal=diabetic, conditions=[diabetes]
-  |── record_health() ──> profile.goal=diabetic, health_conditions=[diabetes]
-  |                        (memory.json + Supabase chat_memory.data, §22)
-  v
-recommend() with diabetic tiers ──> fit items float up, sweets sink
-  |
-  v
-reply: "Noted — I'll remember your diabetes for next time. Here are my
-        top picks (diabetic-friendly): … Note: I'm a canteen recommender,
-        not a doctor — …"   + goal-aware chips
+```mermaid
+flowchart TD
+    UserMsg["User Message<br/>(e.g. 'i have diabetise' or 'crave sweet')"] --> Parser["NLU Health Parser & Normalizer"]
+    Parser --> TypoCheck["Normalize: diabetise -> diabetes<br/>Set goal=diabetic, conditions=['diabetes']"]
+    TypoCheck --> SaveMem["Persist to Session Profile & DB<br/>(profile.goal = diabetic, chat_memory.data)"]
+    
+    SaveMem --> QueryType{"Query Category"}
+    
+    QueryType -->|"General Hunger (e.g., 'under Rs 60')"| ScoreTiers["Evaluate Menu through Diabetic Nutrition Tiers"]
+    subgraph Tiers["Diabetic Fitness Tiers (Data Grounded)"]
+        T1["FIT (+16..22 pts):<br/>sugar <= 10g, carbs <= 45g, not fried, not dessert"]
+        T2["WATCH (+4 pts):<br/>moderate profile ('keep portion small')"]
+        T3["AVOID (-10..-25 pts):<br/>sugar > 15g, carbs > 60g, fried, or dessert"]
+    end
+    ScoreTiers --> Tiers
+    Tiers --> SafeOutput["Return Lower-Sugar Top Picks<br/>+ Honest Nutrition Badges<br/>+ Mandatory Medical Disclaimer"]
+    
+    QueryType -->|"Directly Names High-Sugar Item<br/>(e.g. 'Gulab Jamun')"| ConflictDetect{"Dish Passes diabetic_fit()?"}
+    ConflictDetect -->|"Yes (e.g. Jain Fruit Bowl)"| ServeDish["Serve Card with Nutrition Data"]
+    ConflictDetect -->|"No (High Sugar / Fried)"| CheckHistory{"Already Warned This Session?"}
+    
+    CheckHistory -->|"First Time (warned=False)"| GentleRedirect["1. Mark warned in session memory<br/>2. Gentle Caring Redirect:<br/>'Since you are managing diabetes, Gulab Jamun isn't a great pick'<br/>3. Recommend closer safe alternatives (Green Tea, Peanut Masala)"]
+    CheckHistory -->|"Second Time (warned=True)"| Autonomy["Respect User Autonomy:<br/>Serve requested card with clear sugar/carb warnings"]
 ```
 
 **Tiers** (`recommender.diabetic_fit` / `diabetic_score`, per-item numbers):
@@ -974,22 +1148,83 @@ MENU: 1-col   MENU: 2-col (≥680px)      ADMIN: table (≥768px) else mobile ca
 
 ## 25. Deploying to Vercel
 
-Two Vercel projects from this one repo (free tiers suffice for a campus demo).
+```mermaid
+flowchart TD
+    subgraph GitHubRepo["GitHub Monorepo (MrinallSamal-byte/Hackathon_TCS)"]
+        RootFiles["Root Directory (./)<br/>- pyproject.toml (FastAPI entrypoint: backend.app:app)<br/>- requirements.txt<br/>- backend/ (FastAPI ASGI application)"]
+        FrontendFiles["Frontend Directory (frontend/)<br/>- package.json (Vite + React 18)<br/>- vite.config.js<br/>- src/ (UI Components, Design Tokens, API Client)"]
+    end
 
-**A. Backend (Python preset — zero adapter code).** Vercel auto-detects
-FastAPI from `requirements.txt` and serves `backend.app:app` for every route
-(see `pyproject.toml` `[tool.vercel]`). Import the repo, then set:
+    subgraph VercelPlatform["Vercel Cloud Deployments"]
+        subgraph Project1["Project 1: hackathon-tcs (Backend API)"]
+            P1Config["Configuration:<br/>- Root Directory: ./<br/>- Framework Preset: FastAPI (Python 3.12 via uv)<br/>- Entrypoint: backend.app:app"]
+            P1URL["Backend API Domain:<br/>https://hackathon-tcs-azure.vercel.app"]
+            P1Behavior["GET / -> Returns API Index JSON:<br/>{'name': 'biteMatch API', 'docs': '/docs', 'health': '/health', ...}<br/>All Endpoints: /chat, /menu, /order, /queue, etc."]
+        end
 
-| Var | Value |
-|-----|-------|
-| `SUPABASE_URL` + `SUPABASE_SERVICE_KEY` | **Required** — serverless `/tmp` forgets orders/feedback/memory between calls; Supabase is the persistent store (§10 schema + `sync_to_supabase.py` first) |
-| `CAMPUSBITE_DATA_DIR` | `/tmp` (bundle is read-only; menu still reads from the repo seed, saves fail silent) |
-| `OPENROUTER_API_KEY` | Optional (rule-based fallback otherwise) |
-| `OPENROUTER_TIMEOUT` / `OPENROUTER_CHAIN_BUDGET` | `8` / `8` — Hobby functions cap at 10 s; overruns degrade to templates, never 500 |
+        subgraph Project2["Project 2: hackathon-tcs-frontend (Web UI)"]
+            P2Config["Configuration:<br/>- Root Directory: frontend<br/>- Framework Preset: Vite<br/>- Build Command: npm run build (dist/)"]
+            P2URL["Web Application Domain:<br/>https://hackathon-tcs-frontend.vercel.app (or custom)"]
+            P2Behavior["Serves Full Interactive React UI<br/>(Chat Bubbles, Dish Cards, Tray, Live Queue Tracker)"]
+        end
+    end
 
-**B. Frontend (Vite preset).** Same repo, Root Directory `frontend`,
-build `npm run build`, with `VITE_API_URL=https://<backend>.vercel.app`.
+    subgraph UserExperience["User & Client Flow"]
+        BrowserDirect["User visits hackathon-tcs-azure.vercel.app"] -->|"Hits Python FastAPI root"| P1Behavior
+        BrowserApp["User visits hackathon-tcs-frontend.vercel.app"] -->|"Loads Vite Web App"| P2Behavior
+        P2Behavior -->|"Fetches REST API endpoints"| P1URL
+    end
 
-**.env.example** lists every variable — copy to `.env` locally, paste values
-into Vercel Project Settings → Environment Variables. Real keys never enter
-the repo, logs, or the frontend bundle.
+    RootFiles -->|"Vercel Git Integration"| Project1
+    FrontendFiles -->|"Vercel Git Integration (Root: frontend)"| Project2
+```
+
+> [!IMPORTANT]
+> ### Why does `hackathon-tcs-azure.vercel.app` show JSON instead of the website?
+> 
+> In this repository, the frontend and backend live together in a monorepo structure:
+> 1. `hackathon-tcs-azure.vercel.app` is the **Backend API Deployment**.
+> 2. Vercel automatically detected `pyproject.toml` (`[tool.vercel] entrypoint = "backend.app:app"`) at the root directory and built the Python FastAPI application using its native Python Serverless runtime.
+> 3. When you open `https://hackathon-tcs-azure.vercel.app/` in your browser, FastAPI handles `GET /` with the root API index response:
+>    ```json
+>    {
+>      "name": "biteMatch API",
+>      "docs": "/docs",
+>      "health": "/health",
+>      "try": {
+>        "chat": "POST /chat {message}",
+>        "menu": "GET /menu?max_price=80&dietary=veg",
+>        "specials": "GET /specials",
+>        "order_status": "GET /order/CB-123"
+>      }
+>    }
+>    ```
+>    This confirms that the backend is **100% healthy, online, and responding normally**!
+> 4. The **interactive React/Vite website** lives in the `frontend/` directory and is built as a separate static web deployment.
+
+---
+
+### Step-by-Step Two-Project Deployment Guide
+
+#### A. Backend Deployment (Already Live at `hackathon-tcs-azure.vercel.app`)
+- **Root Directory:** `./`
+- **Framework Preset:** `FastAPI` (Python 3.12)
+- Environment variables configured in Vercel Project Settings:
+  | Var | Value | Purpose |
+  |-----|-------|---------|
+  | `SUPABASE_URL` + `SUPABASE_SERVICE_KEY` | Your Supabase credentials | Persistent cloud storage for orders, feedback, and memory across serverless invocations |
+  | `CAMPUSBITE_DATA_DIR` | `/tmp` | Serverless writable scratch space |
+  | `OPENROUTER_API_KEY` | Your OpenRouter key | Enables AI rephrasing (fallback runs if unset) |
+  | `OPENROUTER_TIMEOUT` / `CHAIN_BUDGET` | `8` / `8` | Keeps AI calls comfortably under Vercel's 10s Hobby timeout |
+
+#### B. Frontend Deployment (Deploying the Interactive Web UI)
+To deploy the React website:
+1. In the [Vercel Dashboard](https://vercel.com/dashboard), click **Add New…** → **Project**.
+2. Select this same repository (`MrinallSamal-byte/Hackathon_TCS`).
+3. Set **Project Name** to `hackathon-tcs-frontend` (or `hackathon-tcs-web`).
+4. **CRITICAL:** Next to **Root Directory**, click **Edit** and set it to `frontend`.
+5. Vercel will automatically detect `Vite` as the framework preset.
+6. Under **Environment Variables**, add:
+   - `VITE_API_URL`: `https://hackathon-tcs-azure.vercel.app`
+   *(Note: Even if this variable is omitted, `frontend/src/api.js` now includes a smart automatic fallback to `https://hackathon-tcs-azure.vercel.app` whenever running in production).*
+7. Click **Deploy**. Your interactive website will be live in ~30 seconds at `https://hackathon-tcs-frontend.vercel.app`!

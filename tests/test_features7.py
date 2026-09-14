@@ -238,7 +238,7 @@ def test_combos_only_hides_singles():
 def test_dynamic_combo_cards_complete():
     from fastapi.testclient import TestClient
     c = TestClient(app_module.app)
-    r = c.post("/chat", json={"message": "Rs 70, spicy veg, 10 mins"}).json()
+    r = c.post("/chat", json={"message": "Rs 70, spicy veg, 10 mins", "meal_override": "lunch"}).json()
     dyn = next(x for x in r["combos"] if x.get("is_dynamic"))
     assert dyn["id"].startswith("dyn_") and dyn["calories"] > 0
     assert dyn["protein_g"] >= 0 and dyn["spice_level"] >= 0

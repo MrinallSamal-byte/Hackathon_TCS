@@ -1,4 +1,8 @@
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const BASE = import.meta.env.VITE_API_URL || (
+  typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
+    ? 'https://hackathon-tcs-azure.vercel.app'
+    : 'http://localhost:8000'
+);
 
 async function req(path, opts = {}) {
   const r = await fetch(`${BASE}${path}`, {
