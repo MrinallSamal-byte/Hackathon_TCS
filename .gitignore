@@ -9,3 +9,11 @@ dist/
 data/memory.json
 data/feedback_log.json
 data/order_history.json
+workspace.tar.gz
+*.tar.gz
+beacon/
+.agents/
+.claude/
+agent/
+skills-lock.json
+data/skills/

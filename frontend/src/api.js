@@ -1,13 +1,17 @@
-const BASE = import.meta.env.VITE_API_URL || (
-  typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
-    ? 'https://hackathon-tcs-azure.vercel.app'
-    : 'http://localhost:8000'
-);
+const BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+function adminHeaders() {
+  try {
+    const t = localStorage.getItem('cb_admin_token');
+    return t ? { 'X-Admin-Token': t } : {};
+  } catch { return {}; }
+}
 
 async function req(path, opts = {}) {
+  const { headers: optHeaders, ...rest } = opts || {};
   const r = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
-    ...opts,
+    ...rest,
+    headers: { 'Content-Type': 'application/json', ...adminHeaders(), ...(optHeaders || {}) },
   });
   if (!r.ok) {
     const t = await r.text();

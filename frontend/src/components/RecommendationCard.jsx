@@ -254,7 +254,7 @@ export function RecommendationCard({ card, onAdd, onFeedback, onAlternatives, is
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: 16,
+            padding: 'clamp(8px, 2.5vw, 16px)',
             animation: 'fadeIn 0.2s ease',
           }}
         >
@@ -262,9 +262,9 @@ export function RecommendationCard({ card, onAdd, onFeedback, onAlternatives, is
             style={{
               background: 'var(--surface)',
               border: '1.5px solid var(--hairline)',
-              borderRadius: 24,
-              padding: '24px 24px 20px',
-              maxWidth: 480,
+              borderRadius: 'clamp(18px, 4vw, 24px)',
+              padding: 'clamp(18px, 4vw, 24px) clamp(14px, 4vw, 22px)',
+              maxWidth: 'min(480px, calc(100vw - 20px))',
               width: '100%',
               maxHeight: '88vh',
               overflowY: 'auto',
@@ -343,11 +343,7 @@ export function RecommendationCard({ card, onAdd, onFeedback, onAlternatives, is
                   <div className="micro-label" style={{ marginBottom: 6, color: 'var(--text-2)' }}>
                     NUTRITION BREAKDOWN (PER SERVING)
                   </div>
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(4, 1fr)',
-                    gap: 8,
-                  }}>
+                  <div className="nutrition-grid">
                     <div style={{ background: 'var(--surface-2)', padding: '8px 6px', borderRadius: 12, textAlign: 'center', border: '1px solid var(--hairline)' }}>
                       <div className="micro-label" style={{ fontSize: 9.5, color: 'var(--text-3)' }}>CALORIES</div>
                       <div className="mono" style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-1)', marginTop: 2 }}>
@@ -440,24 +436,24 @@ export function RecommendationCard({ card, onAdd, onFeedback, onAlternatives, is
                 )}
 
                 {/* Actions */}
-                <div style={{ marginTop: 6, paddingTop: 12, borderTop: '1px solid var(--hairline)', display: 'flex', gap: 10 }}>
+                <div style={{ marginTop: 6, paddingTop: 12, borderTop: '1px solid var(--hairline)', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                   {soldOut || details.availability === false ? (
                     <button
-                      className="btn btn-danger" style={{ flex: 1 }}
+                      className="btn btn-danger" style={{ flex: '1 1 180px' }}
                       onClick={() => { onAlternatives && onAlternatives(card); setDetails(null); }}
                     >
                       SEE ALTERNATIVES
                     </button>
                   ) : (
                     <button
-                      className="btn btn-primary" style={{ flex: 1, padding: '12px 18px', fontSize: 13.5, fontWeight: 800 }}
+                      className="btn btn-primary" style={{ flex: '1 1 180px', padding: '12px 18px', fontSize: 13.5, fontWeight: 800 }}
                       onClick={() => { onAdd && onAdd(details || card); setDetails(null); }}
                     >
                       <ShoppingBag size={16} /> ADD TO TRAY · ₹{num(details.price ?? card.price).toFixed(0)}
                     </button>
                   )}
                   <button
-                    className="btn btn-secondary" style={{ padding: '12px 16px' }}
+                    className="btn btn-secondary" style={{ flex: '1 1 90px', padding: '12px 16px' }}
                     onClick={() => setDetails(null)}
                   >
                     Close

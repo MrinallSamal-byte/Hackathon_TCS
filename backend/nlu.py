@@ -144,8 +144,12 @@ def parse_time(text: str) -> Optional[int]:
     if any(k in t for k in ["in a hurry", "hurry", "asap", "quick", "fast", "rush", "hurry up"]):
         return 5
     m = re.search(r"(\d+)\s*(?:mins?|minutes?)", t)
-    if m and any(k in t for k in ["got", "have", "only", "within", "under", "max", "in ", "want", "andar"]):
-        return int(m.group(1))
+    if m:
+        # A bare "10 mins" is unambiguously a time (budgets use Rs/budget
+        # words, never "mins"). Cap at 60 so stray large numbers don't leak.
+        v = int(m.group(1))
+        if v <= 60:
+            return v
     # Bare number with a time cue ("ready in 10", "dinner in 15"). Capped at
     # 60 so budget-like numbers never leak into prep time.
     m = re.search(r"(?:ready\s+)?in\s+(\d+)(?!\s*(?:rs\.?|inr|₹|bucks|rupees?|items?|peoples?|friends?|persons?))", t)
@@ -203,29 +207,51 @@ def parse_dietary_allergy(text: str) -> tuple[list[str], list[str], bool]:
         diet.append("dairy_free")
 
     allergies: list[str] = []
+    # A food word alone ("i want paneer", "wheat roti", "still want ...")
+    # is a craving — NOT an allergy. Only treat it as an allergy when the
+    # user gives an allergy context (allerg/intoler/sensitiv/reaction or
+    # can't-have phrasing). All matches use word boundaries so "til" never
+    # fires on "still"/"until" and "soy" never fires inside other words.
+    allergy_ctx = bool(re.search(
+        r"allerg|intoler|sensitiv|reaction|can'?t\s+(have|eat)|cannot\s+(have|eat)"
+        r"|not\s+allowed|avoid\s+.*allerg|no\s+.*allerg", t))
     mapping = {"peanut": "peanuts", "groundnut": "peanuts", "tree nut": "tree_nuts",
+               "tree nuts": "tree_nuts",
                "almond": "tree_nuts", "cashew": "tree_nuts", "walnut": "tree_nuts",
+               "pista": "tree_nuts", "pistachio": "tree_nuts",
                "dairy": "dairy", "milk": "dairy", "lactose": "dairy",
                "paneer": "dairy", "curd": "dairy", "dahi": "dairy",
                "ghee": "dairy", "malai": "dairy", "khoya": "dairy",
+               "cheese": "dairy", "butter": "dairy", "cream": "dairy",
                "gluten": "gluten", "wheat": "gluten", "maida": "gluten", "atta": "gluten",
-               "soy": "soy", "soya": "soy", "egg": "egg",
+               "soy": "soy", "soya": "soy", "egg": "egg", "eggs": "egg",
                "seafood": "seafood", "fish": "seafood", "prawn": "seafood", "shrimp": "seafood",
                "sesame": "sesame", "til": "sesame"}
     for k, v in mapping.items():
-        if k in t and v not in allergies:
-            # "egg-free diet" is a restriction, not an allergy — but treat egg mention
-            # with allergy words as allergy.
-            if v == "egg" and ("free" in t or "eggless" in t) and "allerg" not in t:
+        # Word-boundary match (multiword keys allow flexible whitespace).
+        pat = r"\b" + r"\s+".join(re.escape(p) for p in k.split()) + r"\b"
+        if not re.search(pat, t):
+            continue
+        if v in allergies:
+            continue
+        # "egg-free diet" is a restriction, not an allergy — but treat egg mention
+        # with allergy words as allergy.
+        if v == "egg" and ("free" in t or "eggless" in t) and "allerg" not in t:
+            continue
+        if v == "egg" and not re.search(r"\beggs?\b", t):
+            # "eggetarian" contains "egg" but EATS egg — never an allergy.
+            continue
+        if v in ("dairy", "gluten") and "free" in t and "allerg" not in t:
+            # "dairy-free" already captured as diet; skip allergy unless explicit
+            if "allerg" not in t and "intoler" not in t:
                 continue
-            if v == "egg" and not re.search(r"\begg\b", t):
-                # "eggetarian" contains "egg" but EATS egg — never an allergy.
-                continue
-            if v in ("dairy", "gluten") and "free" in t and "allerg" not in t:
-                # "dairy-free" already captured as diet; skip allergy unless explicit
-                if f"{k}" in t and "allerg" not in t and "intoler" not in t:
-                    continue
-            allergies.append(v)
+        # Gate: without an allergy context this is just a food mention.
+        if not allergy_ctx:
+            continue
+        allergies.append(v)
+    # Generic "nut allergy" (no peanut/tree-nut word) covers both families.
+    if not allergies and re.search(r"\bnuts?\b", t) and allergy_ctx:
+        allergies.extend(["peanuts", "tree_nuts"])
     if re.search(r"allerg", t):
         # bare "allergy" with food word already handled; keep list as-is
         pass
@@ -237,13 +263,17 @@ CRAVING_WORDS = ["spicy", "sweet", "cheesy", "cheese", "tangy", "savory", "savou
                  "refreshing", "comfort", "comforting", "warm", "soup", "light",
                  "chocolate", "dosa", "biryani", "maggi", "momos", "noodles",
                  "coffee", "chai", "paneer", "chicken", "mutton", "egg", "fries", "brownie",
-                 "lassi", "juice", "ice cream", "jalebi", "samosa", "masala"]
+                 "lassi", "juice", "ice cream", "jalebi", "samosa", "masala",
+                 "burger", "sandwich", "pasta", "thali", "chaat", "vada", "pav",
+                 "uttapam", "shake", "donut", "kheer", "rasmalai", "bhaji", "kulche",
+                 "puri", "omelette"]
 
 def parse_cravings(text: str) -> list[str]:
     t = normalize_hinglish(text).lower()
     found = []
     for w in CRAVING_WORDS:
-        if w in t and w not in found:
+        pat = r"\b" + r"\s+".join(re.escape(p) for p in w.split()) + r"\b"
+        if re.search(pat, t) and w not in found:
             if w == "egg" and "eggetarian" in t:
                 continue  # the diet word, not a craving
             found.append(w)
@@ -258,7 +288,9 @@ def parse_hunger(text: str) -> Optional[str]:
         return "hungry"
     if any(k in t for k in ["light bite", "light snack", "small bite", "just a bite"]):
         return "light_bite"
-    if re.search(r"\blight\b", t) and "light" not in t.replace("light bite", ""):
+    # Bare "light" (e.g. "something light") means a light bite. The old guard
+    # `and "light" not in ...` was inverted and never fired.
+    if re.search(r"\blight\b", t):
         return "light_bite"
     return None
 
@@ -370,7 +402,7 @@ def detect_intent(text: str) -> str:
         return "smalltalk"
     if parse_goal(t) is not None:
         return "recommend"
-    if re.search(r"(₹|rs|budget|hungry|veg|vegan|jain|eggetarian|nonveg|spicy|sweet|mins?|hurry|mood|combo|snack|breakfast|lunch|dinner|allergy|cheesy|light|refreshing|comfort|chai|coffee|dosa|biryani|biriyani|maggi|momo|noodles|paneer|panner|chicken|chiken|mutton|egg|fries|soup|juice|lassi|eat|food|meal|thali|plate|protein|gym|diet|calorie|healthy|surprise|trending|popular|bestseller|best|special|diab[ea]t|sugar|keto|carb|cheap|sasta|teekha|bhukh|bhook|khana|thirsty|without|don'?t want|\bavoid\b)", t):
+    if re.search(r"(₹|rs|budget|hungry|veg|vegan|jain|eggetarian|nonveg|spicy|sweet|mins?|hurry|mood|combo|snack|breakfast|lunch|dinner|allergy|cheesy|light|refreshing|comfort|chai|coffee|dosa|biryani|biriyani|maggi|momo|noodles|paneer|panner|chicken|chiken|mutton|egg|fries|soup|juice|lassi|eat|food|meal|thali|plate|protein|gym|diet|calorie|healthy|surprise|trending|popular|bestseller|best|special|diab[ea]t|sugar|keto|carb|cheap|sasta|teekha|bhukh|bhook|khana|thirsty|without|don'?t want|\bavoid\b|burger|sandwich|pasta|chaat|vada|uttapam|shake|donut|kheer|rasmalai|bhaji|kulche|puri|omelette|thali|pav|badam|orange|banana)", t):
         return "recommend"
     # Anything with a parseable budget/time/goal is a food request even without keywords.
     if parse_budget(t) is not None or parse_time(t) is not None or parse_goal(t) is not None:

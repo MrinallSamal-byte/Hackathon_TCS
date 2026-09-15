@@ -626,6 +626,14 @@ def recommend(
     sides = side_pool or [i for i, _, _ in ranked_singles]
     # dietary already enforced inside passes_hard_filters
     dynamic = generate_dynamic_combos(mains, sides, prefs, meal, queue)[:4]
+    if not dynamic and prefs.budget is not None:
+        # Low-budget realism: a Rs 60-70 main + Rs 15 side never fits, but a
+        # snack + chai (samosa + chai) does. Retry with snack mains so tight
+        # student budgets still get dynamic pairs.
+        snack_mains = [i for i, _, _ in ranked_singles
+                       if i.category.value in ("main_course", "breakfast", "snack")]
+        if snack_mains != mains:
+            dynamic = generate_dynamic_combos(snack_mains, sides, prefs, meal, queue)[:4]
 
     combos_out: list[dict[str, Any]] = []
     for it, sc, br in ranked_pre[:top_combos]:

@@ -1,7 +1,7 @@
 """One-shot sync: push data/menu_data.json into Supabase `menu_items`.
 
 Run:
-    python3 data/sync_to_supabase.py            # upsert all 53 items
+    python3 data/sync_to_supabase.py            # upsert full menu
     python3 data/sync_to_supabase.py --dry-run  # show first row payload only
 
 Requires SUPABASE_URL + SUPABASE_SERVICE_KEY in the environment or repo .env.

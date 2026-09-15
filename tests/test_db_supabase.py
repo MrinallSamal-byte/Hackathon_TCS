@@ -60,4 +60,4 @@ def test_sync_script_dry_run():
         [sys.executable, str(ROOT / "data" / "sync_to_supabase.py"), "--dry-run"],
         capture_output=True, text=True, timeout=60)
     assert r.returncode == 0
-    assert "53 items ready" in r.stdout and '"id": "masala_dosa"' in r.stdout
+    assert "items ready" in r.stdout and '"id": "masala_dosa"' in r.stdout

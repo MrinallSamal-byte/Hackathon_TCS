@@ -30,11 +30,15 @@ DEFAULT_PATH = Path(__file__).resolve().parents[1] / "data" / "memory.json"
 
 
 def _default_path() -> Path:
-    """Honor CAMPUSBITE_DATA_DIR (serverless-writable override); fall back to
-    the bundled data dir."""
+    """Honor CAMPUSBITE_DATA_DIR (serverless-writable override); on Vercel /
+    Lambda default to /tmp (bundle is read-only); else the bundled data dir."""
     import os as _os
-    return Path(_os.environ.get("CAMPUSBITE_DATA_DIR",
-                               Path(__file__).resolve().parents[1] / "data")) / "memory.json"
+    raw = _os.environ.get("CAMPUSBITE_DATA_DIR")
+    if raw:
+        return Path(raw) / "memory.json"
+    if _os.environ.get("VERCEL") or _os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+        return Path("/tmp/campusbite-data") / "memory.json"
+    return Path(__file__).resolve().parents[1] / "data" / "memory.json"
 _HISTORY_CAP = 20
 # Abuse guard: per-session maps must stay bounded no matter how many
 # feedback/order/chat turns a client fires. Oldest entries evict first.
@@ -42,6 +46,10 @@ _LIKES_CAP = 200
 _ORDERS_MAP_CAP = 200
 _WARNED_CAP = 100
 _COUPONS_CAP = 10
+# Global session cap: the memory mirror is a dict keyed by client-supplied
+# ids — without a bound one client minting random ids could grow the JSON
+# file without limit (disk/memory DOS).
+_SESSIONS_CAP = 2000
 
 LIKED_BOOST = 8.0
 ORDERED_BOOST = 3.0
@@ -130,6 +138,12 @@ class MemoryStore:
     def save(self, session_id: str, mem: dict[str, Any]) -> None:
         mem["updated_at"] = _now()
         self._data[session_id] = mem
+        # Bound total sessions (evict oldest-inserted first).
+        while len(self._data) > _SESSIONS_CAP:
+            try:
+                self._data.pop(next(iter(self._data)))
+            except StopIteration:
+                break
         self._save_local()
         try:
             from backend import db_supabase as db

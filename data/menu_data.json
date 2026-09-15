@@ -886,8 +886,7 @@
       "gluten"
     ],
     "dietary_tags": [
-      "veg",
-      "gluten_free"
+      "veg"
     ],
     "availability": true,
     "available_until": "21:00",
@@ -1005,7 +1004,7 @@
     "serving_times": [
       "all_day"
     ],
-    "popularity_score": 100,
+    "popularity_score": 93,
     "is_combo": false,
     "combo_items": []
   },
@@ -2514,6 +2513,1603 @@
     "combo_items": [
       "jain_khichdi",
       "chaas"
+    ]
+  },
+  {
+    "id": "medu_vada",
+    "name": "Medu Vada (2 pc)",
+    "description": "Crisp urad-dal doughnuts with sambar + chutney.",
+    "price": 35.0,
+    "category": "breakfast",
+    "cuisine": "south_indian",
+    "ingredients": [
+      "urad dal",
+      "curry leaves",
+      "green chilli",
+      "sambar",
+      "coconut chutney"
+    ],
+    "allergens": [],
+    "dietary_tags": [
+      "veg",
+      "vegan",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": "11:30",
+    "prep_time_minutes": 8,
+    "calories": 280,
+    "protein_g": 7,
+    "carbs_g": 36,
+    "sugar_g": 2,
+    "fiber_g": 4,
+    "portion_size": "light",
+    "spice_level": 1,
+    "taste_profile": [
+      "savory",
+      "comforting"
+    ],
+    "mood_tags": [
+      "comfort",
+      "light"
+    ],
+    "serving_times": [
+      "breakfast"
+    ],
+    "popularity_score": 76,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "onion_uttapam",
+    "name": "Onion Uttapam",
+    "description": "Thick tawa pancake topped with onion, tomato, chilli.",
+    "price": 55.0,
+    "category": "breakfast",
+    "cuisine": "south_indian",
+    "ingredients": [
+      "rice",
+      "urad dal",
+      "onion",
+      "tomato",
+      "green chilli"
+    ],
+    "allergens": [],
+    "dietary_tags": [
+      "veg",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": "11:30",
+    "prep_time_minutes": 12,
+    "calories": 340,
+    "protein_g": 8,
+    "carbs_g": 52,
+    "sugar_g": 4,
+    "fiber_g": 4,
+    "portion_size": "medium",
+    "spice_level": 1,
+    "taste_profile": [
+      "savory",
+      "tangy"
+    ],
+    "mood_tags": [
+      "comfort",
+      "homesick"
+    ],
+    "serving_times": [
+      "breakfast"
+    ],
+    "popularity_score": 74,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "puri_sabzi",
+    "name": "Puri Sabzi (4 pc)",
+    "description": "Fluffy puris with aloo-tamatar sabzi.",
+    "price": 45.0,
+    "category": "breakfast",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "wheat flour",
+      "potato",
+      "tomato",
+      "spices",
+      "oil"
+    ],
+    "allergens": [
+      "gluten"
+    ],
+    "dietary_tags": [
+      "veg",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": "11:30",
+    "prep_time_minutes": 10,
+    "calories": 420,
+    "protein_g": 7,
+    "carbs_g": 58,
+    "sugar_g": 4,
+    "fiber_g": 5,
+    "portion_size": "medium",
+    "spice_level": 1,
+    "taste_profile": [
+      "savory",
+      "comforting"
+    ],
+    "mood_tags": [
+      "comfort",
+      "homesick"
+    ],
+    "serving_times": [
+      "breakfast"
+    ],
+    "popularity_score": 81,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "veg_grilled_sandwich",
+    "name": "Veg Grilled Sandwich",
+    "description": "Triple-layer with mint chutney, grilled crisp.",
+    "price": 50.0,
+    "category": "breakfast",
+    "cuisine": "street_food",
+    "ingredients": [
+      "bread",
+      "potato",
+      "cucumber",
+      "tomato",
+      "mint chutney",
+      "butter"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": "11:30",
+    "prep_time_minutes": 8,
+    "calories": 320,
+    "protein_g": 8,
+    "carbs_g": 44,
+    "sugar_g": 4,
+    "fiber_g": 3,
+    "portion_size": "medium",
+    "spice_level": 1,
+    "taste_profile": [
+      "savory",
+      "tangy"
+    ],
+    "mood_tags": [
+      "study_fuel",
+      "light"
+    ],
+    "serving_times": [
+      "breakfast"
+    ],
+    "popularity_score": 83,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "cornflakes_milk",
+    "name": "Cornflakes + Milk",
+    "description": "Classic bowl with cold milk + banana slices.",
+    "price": 40.0,
+    "category": "breakfast",
+    "cuisine": "continental",
+    "ingredients": [
+      "cornflakes",
+      "milk",
+      "banana",
+      "sugar"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg",
+      "gluten_free"
+    ],
+    "availability": true,
+    "available_until": "11:30",
+    "prep_time_minutes": 2,
+    "calories": 260,
+    "protein_g": 7,
+    "carbs_g": 48,
+    "sugar_g": 18,
+    "fiber_g": 1,
+    "portion_size": "light",
+    "spice_level": 0,
+    "taste_profile": [
+      "sweet",
+      "comforting"
+    ],
+    "mood_tags": [
+      "light",
+      "energizing"
+    ],
+    "serving_times": [
+      "breakfast"
+    ],
+    "popularity_score": 60,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "masala_omelette",
+    "name": "Masala Omelette + Toast",
+    "description": "Double-egg masala omelette with 2 toast.",
+    "price": 55.0,
+    "category": "breakfast",
+    "cuisine": "street_food",
+    "ingredients": [
+      "egg",
+      "onion",
+      "tomato",
+      "green chilli",
+      "bread",
+      "butter"
+    ],
+    "allergens": [
+      "egg",
+      "gluten",
+      "dairy"
+    ],
+    "dietary_tags": [
+      "egg"
+    ],
+    "availability": true,
+    "available_until": "11:30",
+    "prep_time_minutes": 9,
+    "calories": 360,
+    "protein_g": 13,
+    "carbs_g": 24,
+    "sugar_g": 2,
+    "fiber_g": 1,
+    "portion_size": "medium",
+    "spice_level": 2,
+    "taste_profile": [
+      "spicy",
+      "savory"
+    ],
+    "mood_tags": [
+      "energizing",
+      "study_fuel"
+    ],
+    "serving_times": [
+      "breakfast"
+    ],
+    "popularity_score": 79,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "boiled_eggs",
+    "name": "Boiled Eggs (2 pc)",
+    "description": "Simple protein — salt + pepper sachets.",
+    "price": 30.0,
+    "category": "breakfast",
+    "cuisine": "continental",
+    "ingredients": [
+      "egg",
+      "salt",
+      "pepper"
+    ],
+    "allergens": [
+      "egg"
+    ],
+    "dietary_tags": [
+      "egg",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "availability": false,
+    "available_until": "11:30",
+    "prep_time_minutes": 8,
+    "calories": 140,
+    "protein_g": 12,
+    "carbs_g": 1,
+    "sugar_g": 0,
+    "fiber_g": 0,
+    "portion_size": "light",
+    "spice_level": 0,
+    "taste_profile": [
+      "savory"
+    ],
+    "mood_tags": [
+      "light",
+      "study_fuel"
+    ],
+    "serving_times": [
+      "breakfast"
+    ],
+    "popularity_score": 65,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "veg_thali",
+    "name": "Veg Thali",
+    "description": "Dal, sabzi, 3 roti, rice, salad + papad. Canteen classic.",
+    "price": 120.0,
+    "category": "main_course",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "toor dal",
+      "mixed vegetables",
+      "wheat flour",
+      "rice",
+      "onion",
+      "salad"
+    ],
+    "allergens": [
+      "gluten"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": "21:00",
+    "prep_time_minutes": 15,
+    "calories": 720,
+    "protein_g": 20,
+    "carbs_g": 105,
+    "sugar_g": 6,
+    "fiber_g": 12,
+    "portion_size": "filling",
+    "spice_level": 1,
+    "taste_profile": [
+      "savory",
+      "comforting"
+    ],
+    "mood_tags": [
+      "comfort",
+      "homesick"
+    ],
+    "serving_times": [
+      "lunch",
+      "dinner"
+    ],
+    "popularity_score": 90,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "chicken_curry_rice",
+    "name": "Chicken Curry + Rice",
+    "description": "Homestyle chicken curry with steamed rice.",
+    "price": 140.0,
+    "category": "main_course",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "chicken",
+      "rice",
+      "onion",
+      "tomato",
+      "garlic",
+      "spices"
+    ],
+    "allergens": [],
+    "dietary_tags": [
+      "non_veg",
+      "halal",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": "21:00",
+    "prep_time_minutes": 20,
+    "calories": 680,
+    "protein_g": 26,
+    "carbs_g": 78,
+    "sugar_g": 4,
+    "fiber_g": 3,
+    "portion_size": "filling",
+    "spice_level": 2,
+    "taste_profile": [
+      "spicy",
+      "savory"
+    ],
+    "mood_tags": [
+      "comfort",
+      "homesick",
+      "indulgent"
+    ],
+    "serving_times": [
+      "lunch",
+      "dinner"
+    ],
+    "popularity_score": 89,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "curd_rice",
+    "name": "Curd Rice",
+    "description": "Comfort curd rice with pomegranate + curry-leaf tempering.",
+    "price": 60.0,
+    "category": "main_course",
+    "cuisine": "south_indian",
+    "ingredients": [
+      "rice",
+      "curd",
+      "pomegranate",
+      "curry leaves",
+      "mustard seeds"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg",
+      "gluten_free"
+    ],
+    "availability": true,
+    "available_until": "21:00",
+    "prep_time_minutes": 8,
+    "calories": 380,
+    "protein_g": 9,
+    "carbs_g": 62,
+    "sugar_g": 8,
+    "fiber_g": 2,
+    "portion_size": "medium",
+    "spice_level": 0,
+    "taste_profile": [
+      "tangy",
+      "comforting"
+    ],
+    "mood_tags": [
+      "comfort",
+      "light",
+      "homesick"
+    ],
+    "serving_times": [
+      "lunch",
+      "dinner"
+    ],
+    "popularity_score": 71,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "lemon_rice",
+    "name": "Lemon Rice",
+    "description": "Zesty tempered rice with peanuts + curry leaves.",
+    "price": 65.0,
+    "category": "main_course",
+    "cuisine": "south_indian",
+    "ingredients": [
+      "rice",
+      "lemon",
+      "peanuts",
+      "curry leaves",
+      "mustard seeds"
+    ],
+    "allergens": [
+      "peanuts"
+    ],
+    "dietary_tags": [
+      "veg",
+      "vegan",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": "21:00",
+    "prep_time_minutes": 10,
+    "calories": 420,
+    "protein_g": 6,
+    "carbs_g": 68,
+    "sugar_g": 3,
+    "fiber_g": 3,
+    "portion_size": "medium",
+    "spice_level": 1,
+    "taste_profile": [
+      "tangy",
+      "savory"
+    ],
+    "mood_tags": [
+      "light",
+      "energizing"
+    ],
+    "serving_times": [
+      "lunch",
+      "dinner"
+    ],
+    "popularity_score": 68,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "pav_bhaji",
+    "name": "Pav Bhaji",
+    "description": "Buttery Mumbai bhaji with 2 toasted pav.",
+    "price": 80.0,
+    "category": "main_course",
+    "cuisine": "street_food",
+    "ingredients": [
+      "potato",
+      "peas",
+      "tomato",
+      "capsicum",
+      "pav",
+      "butter"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": "21:00",
+    "prep_time_minutes": 14,
+    "calories": 560,
+    "protein_g": 9,
+    "carbs_g": 72,
+    "sugar_g": 6,
+    "fiber_g": 6,
+    "portion_size": "heavy",
+    "spice_level": 2,
+    "taste_profile": [
+      "spicy",
+      "savory",
+      "comforting"
+    ],
+    "mood_tags": [
+      "indulgent",
+      "comfort",
+      "celebratory"
+    ],
+    "serving_times": [
+      "lunch",
+      "dinner"
+    ],
+    "popularity_score": 87,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "chole_kulche",
+    "name": "Chole Kulche",
+    "description": "Delhi-style matar-chole with soft kulche.",
+    "price": 70.0,
+    "category": "main_course",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "white peas",
+      "kulche",
+      "onion",
+      "tomato",
+      "spices"
+    ],
+    "allergens": [
+      "gluten"
+    ],
+    "dietary_tags": [
+      "veg",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": "21:00",
+    "prep_time_minutes": 10,
+    "calories": 520,
+    "protein_g": 11,
+    "carbs_g": 78,
+    "sugar_g": 5,
+    "fiber_g": 7,
+    "portion_size": "heavy",
+    "spice_level": 2,
+    "taste_profile": [
+      "spicy",
+      "tangy",
+      "savory"
+    ],
+    "mood_tags": [
+      "comfort",
+      "study_fuel"
+    ],
+    "serving_times": [
+      "lunch",
+      "dinner"
+    ],
+    "popularity_score": 82,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "white_sauce_pasta",
+    "name": "White Sauce Pasta",
+    "description": "Creamy penne with exotic veggies + herbs.",
+    "price": 110.0,
+    "category": "main_course",
+    "cuisine": "continental",
+    "ingredients": [
+      "penne",
+      "milk",
+      "cheese",
+      "capsicum",
+      "corn",
+      "herbs"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": "21:00",
+    "prep_time_minutes": 14,
+    "calories": 580,
+    "protein_g": 13,
+    "carbs_g": 74,
+    "sugar_g": 6,
+    "fiber_g": 3,
+    "portion_size": "heavy",
+    "spice_level": 0,
+    "taste_profile": [
+      "cheesy",
+      "comforting",
+      "savory"
+    ],
+    "mood_tags": [
+      "indulgent",
+      "celebratory",
+      "study_fuel"
+    ],
+    "serving_times": [
+      "lunch",
+      "dinner"
+    ],
+    "popularity_score": 84,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "red_sauce_pasta",
+    "name": "Red Sauce Pasta",
+    "description": "Tangy tomato-basil penne, chilli flakes on side.",
+    "price": 100.0,
+    "category": "main_course",
+    "cuisine": "continental",
+    "ingredients": [
+      "penne",
+      "tomato",
+      "basil",
+      "garlic",
+      "olive oil"
+    ],
+    "allergens": [
+      "gluten"
+    ],
+    "dietary_tags": [
+      "veg",
+      "vegan",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": "21:00",
+    "prep_time_minutes": 13,
+    "calories": 480,
+    "protein_g": 9,
+    "carbs_g": 70,
+    "sugar_g": 8,
+    "fiber_g": 4,
+    "portion_size": "heavy",
+    "spice_level": 1,
+    "taste_profile": [
+      "tangy",
+      "savory"
+    ],
+    "mood_tags": [
+      "study_fuel",
+      "comfort"
+    ],
+    "serving_times": [
+      "lunch",
+      "dinner"
+    ],
+    "popularity_score": 80,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "egg_fried_rice",
+    "name": "Egg Fried Rice",
+    "description": "Smoky wok rice tossed with scrambled egg.",
+    "price": 95.0,
+    "category": "main_course",
+    "cuisine": "chinese",
+    "ingredients": [
+      "rice",
+      "egg",
+      "spring onion",
+      "soy sauce",
+      "garlic"
+    ],
+    "allergens": [
+      "egg",
+      "soy"
+    ],
+    "dietary_tags": [
+      "egg"
+    ],
+    "availability": true,
+    "available_until": "21:00",
+    "prep_time_minutes": 12,
+    "calories": 520,
+    "protein_g": 12,
+    "carbs_g": 70,
+    "sugar_g": 3,
+    "fiber_g": 3,
+    "portion_size": "heavy",
+    "spice_level": 1,
+    "taste_profile": [
+      "savory"
+    ],
+    "mood_tags": [
+      "study_fuel",
+      "comfort"
+    ],
+    "serving_times": [
+      "lunch",
+      "dinner"
+    ],
+    "popularity_score": 78,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "pani_puri",
+    "name": "Pani Puri (8 pc)",
+    "description": "Crisp puris, mint + imli pani, aloo-chana filling.",
+    "price": 50.0,
+    "category": "snack",
+    "cuisine": "street_food",
+    "ingredients": [
+      "semolina",
+      "potato",
+      "chickpeas",
+      "mint",
+      "tamarind"
+    ],
+    "allergens": [
+      "gluten"
+    ],
+    "dietary_tags": [
+      "veg",
+      "vegan",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 6,
+    "calories": 320,
+    "protein_g": 4,
+    "carbs_g": 46,
+    "sugar_g": 5,
+    "fiber_g": 2,
+    "portion_size": "medium",
+    "spice_level": 3,
+    "taste_profile": [
+      "spicy",
+      "tangy"
+    ],
+    "mood_tags": [
+      "indulgent",
+      "celebratory",
+      "study_fuel"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 92,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "bhel_puri",
+    "name": "Bhel Puri",
+    "description": "Puffed rice, sev, onion, tomato, imli chutney.",
+    "price": 40.0,
+    "category": "snack",
+    "cuisine": "street_food",
+    "ingredients": [
+      "puffed rice",
+      "sev",
+      "onion",
+      "tomato",
+      "tamarind"
+    ],
+    "allergens": [
+      "gluten"
+    ],
+    "dietary_tags": [
+      "veg",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 4,
+    "calories": 240,
+    "protein_g": 4,
+    "carbs_g": 38,
+    "sugar_g": 6,
+    "fiber_g": 2,
+    "portion_size": "light",
+    "spice_level": 2,
+    "taste_profile": [
+      "tangy",
+      "savory"
+    ],
+    "mood_tags": [
+      "light",
+      "study_fuel"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 77,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "veg_burger",
+    "name": "Veg Crispy Burger",
+    "description": "Crispy veg patty, mayo, bun + fries dust.",
+    "price": 75.0,
+    "category": "snack",
+    "cuisine": "continental",
+    "ingredients": [
+      "bun",
+      "veg patty",
+      "mayonnaise",
+      "lettuce",
+      "tomato"
+    ],
+    "allergens": [
+      "gluten",
+      "egg",
+      "soy"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 10,
+    "calories": 480,
+    "protein_g": 10,
+    "carbs_g": 52,
+    "sugar_g": 6,
+    "fiber_g": 2,
+    "portion_size": "medium",
+    "spice_level": 1,
+    "taste_profile": [
+      "savory",
+      "comforting"
+    ],
+    "mood_tags": [
+      "indulgent",
+      "celebratory",
+      "study_fuel"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 85,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "chicken_sandwich",
+    "name": "Chicken Mayo Sandwich",
+    "description": "Grilled sandwich with chicken-mayo filling.",
+    "price": 85.0,
+    "category": "snack",
+    "cuisine": "continental",
+    "ingredients": [
+      "bread",
+      "chicken",
+      "mayonnaise",
+      "pepper"
+    ],
+    "allergens": [
+      "gluten",
+      "egg"
+    ],
+    "dietary_tags": [
+      "non_veg",
+      "halal"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 9,
+    "calories": 420,
+    "protein_g": 16,
+    "carbs_g": 38,
+    "sugar_g": 4,
+    "fiber_g": 2,
+    "portion_size": "medium",
+    "spice_level": 0,
+    "taste_profile": [
+      "savory",
+      "comforting"
+    ],
+    "mood_tags": [
+      "study_fuel",
+      "indulgent"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 81,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "cheese_garlic_bread",
+    "name": "Cheese Garlic Bread",
+    "description": "Toasted garlic bread loaded with mozzarella.",
+    "price": 90.0,
+    "category": "snack",
+    "cuisine": "continental",
+    "ingredients": [
+      "bread",
+      "cheese",
+      "garlic",
+      "butter",
+      "herbs"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 9,
+    "calories": 440,
+    "protein_g": 10,
+    "carbs_g": 48,
+    "sugar_g": 3,
+    "fiber_g": 2,
+    "portion_size": "medium",
+    "spice_level": 0,
+    "taste_profile": [
+      "cheesy",
+      "savory"
+    ],
+    "mood_tags": [
+      "indulgent",
+      "celebratory"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 83,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "aloo_tikki",
+    "name": "Aloo Tikki Chaat",
+    "description": "Crisp tikkis with chole, curd, sev + chutneys.",
+    "price": 55.0,
+    "category": "snack",
+    "cuisine": "street_food",
+    "ingredients": [
+      "potato",
+      "chickpeas",
+      "curd",
+      "sev",
+      "tamarind",
+      "mint"
+    ],
+    "allergens": [
+      "dairy",
+      "gluten"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 8,
+    "calories": 380,
+    "protein_g": 6,
+    "carbs_g": 44,
+    "sugar_g": 5,
+    "fiber_g": 4,
+    "portion_size": "medium",
+    "spice_level": 2,
+    "taste_profile": [
+      "spicy",
+      "tangy",
+      "savory"
+    ],
+    "mood_tags": [
+      "indulgent",
+      "comfort"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 79,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "corn_mayo_sandwich",
+    "name": "Corn Mayo Sandwich",
+    "description": "Creamy corn-mayo in soft grilled bread.",
+    "price": 65.0,
+    "category": "snack",
+    "cuisine": "continental",
+    "ingredients": [
+      "bread",
+      "corn",
+      "mayonnaise",
+      "pepper"
+    ],
+    "allergens": [
+      "gluten",
+      "egg"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": false,
+    "available_until": null,
+    "prep_time_minutes": 7,
+    "calories": 360,
+    "protein_g": 7,
+    "carbs_g": 42,
+    "sugar_g": 4,
+    "fiber_g": 2,
+    "portion_size": "medium",
+    "spice_level": 0,
+    "taste_profile": [
+      "cheesy",
+      "savory"
+    ],
+    "mood_tags": [
+      "light",
+      "study_fuel"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 70,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "badam_milk",
+    "name": "Hot Badam Milk",
+    "description": "Saffron-almond milk, served steaming.",
+    "price": 50.0,
+    "category": "beverage",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "milk",
+      "almonds",
+      "saffron",
+      "sugar",
+      "cardamom"
+    ],
+    "allergens": [
+      "dairy",
+      "tree_nuts"
+    ],
+    "dietary_tags": [
+      "veg",
+      "gluten_free"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 6,
+    "calories": 220,
+    "protein_g": 8,
+    "carbs_g": 24,
+    "sugar_g": 20,
+    "fiber_g": 1,
+    "portion_size": "light",
+    "spice_level": 0,
+    "taste_profile": [
+      "sweet",
+      "comforting"
+    ],
+    "mood_tags": [
+      "comfort",
+      "homesick"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 75,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "orange_juice",
+    "name": "Fresh Orange Juice",
+    "description": "Squeezed oranges, no added sugar.",
+    "price": 45.0,
+    "category": "beverage",
+    "cuisine": "street_food",
+    "ingredients": [
+      "orange",
+      "water",
+      "salt"
+    ],
+    "allergens": [],
+    "dietary_tags": [
+      "veg",
+      "vegan",
+      "gluten_free",
+      "dairy_free"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 4,
+    "calories": 110,
+    "protein_g": 1,
+    "carbs_g": 24,
+    "sugar_g": 20,
+    "fiber_g": 1,
+    "portion_size": "light",
+    "spice_level": 0,
+    "taste_profile": [
+      "tangy",
+      "refreshing",
+      "sweet"
+    ],
+    "mood_tags": [
+      "light",
+      "energizing"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 72,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "banana_shake",
+    "name": "Banana Shake",
+    "description": "Thick banana + milk shake with honey.",
+    "price": 60.0,
+    "category": "beverage",
+    "cuisine": "continental",
+    "ingredients": [
+      "banana",
+      "milk",
+      "honey"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg",
+      "gluten_free"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 5,
+    "calories": 300,
+    "protein_g": 9,
+    "carbs_g": 52,
+    "sugar_g": 34,
+    "fiber_g": 2,
+    "portion_size": "medium",
+    "spice_level": 0,
+    "taste_profile": [
+      "sweet",
+      "comforting"
+    ],
+    "mood_tags": [
+      "energizing",
+      "study_fuel"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 73,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "sweet_lassi",
+    "name": "Sweet Punjabi Lassi",
+    "description": "Thick curd lassi with malai topping.",
+    "price": 50.0,
+    "category": "beverage",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "curd",
+      "sugar",
+      "malai",
+      "cardamom"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg",
+      "gluten_free"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 4,
+    "calories": 280,
+    "protein_g": 8,
+    "carbs_g": 38,
+    "sugar_g": 30,
+    "fiber_g": 0,
+    "portion_size": "medium",
+    "spice_level": 0,
+    "taste_profile": [
+      "sweet",
+      "refreshing"
+    ],
+    "mood_tags": [
+      "comfort",
+      "celebratory",
+      "homesick"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 80,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "chocolate_milkshake",
+    "name": "Chocolate Milkshake",
+    "description": "Cocoa + vanilla ice cream blended thick.",
+    "price": 75.0,
+    "category": "beverage",
+    "cuisine": "continental",
+    "ingredients": [
+      "milk",
+      "cocoa",
+      "ice cream",
+      "sugar"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 6,
+    "calories": 420,
+    "protein_g": 8,
+    "carbs_g": 58,
+    "sugar_g": 44,
+    "fiber_g": 1,
+    "portion_size": "medium",
+    "spice_level": 0,
+    "taste_profile": [
+      "sweet"
+    ],
+    "mood_tags": [
+      "indulgent",
+      "celebratory"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 82,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "rasmalai",
+    "name": "Rasmalai (2 pc)",
+    "description": "Soft chenna discs in saffron milk.",
+    "price": 55.0,
+    "category": "dessert",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "milk",
+      "sugar",
+      "saffron",
+      "cardamom",
+      "pistachio"
+    ],
+    "allergens": [
+      "dairy",
+      "tree_nuts"
+    ],
+    "dietary_tags": [
+      "veg",
+      "gluten_free"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 3,
+    "calories": 280,
+    "protein_g": 8,
+    "carbs_g": 36,
+    "sugar_g": 30,
+    "fiber_g": 0,
+    "portion_size": "light",
+    "spice_level": 0,
+    "taste_profile": [
+      "sweet",
+      "comforting"
+    ],
+    "mood_tags": [
+      "celebratory",
+      "comfort",
+      "homesick"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 81,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "rice_kheer",
+    "name": "Rice Kheer",
+    "description": "Slow-cooked rice pudding with cardamom.",
+    "price": 45.0,
+    "category": "dessert",
+    "cuisine": "north_indian",
+    "ingredients": [
+      "rice",
+      "milk",
+      "sugar",
+      "cardamom"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg",
+      "gluten_free"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 5,
+    "calories": 260,
+    "protein_g": 7,
+    "carbs_g": 42,
+    "sugar_g": 28,
+    "fiber_g": 0,
+    "portion_size": "light",
+    "spice_level": 0,
+    "taste_profile": [
+      "sweet",
+      "comforting"
+    ],
+    "mood_tags": [
+      "comfort",
+      "homesick",
+      "celebratory"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 76,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "choco_donut",
+    "name": "Choco Donut",
+    "description": "Glazed chocolate donut, canteen bakery.",
+    "price": 40.0,
+    "category": "dessert",
+    "cuisine": "continental",
+    "ingredients": [
+      "wheat flour",
+      "cocoa",
+      "sugar",
+      "oil"
+    ],
+    "allergens": [
+      "gluten"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 2,
+    "calories": 320,
+    "protein_g": 4,
+    "carbs_g": 44,
+    "sugar_g": 26,
+    "fiber_g": 1,
+    "portion_size": "light",
+    "spice_level": 0,
+    "taste_profile": [
+      "sweet"
+    ],
+    "mood_tags": [
+      "indulgent",
+      "celebratory",
+      "study_fuel"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 78,
+    "is_combo": false,
+    "combo_items": []
+  },
+  {
+    "id": "combo_burger_fries",
+    "name": "Burger + Fries",
+    "description": "Veg crispy burger with salted fries.",
+    "price": 130.0,
+    "category": "combo",
+    "cuisine": "continental",
+    "ingredients": [
+      "bun",
+      "veg patty",
+      "potato",
+      "mayonnaise",
+      "lettuce"
+    ],
+    "allergens": [
+      "gluten",
+      "egg",
+      "soy"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 12,
+    "calories": 860,
+    "protein_g": 14,
+    "carbs_g": 96,
+    "sugar_g": 6,
+    "fiber_g": 6,
+    "portion_size": "filling",
+    "spice_level": 1,
+    "taste_profile": [
+      "savory",
+      "comforting"
+    ],
+    "mood_tags": [
+      "indulgent",
+      "celebratory",
+      "study_fuel"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 88,
+    "is_combo": true,
+    "combo_items": [
+      "veg_burger",
+      "fries"
+    ]
+  },
+  {
+    "id": "combo_sandwich_juice",
+    "name": "Sandwich + Orange Juice",
+    "description": "Grilled veg sandwich with fresh orange juice.",
+    "price": 85.0,
+    "category": "combo",
+    "cuisine": "street_food",
+    "ingredients": [
+      "bread",
+      "potato",
+      "orange",
+      "mint chutney",
+      "butter"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 9,
+    "calories": 430,
+    "protein_g": 9,
+    "carbs_g": 68,
+    "sugar_g": 24,
+    "fiber_g": 4,
+    "portion_size": "heavy",
+    "spice_level": 1,
+    "taste_profile": [
+      "savory",
+      "refreshing",
+      "tangy"
+    ],
+    "mood_tags": [
+      "light",
+      "study_fuel"
+    ],
+    "serving_times": [
+      "all_day"
+    ],
+    "popularity_score": 79,
+    "is_combo": true,
+    "combo_items": [
+      "veg_grilled_sandwich",
+      "orange_juice"
+    ]
+  },
+  {
+    "id": "combo_pasta_bread",
+    "name": "Pasta + Garlic Bread",
+    "description": "White-sauce pasta with cheese garlic bread.",
+    "price": 175.0,
+    "category": "combo",
+    "cuisine": "continental",
+    "ingredients": [
+      "penne",
+      "milk",
+      "cheese",
+      "bread",
+      "garlic",
+      "herbs"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy"
+    ],
+    "dietary_tags": [
+      "veg"
+    ],
+    "availability": true,
+    "available_until": null,
+    "prep_time_minutes": 15,
+    "calories": 1020,
+    "protein_g": 23,
+    "carbs_g": 122,
+    "sugar_g": 9,
+    "fiber_g": 5,
+    "portion_size": "filling",
+    "spice_level": 0,
+    "taste_profile": [
+      "cheesy",
+      "savory",
+      "comforting"
+    ],
+    "mood_tags": [
+      "indulgent",
+      "celebratory"
+    ],
+    "serving_times": [
+      "lunch",
+      "dinner"
+    ],
+    "popularity_score": 86,
+    "is_combo": true,
+    "combo_items": [
+      "white_sauce_pasta",
+      "cheese_garlic_bread"
     ]
   }
 ]

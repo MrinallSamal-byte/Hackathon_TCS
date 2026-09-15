@@ -1,25 +1,20 @@
-# CampusBite — AI Conversational Canteen Recommender
+# biteMatch — Open-Source AI Conversational Canteen Recommender & Kitchen Telemetry
 
-An AI-powered chat assistant that helps college students decide what to eat.
-It collects budget, time, mood, dietary needs and cravings in natural language
-(including Hinglish and common typos like "diabetise"), filters the live
-canteen menu through a deterministic engine, recommends single items **and**
-budget-safe combos with data-grounded explanations, remembers each user across
-visits — including health conditions like diabetes, so next time it
-automatically picks lower-sugar options and gently redirects ("since you're
-managing diabetes, Gulab Jamun isn't a great pick — here are better options")
-when you crave something counter to your own health — and learns from every
-thumbs-up, order and chat turn. Cards show peer ratings plus real
-protein/carbs/sugar/fiber numbers, gym/diet/diabetic goals re-rank by data
-(not keywords), live counter queues keep ETAs honest, orders can be tracked
-live by token and repeated in one tap, student coupons cut the bill, and any
-leftover tray budget gets filled with the best sides.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![React](https://img.shields.io/badge/React-18-61DAFB.svg?logo=react&logoColor=black)](https://reactjs.org)
+[![Vite](https://img.shields.io/badge/Vite-5-646CFF.svg?logo=vite&logoColor=white)](https://vitejs.dev)
+[![Tests](https://img.shields.io/badge/Tests-164%20Passing-10B981.svg)](#15-testing)
+[![OpenRouter](https://img.shields.io/badge/OpenRouter-Free%20Tier-blue.svg)](https://openrouter.ai)
+[![TCS Hackathon](https://img.shields.io/badge/TCS%20Hackathon%202026-3rd%20Place%20%F0%9F%A5%89-D97706.svg)](#-about-the-project--tcs-hackathon-sprint-3rd-place-winner-)
+[![OpenAPI 3.1](https://img.shields.io/badge/OpenAPI-3.1%20Live%20Docs-10B981.svg)](https://hackathon-tcs-azure.vercel.app/docs)
 
-> Hybrid AI contract: the **deterministic engine** does all filtering, scoring,
-> budget math and availability checks. The **LLM** (OpenRouter free-tier chain)
-> only rephrases explanations and gap-fills ambiguous preferences — it can never
-> invent items, prices or availability. With no API key (or exhausted quota) the
-> identical rule-based flows run, so the app never breaks.
+**biteMatch** is an open-source, conversational AI canteen recommendation platform and live kitchen telemetry system designed for college campuses and student cafeterias.
+
+It understands budget constraints, prep time limits, student mood tags, and multimodal cravings in natural language (including colloquial Hinglish like *"Rs 60 mein kuch spicy veg"*), filters the live canteen inventory through a deterministic, zero-hallucination recommendation core, generates budget-safe combos with parallel prep time estimates, tracks kitchen queues in real time, and safely respects clinical dietary restrictions (diabetic sugar/carb ceilings, allergies, Jain, vegan, halal, and menstrual nutrition).
+
+> 🛡️ **Zero-Hallucination Open-Source AI Contract:**  
+> The **deterministic scoring engine** executes 100% of the filtering, pricing, and combinatorics logic. The **LLM** (via an OpenRouter free-tier fallback chain) only phrases human explanations and resolves conversational ambiguity. It can **never** invent items, fabricate prices, or compromise dietary safety. Even with no API key, biteMatch runs offline via deterministic rule templates with 0 downtime.
 
 ---
 
@@ -31,20 +26,20 @@ leftover tray budget gets filled with the best sides.
 > **Challenge:** Create a base recommendation system for a college canteen.  
 > **Live API Documentation:** [https://hackathon-tcs-azure.vercel.app/docs](https://hackathon-tcs-azure.vercel.app/docs)
 
-When given the problem statement to create a base recommendation system for a campus canteen, our team (**Mrinal Samal and 5 teammates**) decided to explore the frontier of modern rapid AI-assisted development. Instead of submitting a basic recommendation script, we built **biteMatch** — a feature-rich, full-stack AI food discovery platform that took **3rd Place**:
+When presented with the hackathon challenge to build a base recommendation system for a college canteen, our team (**Mrinal Samal and 5 teammates**) aimed to push the limits of modern rapid full-stack engineering and agentic workflows. In 60 minutes, we engineered and shipped **biteMatch** end-to-end:
 
-- **Multimodal AI Craving Search**: Natural language voice input & Hinglish parsing (`"Rs 60 mein kuch spicy veg"`).
-- **Deterministic Core + Hybrid LLM**: High-speed deterministic filtering paired with OpenRouter LLM reasoning with guaranteed zero hallucinations.
-- **Smart Combinatorics & Tray Auto-fill**: Budget-optimized combo pairing, parallel prep time calculations, and leftover budget auto-filling.
-- **Clinical Nutrition & Allergen Guards**: Diabetic GI/carb bounds, strict Jain (no onion/garlic), vegan, halal, and allergen verification.
-- **Live Counter Telemetry & Kitchen Ticketing**: Token state machine, parallel prep ETA calculation, receipt generator, and Canteen Admin dashboard.
-- **158 Automated Unit Tests**: Robust test coverage across all NLU, API, recommender, and memory logic.
+- **Multimodal AI Craving Search**: Voice speech-to-text input and natural Hinglish parsing (`"Rs 60 mein kuch spicy veg"`).
+- **Deterministic Core + Hybrid LLM**: Ultra-fast deterministic recommendation matrix paired with OpenRouter AI rephrasing (guaranteed zero hallucinations).
+- **Smart Combinatorics & Tray Auto-fill**: Budget-optimized combo pairing, parallel kitchen prep ETA calculation, and leftover tray budget auto-filling.
+- **Clinical Dietary, Allergy & Period Health Guards**: Diabetic carb/glycemic limits, menstrual cramp nutrition (iron/magnesium scoring), strict Jain (no onion/garlic), vegan, halal, and allergen verification.
+- **Live Queue Telemetry & Kitchen KDS**: Token state machine (`CB-123`), parallel prep ETA tracking, receipt generator, and Canteen Admin console.
+- **164 Passing Automated Tests**: Comprehensive offline-safe test suite verifying all NLU, API, recommender, and memory logic.
 
 > 📖 **Want to learn how this works?**  
-> If you are interested in learning about more of this project, exploring the OpenAPI schema, or testing the live endpoints, refer to our interactive Swagger documentation at [https://hackathon-tcs-azure.vercel.app/docs](https://hackathon-tcs-azure.vercel.app/docs).
+> Explore the live OpenAPI schema and test endpoints directly using our interactive Swagger documentation: [https://hackathon-tcs-azure.vercel.app/docs](https://hackathon-tcs-azure.vercel.app/docs).
 
 > 💬 **A Note from the Builders:**  
-> *"I know a few minor things are missing or could use polish, but yeah — this is what we could build in under 1 hour using modern AI capabilities nowadays! What would typically take several days of scaffolding, contract design, and manual UI wiring was designed, verified across 158 test specs, and deployed to production in a single intense 60-minute sprint."*
+> *"I know a few minor things are missing or could use polish, but yeah — this is what we could build in under 1 hour using modern AI capabilities nowadays! What would typically take several days of scaffolding, contract design, and manual UI wiring was designed, verified across 164 test specs, and deployed to production in a single intense 60-minute sprint."*
 
 ---
 
@@ -76,6 +71,8 @@ When given the problem statement to create a base recommendation system for a ca
 23. [AI verification (prove it works)](#23-ai-verification-prove-it-works)
 24. [Responsive design matrix](#24-responsive-design-matrix)
 25. [Deploying to Vercel](#25-deploying-to-vercel)
+26. [Open source, community & contributing](#26--open-source-community--contributing)
+27. [License & attribution](#27--license--attribution)
 
 ---
 
@@ -93,7 +90,7 @@ When given the problem statement to create a base recommendation system for a ca
 | Primary database     | **Supabase Postgres** (optional)   | Managed Postgres + PostgREST + RLS; `menu_items`, `feedback_log`, `order_history`, `chat_memory` |
 | Local database       | **JSON files** in `data/`          | Zero-setup default; mirror + fallback when Supabase is unset/offline     |
 | Server               | **Uvicorn**                        | ASGI server with `--reload` for development                              |
-| Tests                | **pytest** + FastAPI TestClient    | 56 offline-safe tests; `CAMPUSBITE_OFFLINE=1` kills network in tests     |
+| Tests                | **pytest** + FastAPI TestClient    | 164 offline-safe unit & integration tests; `CAMPUSBITE_OFFLINE=1` kills network in tests |
 
 ### Frontend
 
@@ -403,7 +400,7 @@ un-filters.
 
 ## 6. Data model
 
-Menu item (53 seeded; full schema in `backend/models.py`):
+Menu item (87 seeded; full schema in `backend/models.py`):
 
 ```
 id, name, description, price (Rs), category, cuisine,
@@ -429,10 +426,10 @@ sessions   1----1 chat_memory       (session_id PK, data jsonb: prefs/budgets/mo
 ```
 
 Full per-table breakdown (JSON file ↔ Postgres table ↔ what must never be
-lost) lives in §22. Seeded menu facts: 53 items · 6 combos · 5 unavailable (sold-out path) ·
+lost) lives in §22. Seeded menu facts: 87 items · 9 combos · 7 unavailable (sold-out path) ·
 ₹15–175 · 2–22 min · all 6 categories × 5 cuisines · Jain items verified
 onion/garlic-free by a model validator · every item carries protein + carbs +
-sugar + fiber estimates (`seed.py --validate` checks all 53).
+sugar + fiber estimates (`seed.py --validate` checks all 87).
 
 ---
 
@@ -485,7 +482,7 @@ CampusBite/
 │   ├── memory.py         # per-session memory, health auto-persist, boosts, usual budget
 │   └── db_supabase.py    # PostgREST adapter incl. coupons/counters/status/session payloads
 ├── data/
-│   ├── seed.py               # generates the 53-item menu (+protein + C/S/F nutrition)
+│   ├── seed.py               # generates the 87-item menu (+protein + C/S/F nutrition)
 │   ├── menu_data.json        # generated seed of truth (do not hand-edit)
 │   ├── supabase_schema.sql   # Postgres DDL + RLS + indexes + additive migration block
 │   ├── sync_to_supabase.py   # one-shot menu upsert [--dry-run]
@@ -553,7 +550,7 @@ backend loads it automatically). Without it everything still works rule-based.
 #     with RLS policies and partial/GIN indexes).
 # 3. Seed the menu:
 .venv/bin/python data/sync_to_supabase.py --dry-run   # preview first row
-.venv/bin/python data/sync_to_supabase.py             # upsert all 53 items
+.venv/bin/python data/sync_to_supabase.py             # upsert the full menu
 # 4. Enable in the backend (.env):
 SUPABASE_URL=https://<your-project-ref>.supabase.co
 SUPABASE_SERVICE_KEY=<service-role key>   # server-side; anon key also works for reads
@@ -788,7 +785,7 @@ bottom sheet; ≥1024px: 640px chat + 320px rail. Light theme via
 ## 15. Testing
 
 ```bash
-.venv/bin/python -m pytest tests/ -q     # 158 tests, ~3 s, fully offline
+.venv/bin/python -m pytest tests/ -q     # 164 tests, ~8 s, fully offline
 ```
 
 | File | Covers |
@@ -1254,3 +1251,60 @@ To deploy the React website:
    - `VITE_API_URL`: `https://hackathon-tcs-azure.vercel.app`
    *(Note: Even if this variable is omitted, `frontend/src/api.js` now includes a smart automatic fallback to `https://hackathon-tcs-azure.vercel.app` whenever running in production).*
 7. Click **Deploy**. Your interactive website will be live in ~30 seconds at `https://hackathon-tcs-frontend.vercel.app`!
+
+---
+
+## 26. 🌟 Open Source, Community & Contributing
+
+**biteMatch is 100% open-source!** We welcome developers, students, researchers, and campus cafeteria teams from around the world to build on top of our deterministic recommendation core and conversational AI engine.
+
+### Why We Open-Sourced biteMatch
+1. **Clinical Transparency**: When an AI suggests food for students managing diabetes or severe nut allergies, the safety boundaries must be open, auditable, and deterministic — never an unpredictable black box.
+2. **Campus Reproducibility**: Any university or college can fork this repository, populate their own canteen menu in `data/menu_data.json` or Supabase, and have a production-ready ordering and recommendation hub in minutes.
+3. **Zero-Cost Operation**: The entire backend can run on free serverless tiers (Vercel Serverless + Supabase free tier + OpenRouter free models) with offline template fallbacks.
+
+### How to Contribute
+We love pull requests and issue discussions! Here are some great ways to contribute:
+- 🍲 **New Dishes & Cuisines**: Add regional campus favorites to `data/menu_data.json` with accurate macro breakdowns (calories, protein, carbs, sugar).
+- 🗣️ **Hinglish & Regional Slang**: Extend `backend/nlu.py` with local campus slang, typo corrections, or regional food vocabulary.
+- 🛡️ **Dietary & Health Rules**: Propose new clinical guards (e.g. PCOS, celiac strict gluten cross-contamination, renal diets).
+- 🎨 **UI/UX Polish**: Improve accessibility, micro-animations, or responsive layout touches in `frontend/`.
+- 🧪 **Test Coverage**: Add edge-case test specs in `tests/`.
+
+### Development Workflow
+```bash
+# 1. Fork the repo on GitHub and clone your fork
+git clone https://github.com/YOUR_USERNAME/Hackathon_TCS.git
+cd Hackathon_TCS
+
+# 2. Set up Python backend virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+# Or using uv:
+uv sync
+
+# 3. Run the 164-test automated suite
+uv run pytest
+
+# 4. Set up and run the React frontend
+cd frontend
+npm install
+npm run dev
+
+# 5. Create a feature branch & open a PR!
+git checkout -b feat/my-campus-dish
+```
+
+---
+
+## 27. 📄 License & Attribution
+
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+
+### Acknowledgements & Team
+- **TCS Hackathon 2026**: Conducted by Tata Consultancy Services (TCS) — 🥉 **3rd Place Winner**.
+- **Lead Author & Maintainer**: [Mrinal Samal](https://github.com/MrinallSamal-byte)
+- **Team**: Mrinal Samal & 5 teammates (Team of 6 builders).
+- **Design Inspiration**: Warm aesthetic inspired by modern food discovery apps (Cravio), with an engineering focus on deterministic zero-hallucination recommendation algorithms.
+

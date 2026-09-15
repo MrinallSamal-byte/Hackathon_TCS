@@ -1,7 +1,7 @@
 {
-  "name": "campusbite-frontend",
-  "private": true,
+  "name": "bitematch-frontend",
   "version": "1.0.0",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",

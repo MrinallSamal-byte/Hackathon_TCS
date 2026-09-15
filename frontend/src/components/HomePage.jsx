@@ -3,7 +3,8 @@ import {
   Mic, Sparkles, Clock, Utensils, MessageSquare,
   Flame, ShoppingBag, ShieldCheck, ArrowRight,
   TrendingUp, Dumbbell, Zap, ChevronRight, Store,
-  CheckCircle2, Compass, RefreshCw, Users, Award, Timer, Code2, BookOpen, ExternalLink
+  CheckCircle2, Compass, RefreshCw, Users, Award, Timer, Code2, BookOpen, ExternalLink,
+  Copy, Check, HeartPulse, Layers, Users2, Quote
 } from 'lucide-react';
 
 export function HomePage({ onNavigate, onLaunchSearch, liveCount }) {
@@ -12,6 +13,15 @@ export function HomePage({ onNavigate, onLaunchSearch, liveCount }) {
   const [activeShowcaseTab, setActiveShowcaseTab] = useState(0);
   const [isListening, setIsListening] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
+  const [copiedDocLink, setCopiedDocLink] = useState(false);
+
+  const handleCopyDocs = async () => {
+    try {
+      await navigator.clipboard.writeText('https://hackathon-tcs-azure.vercel.app/docs');
+      setCopiedDocLink(true);
+      setTimeout(() => setCopiedDocLink(false), 2400);
+    } catch { /* ignore */ }
+  };
 
   useEffect(() => {
     if (typeof window !== 'undefined' && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
@@ -349,7 +359,7 @@ export function HomePage({ onNavigate, onLaunchSearch, liveCount }) {
 
           {/* Interactive Center Phone Showcase */}
           <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <div className="phone-device" style={{ width: 270 }}>
+            <div className="phone-device" style={{ width: 'min(270px, calc(100vw - 36px))' }}>
               <div className="phone-island" />
               <div className="phone-screen" style={{ justifyContent: 'center' }}>
                 <div style={{ textAlign: 'center', marginBottom: 14 }}>
@@ -540,103 +550,183 @@ export function HomePage({ onNavigate, onLaunchSearch, liveCount }) {
       {/* =====================================================================
           ABOUT SECTION — TCS HACKATHON & TEAM
           ===================================================================== */}
-      <section id="about" style={{ padding: '0 20px 80px', maxWidth: 1180, margin: '0 auto' }}>
+      <section id="about" style={{ padding: '0 clamp(10px, 3vw, 20px) clamp(40px, 6vw, 80px)', maxWidth: 1180, margin: '0 auto' }}>
         <div style={{
           background: 'var(--surface)',
           border: '1.5px solid var(--hairline)',
-          borderRadius: 36,
-          padding: 'clamp(28px, 5vw, 56px)',
+          borderRadius: 'clamp(20px, 4vw, 36px)',
+          padding: 'clamp(18px, 4vw, 56px)',
           boxShadow: 'var(--shadow-card)',
           position: 'relative',
           overflow: 'hidden'
         }}>
-          {/* Subtle accent glow */}
+          {/* Ambient accent glow */}
           <div style={{
             position: 'absolute',
             top: -60,
             right: -60,
-            width: 220,
-            height: 220,
+            width: 260,
+            height: 260,
             borderRadius: '50%',
-            background: 'var(--brand-soft)',
-            filter: 'blur(55px)',
-            pointerEvents: 'none',
-            opacity: 0.8
+            background: 'radial-gradient(circle, rgba(255, 107, 87, 0.16) 0%, rgba(245, 158, 11, 0.08) 55%, transparent 75%)',
+            filter: 'blur(50px)',
+            pointerEvents: 'none'
           }} />
 
           <div style={{ maxWidth: 860, position: 'relative', zIndex: 1 }}>
-            <div className="hero-pill-badge" style={{ marginBottom: 14, background: 'var(--brand-soft)', color: 'var(--brand)' }}>
-              <Award size={14} /> 🥉 3rd Place Winner · TCS Hackathon 2026
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
+              <div className="hackathon-trophy-badge">
+                <span className="trophy-pulse-dot" />
+                <Award size={15} style={{ color: '#F59E0B' }} />
+                <span>3rd Place Winner</span>
+                <span style={{ opacity: 0.6, fontSize: 11 }}>•</span>
+                <span style={{ fontWeight: 800 }}>TCS Hackathon 2026</span>
+              </div>
+              <span style={{
+                fontSize: 11.5,
+                fontFamily: 'var(--font-data)',
+                background: 'var(--surface-2)',
+                color: 'var(--text-3)',
+                padding: '4px 10px',
+                borderRadius: 'var(--r-pill)',
+                border: '1px solid var(--hairline)'
+              }}>
+                60-Min Sprint
+              </span>
             </div>
 
             <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 900, letterSpacing: '-0.03em', margin: '0 0 16px', lineHeight: 1.15 }}>
-              Built in under 1 hour by Mrinal Samal & 5 teammates — 3rd Place Winner.
+              Built in under 1 hour by{' '}
+              <span className="gradient-title-accent">Mrinal Samal & 5 teammates</span> — 3rd Place Winner.
             </h2>
 
-            <p style={{ fontSize: 16, color: 'var(--text-2)', lineHeight: 1.75, margin: '0 0 20px' }}>
+            <p style={{ fontSize: 16, color: 'var(--text-2)', lineHeight: 1.75, margin: '0 0 16px' }}>
               This project was created during a fast-paced hackathon conducted by <strong>TCS</strong>. The original problem statement challenged teams to build a <em>base recommendation system for a college canteen</em>. Our project secured <strong>3rd Place</strong> among competing teams!
             </p>
 
-            <p style={{ fontSize: 16, color: 'var(--text-2)', lineHeight: 1.75, margin: '0 0 28px' }}>
-              Rather than stopping at a basic script, <strong>Mrinal Samal</strong> and <strong>5 other teammates</strong> rallied together to see how far modern AI and rapid full-stack architecture could take the idea within 60 minutes. We engineered <strong>biteMatch</strong> with a comprehensive set of production-grade features: multimodal voice craving capture, conversational Hinglish comprehension, clinical dietary validation (diabetic carb bounds, allergen checks, Jain no-onion-garlic), live queue telemetry, parallel prep ETA calculation, dynamic combo auto-fill, coupon discounts, split billing, and an end-to-end canteen kitchen admin console.
+            <p style={{ fontSize: 16, color: 'var(--text-2)', lineHeight: 1.75, margin: '0 0 26px' }}>
+              Rather than stopping at a basic script, <strong>Mrinal Samal</strong> and <strong>5 other teammates</strong> rallied together to see how far modern AI and rapid full-stack architecture could take the idea within 60 minutes. We engineered <strong>biteMatch</strong> with a comprehensive set of production-grade features: multimodal voice craving capture, conversational Hinglish comprehension, clinical dietary validation, diabetic carb guards, live queue telemetry, parallel prep ETA calculation, dynamic combo auto-fill, coupon discounts, split billing, and an end-to-end canteen kitchen admin console.
             </p>
 
             {/* Sprint Stats Grid */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-              gap: 14,
-              marginBottom: 28
-            }}>
-              <div style={{ background: 'var(--surface-2)', padding: '18px 20px', borderRadius: 20, border: '1px solid var(--hairline)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--brand)', marginBottom: 6 }}>
-                  <Timer size={18} />
-                  <span className="micro-label" style={{ color: 'var(--text-3)' }}>SPRINT DURATION</span>
+            <div className="metrics-quad-grid" style={{ marginBottom: 28 }}>
+              <div className="metric-pill-card" style={{ padding: '16px 14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: 'var(--brand)', marginBottom: 6 }}>
+                  <Timer size={16} />
+                  <span className="micro-label" style={{ fontSize: 10 }}>SPRINT DURATION</span>
                 </div>
                 <div className="mono" style={{ fontSize: 24, fontWeight: 900, color: 'var(--text-1)' }}>&lt; 1 Hour</div>
                 <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 4 }}>Ideation to live deployment</div>
               </div>
 
-              <div style={{ background: 'var(--surface-2)', padding: '18px 20px', borderRadius: 20, border: '1px solid var(--hairline)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--brand)', marginBottom: 6 }}>
-                  <Users size={18} />
-                  <span className="micro-label" style={{ color: 'var(--text-3)' }}>TEAM</span>
+              <div className="metric-pill-card" style={{ padding: '16px 14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: 'var(--brand)', marginBottom: 6 }}>
+                  <Users size={16} />
+                  <span className="micro-label" style={{ fontSize: 10 }}>TEAM</span>
                 </div>
                 <div className="mono" style={{ fontSize: 24, fontWeight: 900, color: 'var(--text-1)' }}>6 Builders</div>
                 <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 4 }}>Mrinal Samal + 5 teammates</div>
               </div>
 
-              <div style={{ background: 'var(--surface-2)', padding: '18px 20px', borderRadius: 20, border: '1px solid var(--hairline)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--brand)', marginBottom: 6 }}>
-                  <Award size={18} />
-                  <span className="micro-label" style={{ color: 'var(--text-3)' }}>AWARD</span>
+              <div className="metric-pill-card featured" style={{ padding: '16px 14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: '#D97706', marginBottom: 6 }}>
+                  <Award size={16} />
+                  <span className="micro-label" style={{ fontSize: 10, color: '#D97706' }}>AWARD</span>
                 </div>
-                <div className="mono" style={{ fontSize: 24, fontWeight: 900, color: 'var(--brand)' }}>3rd Place 🥉</div>
-                <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 4 }}>TCS Hackathon 2026</div>
+                <div className="mono" style={{ fontSize: 24, fontWeight: 900, color: '#D97706' }}>3rd Place 🥉</div>
+                <div style={{ fontSize: 12, color: 'var(--text-2)', marginTop: 4, fontWeight: 600 }}>TCS Hackathon 2026</div>
               </div>
 
-              <div style={{ background: 'var(--surface-2)', padding: '18px 20px', borderRadius: 20, border: '1px solid var(--hairline)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--brand)', marginBottom: 6 }}>
-                  <Code2 size={18} />
-                  <span className="micro-label" style={{ color: 'var(--text-3)' }}>TEST SUITE</span>
+              <div className="metric-pill-card" style={{ padding: '16px 14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: '#10B981', marginBottom: 6 }}>
+                  <Code2 size={16} />
+                  <span className="micro-label" style={{ fontSize: 10 }}>TEST SUITE</span>
                 </div>
-                <div className="mono" style={{ fontSize: 24, fontWeight: 900, color: 'var(--text-1)' }}>158 Tests</div>
+                <div className="mono" style={{ fontSize: 24, fontWeight: 900, color: 'var(--text-1)' }}>164 Tests</div>
                 <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 4 }}>FastAPI + Vite + OpenRouter</div>
               </div>
             </div>
 
+            {/* Engineered Modules Showcase */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{
+                fontSize: 11.5,
+                fontWeight: 800,
+                color: 'var(--text-2)',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                fontFamily: 'var(--font-data)',
+                marginBottom: 12
+              }}>
+                ⚡ 8 Production Modules Engineered in 60 Minutes
+              </div>
+              <div className="capability-badges-grid">
+                <div className="capability-badge-item">
+                  <div className="cap-icon-box"><Mic size={15} /></div>
+                  <div>
+                    <strong style={{ display: 'block', fontSize: 13, color: 'var(--text-1)' }}>Voice Craving AI</strong>
+                    <span style={{ fontSize: 11.5, color: 'var(--text-3)' }}>Multimodal speech & intent parser</span>
+                  </div>
+                </div>
+                <div className="capability-badge-item">
+                  <div className="cap-icon-box"><Sparkles size={15} /></div>
+                  <div>
+                    <strong style={{ display: 'block', fontSize: 13, color: 'var(--text-1)' }}>Hinglish NLU</strong>
+                    <span style={{ fontSize: 11.5, color: 'var(--text-3)' }}>Understands Hindi-English campus slang</span>
+                  </div>
+                </div>
+                <div className="capability-badge-item">
+                  <div className="cap-icon-box"><HeartPulse size={15} /></div>
+                  <div>
+                    <strong style={{ display: 'block', fontSize: 13, color: 'var(--text-1)' }}>Clinical Dietary Guard</strong>
+                    <span style={{ fontSize: 11.5, color: 'var(--text-3)' }}>Diabetic carb limits & allergens</span>
+                  </div>
+                </div>
+                <div className="capability-badge-item">
+                  <div className="cap-icon-box"><Zap size={15} /></div>
+                  <div>
+                    <strong style={{ display: 'block', fontSize: 13, color: 'var(--text-1)' }}>Live Queue Telemetry</strong>
+                    <span style={{ fontSize: 11.5, color: 'var(--text-3)' }}>Real-time student rush & wait times</span>
+                  </div>
+                </div>
+                <div className="capability-badge-item">
+                  <div className="cap-icon-box"><Timer size={15} /></div>
+                  <div>
+                    <strong style={{ display: 'block', fontSize: 13, color: 'var(--text-1)' }}>Parallel Prep ETA</strong>
+                    <span style={{ fontSize: 11.5, color: 'var(--text-3)' }}>Kitchen bottleneck predictor</span>
+                  </div>
+                </div>
+                <div className="capability-badge-item">
+                  <div className="cap-icon-box"><Layers size={15} /></div>
+                  <div>
+                    <strong style={{ display: 'block', fontSize: 13, color: 'var(--text-1)' }}>Smart Tray Auto-Fill</strong>
+                    <span style={{ fontSize: 11.5, color: 'var(--text-3)' }}>Nutritious budget combos</span>
+                  </div>
+                </div>
+                <div className="capability-badge-item">
+                  <div className="cap-icon-box"><Users2 size={15} /></div>
+                  <div>
+                    <strong style={{ display: 'block', fontSize: 13, color: 'var(--text-1)' }}>Split Billing</strong>
+                    <span style={{ fontSize: 11.5, color: 'var(--text-3)' }}>Instant friend share calculation</span>
+                  </div>
+                </div>
+                <div className="capability-badge-item">
+                  <div className="cap-icon-box"><Code2 size={15} /></div>
+                  <div>
+                    <strong style={{ display: 'block', fontSize: 13, color: 'var(--text-1)' }}>Canteen Admin KDS</strong>
+                    <span style={{ fontSize: 11.5, color: 'var(--text-3)' }}>Live orders & kitchen telemetry</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Honest Builder Reflection Note */}
-            <div style={{
-              background: 'var(--surface-2)',
-              borderLeft: '4px solid var(--brand)',
-              borderTop: '1px solid var(--hairline)',
-              borderRight: '1px solid var(--hairline)',
-              borderBottom: '1px solid var(--hairline)',
-              borderRadius: 18,
-              padding: '20px 24px',
+            <div className="reflection-quote-card" style={{
               display: 'flex',
               alignItems: 'flex-start',
-              gap: 16
+              gap: 16,
+              padding: 'clamp(14px, 3.5vw, 20px) clamp(14px, 3.5vw, 24px)',
+              marginBottom: 24
             }}>
               <div style={{
                 width: 38, height: 38, borderRadius: '50%',
@@ -644,39 +734,67 @@ export function HomePage({ onNavigate, onLaunchSearch, liveCount }) {
                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                 marginTop: 2
               }}>
-                <Sparkles size={18} />
+                <Quote size={18} />
               </div>
               <div>
                 <strong style={{ fontSize: 15, color: 'var(--text-1)', display: 'block', marginBottom: 4 }}>
                   A Note from the Builders
                 </strong>
-                <p style={{ margin: 0, fontSize: 14, color: 'var(--text-2)', lineHeight: 1.65 }}>
-                  "I know a few minor things are missing or could use polish, but yeah — this is what we could build in under 1 hour using modern AI capabilities nowadays! What traditionally took days of boilerplates, mocks, and manual UI wiring was designed, tested against 158 test specs, and shipped end-to-end in 60 minutes."
+                <p style={{ margin: 0, fontSize: 14, color: 'var(--text-2)', lineHeight: 1.65, fontStyle: 'italic' }}>
+                  "I know a few minor things are missing or could use polish, but yeah — this is what we could build in under 1 hour using modern AI capabilities nowadays! What traditionally took days of boilerplates, mocks, and manual UI wiring was designed, tested against 164 test specs, and shipped end-to-end in 60 minutes."
                 </p>
-                <div style={{ marginTop: 10, fontSize: 12.5, fontWeight: 700, color: 'var(--brand)' }}>
-                  — Mrinal Samal & Team (TCS Hackathon 2026)
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
+                  <div style={{
+                    width: 22, height: 22, borderRadius: '50%',
+                    background: 'linear-gradient(135deg, var(--brand), #FF9040)',
+                    color: '#fff', fontSize: 10, fontWeight: 900,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                  }}>
+                    MS
+                  </div>
+                  <div style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--brand)' }}>
+                    Mrinal Samal & Team
+                  </div>
+                  <span style={{ fontSize: 11.5, color: 'var(--text-3)' }}>• TCS Hackathon 2026 (3rd Place)</span>
                 </div>
               </div>
             </div>
 
-            {/* Learn More & Architecture Documentation Link */}
-            <div style={{
-              background: 'var(--surface-2)',
-              border: '1.5px solid var(--brand-soft-border)',
-              borderRadius: 20,
-              padding: '22px 24px',
-              marginTop: 20,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 10
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 800, color: 'var(--brand)', letterSpacing: '0.04em' }}>
-                <BookOpen size={17} /> WANT TO LEARN HOW THIS PROJECT WORKS?
+            {/* Interactive API & Architecture Documentation Hub */}
+            <div className="api-hub-card">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, flexWrap: 'wrap', gap: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 800, color: 'var(--brand)', letterSpacing: '0.04em' }}>
+                  <BookOpen size={17} /> WANT TO LEARN HOW THIS PROJECT WORKS?
+                </div>
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 5,
+                  fontSize: 11,
+                  fontFamily: 'var(--font-data)',
+                  color: '#10B981',
+                  background: 'rgba(16, 185, 129, 0.1)',
+                  padding: '3px 9px',
+                  borderRadius: 'var(--r-pill)',
+                  fontWeight: 700
+                }}>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10B981', display: 'inline-block' }} />
+                  Live OpenAPI 3.1
+                </span>
               </div>
-              <p style={{ margin: 0, fontSize: 14.5, color: 'var(--text-2)', lineHeight: 1.65 }}>
-                If you are interested in learning about more of this project, exploring the deterministic scoring model, clinical dietary algorithms, or interacting with the endpoints directly, refer to our live interactive API documentation:
+              <p style={{ margin: '0 0 12px', fontSize: 14.5, color: 'var(--text-2)', lineHeight: 1.65 }}>
+                If you are interested in exploring the deterministic scoring model, clinical dietary algorithms, or interacting with the endpoints directly, check out our live interactive API documentation:
               </p>
-              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 4 }}>
+
+              {/* Endpoints preview tags */}
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+                <span className="api-endpoint-chip"><span className="method-post">POST</span> /chat</span>
+                <span className="api-endpoint-chip"><span className="method-get">GET</span> /menu</span>
+                <span className="api-endpoint-chip"><span className="method-post">POST</span> /orders</span>
+                <span className="api-endpoint-chip"><span className="method-get">GET</span> /queue-telemetry</span>
+              </div>
+
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 <a
                   href="https://hackathon-tcs-azure.vercel.app/docs"
                   target="_blank"
@@ -692,13 +810,37 @@ export function HomePage({ onNavigate, onLaunchSearch, liveCount }) {
                     padding: '10px 18px',
                     color: 'var(--brand)',
                     background: 'var(--surface)',
-                    border: '1.5px solid var(--brand-soft-border)'
+                    border: '1.5px solid var(--brand-soft-border)',
+                    borderRadius: 12
                   }}
                 >
                   <BookOpen size={16} />
-                  <span>https://hackathon-tcs-azure.vercel.app/docs</span>
+                  <span>Open Interactive Swagger Docs</span>
                   <ExternalLink size={14} />
                 </a>
+
+                <button
+                  type="button"
+                  onClick={handleCopyDocs}
+                  className="btn"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '10px 16px',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: copiedDocLink ? '#10B981' : 'var(--text-2)',
+                    background: 'var(--surface)',
+                    border: copiedDocLink ? '1.5px solid rgba(16, 185, 129, 0.4)' : '1px solid var(--hairline)',
+                    borderRadius: 12,
+                    cursor: 'pointer'
+                  }}
+                  title="Copy docs URL"
+                >
+                  {copiedDocLink ? <Check size={15} style={{ color: '#10B981' }} /> : <Copy size={15} />}
+                  <span>{copiedDocLink ? 'Copied URL!' : 'Copy Link'}</span>
+                </button>
               </div>
             </div>
           </div>
@@ -708,10 +850,10 @@ export function HomePage({ onNavigate, onLaunchSearch, liveCount }) {
       {/* =====================================================================
           CAMPUS LAUNCH BANNER & CTA
           ===================================================================== */}
-      <section style={{ padding: '0 20px 80px', maxWidth: 1180, margin: '0 auto' }}>
+      <section style={{ padding: '0 clamp(10px, 3vw, 20px) clamp(40px, 6vw, 80px)', maxWidth: 1180, margin: '0 auto' }}>
         <div className="cta-banner" style={{
           background: 'linear-gradient(135deg, #FFF8F5 0%, #FFFFFF 52%, #FFE7DF 100%)',
-          borderRadius: 40, padding: '48px 36px',
+          borderRadius: 'clamp(24px, 4vw, 40px)', padding: 'clamp(28px, 5vw, 48px) clamp(16px, 4vw, 36px)',
           boxShadow: 'var(--shadow-elevated)', border: '1px solid var(--hairline)',
           display: 'grid', gap: 24, alignItems: 'center'
         }}>
@@ -778,7 +920,7 @@ export function HomePage({ onNavigate, onLaunchSearch, liveCount }) {
             <div style={{ marginTop: 14, fontSize: 14, color: 'var(--text-2)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#10B981', fontWeight: 700, marginBottom: 8 }}>
                 <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10B981' }} />
-                {liveCount || '48 ITEMS LIVE'}
+                {liveCount || 'MENU LOADING…'}
               </div>
               <p style={{ fontSize: 12, margin: 0 }}>Campus Canteen v1.0 · Fast Deterministic Core + OpenRouter AI</p>
             </div>

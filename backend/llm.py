@@ -39,12 +39,11 @@ def _env_float(name: str, default: float) -> float:
         return default
 
 
-# Per-model HTTP timeout (s). The chain has 9 models — a 30 s timeout each
-# could stall one chat turn for minutes when quota is exhausted. 12 s per
-# model plus an overall chain budget keeps the worst case bounded; every
-# failure still degrades to the identical rule-based templates.
-_MODEL_TIMEOUT = _env_float("OPENROUTER_TIMEOUT", 12.0)
-_CHAIN_BUDGET = _env_float("OPENROUTER_CHAIN_BUDGET", 25.0)
+# Per-model HTTP timeout (s). Defaults fit under Vercel Hobby's 10 s function
+# limit (override via env for longer hosts). Every failure still degrades to
+# the identical rule-based templates, so a tight budget never breaks picks.
+_MODEL_TIMEOUT = _env_float("OPENROUTER_TIMEOUT", 8.0)
+_CHAIN_BUDGET = _env_float("OPENROUTER_CHAIN_BUDGET", 8.0)
 
 DEFAULT_CHAIN = [
     "nex-agi/nex-n2.5-mini:free",

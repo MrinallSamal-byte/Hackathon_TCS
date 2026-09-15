@@ -15,6 +15,7 @@
   --surface-glass: rgba(255, 255, 255, 0.88);
   --hairline:     rgba(23, 23, 23, 0.08);
   --hairline-soft: rgba(255, 107, 87, 0.22);
+  --brand-soft-border: rgba(255, 107, 87, 0.22);
   --text-1:       #171717;
   --text-2:       #6B6B6B;
   --text-3:       #9E9E9E;
@@ -54,6 +55,7 @@
   --surface-glass: rgba(23, 23, 30, 0.88);
   --hairline:     rgba(255, 255, 255, 0.08);
   --hairline-soft: rgba(255, 107, 87, 0.35);
+  --brand-soft-border: rgba(255, 107, 87, 0.35);
   --text-1:       #FFFFFF;
   --text-2:       #A5A5B2;
   --text-3:       #656573;

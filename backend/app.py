@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Optional
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, Header, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
@@ -38,23 +38,69 @@ def data_dir() -> Path:
     """Writable runtime dir. Locally ./data; on serverless hosts (Vercel —
     read-only bundle except /tmp) point CAMPUSBITE_DATA_DIR at /tmp and use
     Supabase for anything that must persist."""
-    d = Path(os.environ.get("CAMPUSBITE_DATA_DIR", ROOT / "data"))
+    raw = os.environ.get("CAMPUSBITE_DATA_DIR")
+    if raw:
+        d = Path(raw)
+    elif os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+        d = Path("/tmp/campusbite-data")
+    else:
+        d = ROOT / "data"
     try:
         d.mkdir(parents=True, exist_ok=True)
+        # Probe writability: on read-only bundles mkdir succeeds (dir exists)
+        # but file writes fail. Fall back to /tmp before callers cache paths.
+        probe = d / ".write_probe"
+        probe.write_text("ok", encoding="utf-8")
+        probe.unlink(missing_ok=True)
     except Exception:
-        pass
+        try:
+            d = Path("/tmp/campusbite-data")
+            d.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
     return d
 
 
 FEEDBACK_PATH = data_dir() / "feedback_log.json"
 ORDERS_PATH = data_dir() / "order_history.json"
 
-app = FastAPI(title="CampusBite", version="1.0.0")
+def _cors_origins() -> list[str]:
+    raw = os.environ.get("CAMPUSBITE_CORS_ORIGINS", "").strip()
+    if raw:
+        return [o.strip() for o in raw.split(",") if o.strip()]
+    return ["*"]
+
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def _lifespan(_app: FastAPI):
+    """Load live menu from Supabase when configured; JSON stays fallback."""
+    try:
+        if db.is_configured():
+            items = db.fetch_menu()
+            if items:
+                store.load_items(items)
+    except Exception:
+        pass
+    yield
+
+app = FastAPI(title="CampusBite", version="1.0.0", lifespan=_lifespan)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], allow_credentials=True,
+    # NOTE: "*" + credentials=True is rejected by browsers. The API uses no
+    # cookies (session id travels in JSON bodies), so credentials stay off.
+    allow_origins=_cors_origins(), allow_credentials=False,
     allow_methods=["*"], allow_headers=["*"],
 )
+
+def _require_admin(request_token: Optional[str] = None) -> None:
+    """Optional admin guard. Set ADMIN_API_TOKEN in prod; when unset (local /
+    hackathon) admin routes stay open for backwards compatibility."""
+    want = os.environ.get("ADMIN_API_TOKEN", "").strip()
+    if not want:
+        return
+    if not request_token or request_token != want:
+        raise HTTPException(401, "Admin token required")
 
 store = MenuStore()
 memory_store = MemoryStore()
@@ -211,8 +257,10 @@ def _spending_for(sid: str) -> dict[str, Any]:
             continue
         day = at.date().isoformat()
         amt = _money(r)
-        # week approx: last 7 calendar days by date prefix comparison
-        if (today - at.date()).days <= 6:
+        # week approx: last 7 calendar days. Ignore future-dated rows
+        # (clock skew) — they must not inflate this week's revenue.
+        _age = (today - at.date()).days
+        if 0 <= _age <= 6:
             week_tot += amt
         if day == today.isoformat():
             today_tot += amt
@@ -223,18 +271,6 @@ def _spending_for(sid: str) -> dict[str, Any]:
     return {"today_total": round(today_tot, 2), "week_total": round(week_tot, 2),
             "today_count": today_n, "order_count": len(rows),
             "by_day": list(per_day.values())}
-
-
-@app.on_event("startup")
-def _startup_supabase() -> None:
-    """If Supabase is configured, load the live menu from Postgres (JSON stays fallback)."""
-    try:
-        if db.is_configured():
-            items = db.fetch_menu()
-            if items:
-                store.load_items(items)
-    except Exception:
-        pass
 
 
 # ---------- helpers ----------
@@ -256,10 +292,17 @@ def _append_json(path: Path, row: dict) -> None:
 
 def _write_json_atomic(path: Path, rows: list) -> None:
     """Crash-safe write: temp file + atomic replace, so a crash can never
-    leave a half-written order/feedback log behind."""
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(json.dumps(rows, indent=2, ensure_ascii=False), encoding="utf-8")
-    tmp.replace(path)
+    leave a half-written order/feedback log behind. Never raises: on
+    read-only hosts (serverless bundle) the Supabase mirror remains the
+    persistent path, so a file failure must not 500 the request."""
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix(path.suffix + ".tmp")
+        tmp.write_text(json.dumps(rows, indent=2, ensure_ascii=False), encoding="utf-8")
+        tmp.replace(path)
+    except Exception:
+        # Best-effort only — callers already dual-write to Supabase.
+        pass
 
 
 def _money(row: dict) -> float:
@@ -275,14 +318,21 @@ def _money(row: dict) -> float:
 
 
 def _mint_token() -> str:
-    """Unique order token — the CB-100..999 space collides after ~40 orders
-    (birthday paradox), and status/cancel must agree on ONE row."""
+    """Unique order token. The old CB-100..999 space collides after ~40 orders
+    (birthday paradox); use a 4-digit space + numeric overflow so status/cancel
+    always agree on ONE row, even across restarts/instances. Tokens stay
+    `CB-<digits>` so the `cb-\\d+` chat/status regexes keep matching."""
     seen = {str(r.get("token", "")).upper() for r in _read_json_list(ORDERS_PATH)}
     for _ in range(50):
-        tok = f"CB-{random.randint(100, 999)}"
+        tok = f"CB-{random.randint(1000, 9999)}"
         if tok not in seen:
             return tok
-    return f"CB-{random.randint(1000, 9999)}"  # overflow space, still unique enough
+    for _ in range(50):
+        tok = f"CB-{random.randint(10000, 99999)}"
+        if tok not in seen:
+            return tok
+    # Practically collision-free numeric fallback.
+    return f"CB-{uuid.uuid4().int % 90000 + 10000}"
 
 
 def _budget_stats() -> dict[str, Any]:
@@ -399,14 +449,15 @@ def result_payload(res: dict, prefs: UserPreferences) -> dict[str, Any]:
 def find_named_item(text: str) -> Optional[MenuItem]:
     t = text.lower()
     flat = re.sub(r"[^a-z]", "", t)  # "gulabjamun" still matches "Gulab Jamun"
+    # Generic modifiers that must never match alone ("something masala").
+    _STOP = {"masala", "hot", "sweet", "veg", "non", "with", "and", "the", "fresh"}
     best = None
-    best_exact = False
+    best_rank = -1
     for it in store.all():
         name = it.name.lower()
         slug = it.id.replace("_", " ")
-        exact = (name in t or slug in t)
-        if exact:
-            hit = True
+        if name in t or slug in t:
+            rank = 3
         else:
             # Spaceless fallback on alpha words only ("(2 pc)" suffixes are
             # dropped so "gulabjamun" matches "Gulab Jamun (2 pc)"). Only
@@ -414,14 +465,24 @@ def find_named_item(text: str) -> Optional[MenuItem]:
             # not hijack generic queries like "something masala".
             words = [w for w in re.sub(r"[^a-z ]", " ", name).split() if len(w) > 1]
             keys = {"".join(words), "".join(words[:2])} if words else set()
-            hit = bool(keys) and any(k in flat for k in keys if len(k) > 3)
-        if hit:
-            if best is None:
-                best, best_exact = it, exact
-            elif exact and not best_exact:
-                best, best_exact = it, True
-            elif exact == best_exact and len(it.name) > len(best.name):
-                best, best_exact = it, exact
+            if bool(keys) and any(k in flat for k in keys if len(k) > 3):
+                rank = 2
+            else:
+                # Head-noun fallback: "dosa" -> Masala Dosa, "chai" ->
+                # Masala Chai, "biryani" -> Chicken Biryani. Matches only when
+                # a distinctive dish noun appears as a whole word; generic
+                # modifiers in _STOP never match alone.
+                toks = set(re.findall(r"[a-z]{3,}", t))
+                head = words[-1] if words else ""
+                if head and len(head) > 3 and head not in _STOP and head in toks:
+                    rank = 1
+                else:
+                    continue
+        if rank > best_rank or (rank == best_rank and best is not None
+                                and len(it.name) > len(best.name)):
+            best, best_rank = it, rank
+        elif best is None:
+            best, best_rank = it, rank
     return best
 
 
@@ -804,12 +865,26 @@ def list_menu(
             continue
         if max_sugar is not None and it.sugar_g > max_sugar:
             continue
-        if dietary and dietary not in [str(d).split(".")[-1] for d in it.dietary_tags]:
-            # 'veg' browsing should also surface vegan/jain (they are veg-safe)
+        if dietary:
+            # Browsing filters must agree with passes_dietary(): veg surfaces
+            # vegan/jain (veg-safe); halal surfaces veg/vegan/jain/egg
+            # (inherently fine — only meat needs the halal tag).
             tags = {str(d).split(".")[-1] for d in it.dietary_tags}
-            if dietary == "veg" and not (tags & {"veg", "vegan", "jain"}):
+            alls = {str(a).split(".")[-1].lower() for a in it.allergens}
+            if dietary not in tags:
+                if dietary == "veg" and (tags & {"veg", "vegan", "jain"}):
+                    pass
+                elif dietary == "halal" and "non_veg" not in tags:
+                    # Veg/vegan/jain/egg dishes without a halal tag are still
+                    # halal-safe per passes_dietary().
+                    pass
+                else:
+                    continue
+            # A mistagged dish (e.g. gluten_free tag + gluten allergen) must
+            # never surface under that diet — mirrors passes_dietary().
+            if dietary == "gluten_free" and "gluten" in alls:
                 continue
-            elif dietary != "veg":
+            if dietary == "dairy_free" and "dairy" in alls:
                 continue
         if q and q.lower() not in (it.name + " " + it.description + " " + " ".join(it.ingredients)).lower():
             continue
@@ -1646,7 +1721,7 @@ def feedback(body: FeedbackBody):
     try:
         db.log_feedback({"item_id": body.item_id, "rating": body.rating,
                          "comment": body.comment, "budget": body.budget,
-                         "mood": body.mood})
+                         "mood": body.mood, "session_id": body.session_id or ""})
     except Exception:
         pass
     # Log improves popularity scores: small nudge, clamped 0-100.
@@ -1673,10 +1748,12 @@ def feedback(body: FeedbackBody):
             "deduped": deduped}
 
 
-# ---------- admin ----------
+# ---------- admin (guarded by ADMIN_API_TOKEN when set) ----------
 
 @app.patch("/admin/items/{item_id}/availability")
-def admin_availability(item_id: str, body: AvailabilityBody):
+def admin_availability(item_id: str, body: AvailabilityBody,
+                       x_admin_token: Optional[str] = Header(default=None, alias="X-Admin-Token")):
+    _require_admin(x_admin_token)
     try:
         it = store.set_availability(item_id, body.available)
     except KeyError:
@@ -1690,7 +1767,9 @@ def admin_availability(item_id: str, body: AvailabilityBody):
 
 
 @app.patch("/admin/items/{item_id}/price")
-def admin_price(item_id: str, body: PriceBody):
+def admin_price(item_id: str, body: PriceBody,
+                x_admin_token: Optional[str] = Header(default=None, alias="X-Admin-Token")):
+    _require_admin(x_admin_token)
     try:
         it = store.update_price(item_id, body.price)
     except KeyError:
@@ -1704,7 +1783,9 @@ def admin_price(item_id: str, body: PriceBody):
 
 
 @app.post("/admin/items")
-def admin_add(data: dict):
+def admin_add(data: dict,
+              x_admin_token: Optional[str] = Header(default=None, alias="X-Admin-Token")):
+    _require_admin(x_admin_token)
     try:
         it = store.add_item(data)
     except ValueError as e:
@@ -1718,7 +1799,8 @@ def admin_add(data: dict):
 
 
 @app.get("/admin/analytics")
-def admin_analytics():
+def admin_analytics(x_admin_token: Optional[str] = Header(default=None, alias="X-Admin-Token")):
+    _require_admin(x_admin_token)
     orders = _read_json_list(ORDERS_PATH)
     feedbacks = _read_json_list(FEEDBACK_PATH)
     counts: dict[str, int] = {}
@@ -1776,7 +1858,9 @@ def admin_analytics():
 
 
 @app.patch("/admin/queue")
-def admin_set_queue(body: QueueBody):
+def admin_set_queue(body: QueueBody,
+                    x_admin_token: Optional[str] = Header(default=None, alias="X-Admin-Token")):
+    _require_admin(x_admin_token)
     try:
         qs = qmod.set_override(body.counter, body.minutes)
     except KeyError:
@@ -1785,7 +1869,8 @@ def admin_set_queue(body: QueueBody):
 
 
 @app.delete("/admin/queue")
-def admin_clear_queue():
+def admin_clear_queue(x_admin_token: Optional[str] = Header(default=None, alias="X-Admin-Token")):
+    _require_admin(x_admin_token)
     return {"ok": True, "queues": qmod.clear_overrides()}
 
 
@@ -1938,7 +2023,9 @@ def list_coupons():
 # ---------- admin real-world routes (all additive) ----------
 
 @app.get("/admin/orders")
-def admin_orders(q: str = "", limit: int = Query(default=50, ge=1, le=200)):
+def admin_orders(q: str = "", limit: int = Query(default=50, ge=1, le=200),
+                 x_admin_token: Optional[str] = Header(default=None, alias="X-Admin-Token")):
+    _require_admin(x_admin_token)
     rows = sorted(_read_json_list(ORDERS_PATH), key=lambda r: r.get("at", ""), reverse=True)
     if q:
         ql = q.lower()
@@ -1958,7 +2045,9 @@ def admin_orders(q: str = "", limit: int = Query(default=50, ge=1, le=200)):
 
 
 @app.patch("/admin/orders/{token}")
-def admin_order_status(token: str, body: OrderStatusBody):
+def admin_order_status(token: str, body: OrderStatusBody,
+                       x_admin_token: Optional[str] = Header(default=None, alias="X-Admin-Token")):
+    _require_admin(x_admin_token)
     want = str(body.status or "").upper()
     if want not in ("READY", "COMPLETED", "CANCELLED"):
         raise HTTPException(400, "status must be READY | COMPLETED | CANCELLED")
@@ -1973,7 +2062,9 @@ def admin_order_status(token: str, body: OrderStatusBody):
 
 
 @app.get("/admin/feedback")
-def admin_feedback(limit: int = Query(default=50, ge=1, le=200)):
+def admin_feedback(limit: int = Query(default=50, ge=1, le=200),
+                   x_admin_token: Optional[str] = Header(default=None, alias="X-Admin-Token")):
+    _require_admin(x_admin_token)
     rows = sorted(_read_json_list(FEEDBACK_PATH), key=lambda r: r.get("at", ""), reverse=True)
     out = []
     for r in rows[:limit]:
@@ -1983,19 +2074,24 @@ def admin_feedback(limit: int = Query(default=50, ge=1, le=200)):
 
 
 @app.post("/admin/items/bulk-availability")
-def admin_bulk_availability(body: BulkAvailabilityBody):
+def admin_bulk_availability(body: BulkAvailabilityBody,
+                            x_admin_token: Optional[str] = Header(default=None, alias="X-Admin-Token")):
+    _require_admin(x_admin_token)
     n = store.bulk_availability(body.ids, body.available)
     return {"ok": True, "updated": n, "available": body.available}
 
 
 @app.post("/admin/items/mark-all-live")
-def admin_mark_all_live():
+def admin_mark_all_live(x_admin_token: Optional[str] = Header(default=None, alias="X-Admin-Token")):
+    _require_admin(x_admin_token)
     n = store.mark_all_live()
     return {"ok": True, "restored": n}
 
 
 @app.patch("/admin/items/{item_id}")
-def admin_edit_item(item_id: str, data: dict):
+def admin_edit_item(item_id: str, data: dict,
+                    x_admin_token: Optional[str] = Header(default=None, alias="X-Admin-Token")):
+    _require_admin(x_admin_token)
     try:
         it = store.update_item(item_id, data)
     except KeyError:
@@ -2015,7 +2111,9 @@ def admin_edit_item(item_id: str, data: dict):
 
 
 @app.get("/admin/export")
-def admin_export(kind: str = "menu"):
+def admin_export(kind: str = "menu",
+                 x_admin_token: Optional[str] = Header(default=None, alias="X-Admin-Token")):
+    _require_admin(x_admin_token)
     import csv
     import io
     buf = io.StringIO()
@@ -2045,7 +2143,8 @@ def admin_export(kind: str = "menu"):
 
 
 @app.get("/admin/alerts")
-def admin_alerts():
+def admin_alerts(x_admin_token: Optional[str] = Header(default=None, alias="X-Admin-Token")):
+    _require_admin(x_admin_token)
     sold_out = [{"id": i.id, "name": i.name, "price": i.price}
                 for i in store.all() if not i.availability]
     queues = qmod.current_queues()

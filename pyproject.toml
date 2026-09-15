@@ -1,8 +1,11 @@
 [project]
 name = "campusbite"
 version = "1.0.0"
-description = "CampusBite — AI conversational canteen recommender (FastAPI)"
-requires-python = ">=3.12"
+description = "biteMatch — Open-Source AI Conversational Canteen Recommender & Kitchen Telemetry (FastAPI)"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Mrinal Samal" }]
+requires-python = ">=3.10"
 dependencies = [
     "fastapi>=0.110",
     "uvicorn[standard]>=0.29",

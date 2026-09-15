@@ -90,7 +90,11 @@ def test_conflict_on_craving_fried_during_periods():
 
 
 def test_counter_to_self_period_redirect():
-    sid = "test_period_redirect_session"
+    import uuid
+    # Unique sid per run: the warn-once flag lives in the persistent memory
+    # mirror, so a fixed sid would see "already warned" on re-runs and flake
+    # from recommend-vs-redirect. Fresh sid => deterministic first-turn redirect.
+    sid = f"test_period_redirect_{uuid.uuid4().hex[:8]}"
     # Turn 1: user asks for Chole Bhature with period cramps -> caring redirect
     r1 = client.post("/chat", json={"message": "i have cramps but i crave chole bhature", "session_id": sid})
     assert r1.status_code == 200

@@ -16,7 +16,7 @@ ITEMS = STORE.all()
 
 
 def test_menu_schema_and_counts():
-    assert 40 <= len(ITEMS) <= 60
+    assert 40 <= len(ITEMS) <= 100
     assert sum(1 for i in ITEMS if i.is_combo) >= 5
     assert sum(1 for i in ITEMS if not i.availability) >= 5
     for i in ITEMS:

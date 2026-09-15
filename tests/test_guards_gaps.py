@@ -144,7 +144,7 @@ def test_vercel_data_dir_override(tmp_path):
     assert out.returncode == 0, out.stderr[-500:]
     lines = out.stdout.strip().splitlines()
     assert all(str(target) in ln for ln in lines[:3])
-    assert lines[3].strip() == "53"  # menu still reads from the bundle
+    assert int(lines[3].strip()) >= 80  # menu still reads from the bundle
 
 
 def test_menu_save_silent_on_readonly_fs(tmp_path):
